@@ -19,7 +19,7 @@ if __name__ == '__main__':
     
     # Loop over data to create json files
     # TODO: check organisation - some folders might not have the same depth
-    for dir in [x for x in os.listdir(args.input_dir) if os.path.isdir(x)]:
+    for dir in [x for x in os.listdir(args.input_dir) if os.path.isdir(os.path.join(args.input_dir, x))]:
         in_dir = os.path.join(args.input_dir, dir)
         out_dir = os.path.join(args.output_dir, dir)
         if args.input_dir != args.output_dir:

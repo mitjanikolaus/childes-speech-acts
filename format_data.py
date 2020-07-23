@@ -57,7 +57,7 @@ def loop_over(input_dir, output_dir, reading_function, input_format, child_analy
             dump_json(new_shape, out_file)
             # add metadata to df
             tmp = pd.DataFrame(lines)
-            tmp["file"] = out_file
+            tmp["file_id"] = out_file
             tmp["errors"] = " ".join(errors)
             tmp["child"] = new_shape["header"]["target_child"].lower()
             if 'time_stamp' in tmp.columns:

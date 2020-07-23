@@ -1,3 +1,11 @@
+""" Formatting previously extracted data into datasets with correct format for training/testing
+
+Examples:
+    With training data (NewEngland corpus):
+    >>> python extract_data.py formatted/NewEngland/data.csv --output_format one_tsv --ttv_filepattern childes_{}.tsv --select_data file_id spa_1 spa_2 spa_2a speaker sentence
+    With test data (Bates corpus):
+    >>> python extract_data.py formatted/Bates/data.csv --keep_empty_spa --output_format one_tsv --ttv_filepattern 'bates_{}.tsv'
+"""
 import json
 import os, sys
 from collections import Counter
@@ -25,13 +33,13 @@ def sep_loop(df, line_function, ttv_writer, remove_empty_tags=True):
 def one_loop(df, line_function, ttv_writer, remove_empty_tags=True):
     sub_data = {k: df[df['ttv'] == k] for k in range(0,3)}
     for k,v in ttv_writer.items():
-        for columns, writer in zip(line_function, v):
-            tag = [col for col in columns if 'spa_' in col][0]
+        for columns, filepath in zip(line_function, v):
+            tag = [col for col in columns if 'spa_' in col]
             if remove_empty_tags:
-                sub_data[k].dropna(subset = [tag], inplace=True)
+                sub_data[k].dropna(subset = tag, inplace=True)
             else:
                 sub_data[k][tag] = sub_data[k][tag].fillna(value='None')
-            sub_data[k][columns].rename(columns={col:col.upper() for col in columns}).to_csv(writer, sep='\t', index=False)
+            sub_data[k][columns].rename(columns={col:col.upper() for col in columns}).to_csv(filepath, sep='\t', index=False)
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Extract and transform data.', formatter_class=argparse.RawTextHelpFormatter)
@@ -55,9 +63,14 @@ if __name__ == '__main__':
             args.select_data = ["spa_all", "utterance", "time_stamp", "speaker", "sentence"]
         if args.output_format == 'one_tsv':
             args.select_data = ['file_id', 'spa_1', 'spa_2', 'spa_2a', 'speaker', 'sentence']
-    elif args.output_format == 'one_tsv' and not args.keep_empty_spa:
-        # split for different files
-        args.select_data = [[x for x in args.select_data if re.search("spa_", x) is None or x == tag] for tag in ["spa_1", "spa_2", "spa_2a"]]
+    spa_subtags = [x for x in args.select_data if re.search("spa_", x) is not None]
+    if args.output_format == 'one_tsv':
+        if not args.keep_empty_spa:
+            # split for different files
+            args.select_data = [[x for x in args.select_data if re.search("spa_", x) is None or x == tag] for tag in spa_subtags]
+        else:
+            args.select_data = [args.select_data]
+            spa_subtags = ['spa_all']
 
     data = pd.read_csv(args.csv_loc)
     if not args.keep_empty_text:
@@ -81,9 +94,9 @@ if __name__ == '__main__':
     
     elif args.output_format == 'one_tsv':
         ttv_writer = { 
-            0: [os.path.join('ttv', args.ttv_filepattern.format("train_"+x)) for x in ["spa_1", "spa_2", "spa_2a"]],
-            1: [os.path.join('ttv', args.ttv_filepattern.format("test_"+x)) for x in ["spa_1", "spa_2", "spa_2a"]],
-            2: [os.path.join('ttv', args.ttv_filepattern.format("valid_"+x)) for x in ["spa_1", "spa_2", "spa_2a"]]
+            0: [os.path.join('ttv', args.ttv_filepattern.format("train_"+x)) for x in spa_subtags],
+            1: [os.path.join('ttv', args.ttv_filepattern.format("test_"+x)) for x in spa_subtags],
+            2: [os.path.join('ttv', args.ttv_filepattern.format("valid_"+x)) for x in spa_subtags]
         }
         # also duplicating line_function
         one_loop(data, args.select_data, ttv_writer, remove_empty_tags=(not args.keep_empty_spa))

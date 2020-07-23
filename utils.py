@@ -67,8 +67,8 @@ def parse_w(d:dict, replace_name=False):
                 lemma = "".join([x["stem"] for x in d["mor"]["mwc"]["mw"]])
                 pos = "_".join(list(d["mor"]["mwc"]["pos"].values()))
                 if "mor-post" in d["mor"].keys():
-                    lemma += " "+"".join([x["stem"] for x in d["mor"]["mw"]])
-                    pos += " "+"_".join(list(d["mor"]["mor-post"]["mwc"]["pos"].values()))
+                    lemma += " "+d["mor"]["mor-post"]["mw"]['stem']
+                    pos += " "+"_".join(list(d["mor"]["mor-post"]["mw"]["pos"].values()))
     elif "@type" in kys and d["@type"] == "fragment":
         # TODO: see u327 # cannot be taken into account
         loc = None
@@ -110,7 +110,8 @@ def parse_xml(d:dict):
     punct = {
         'p':'.', 'q':'?', 'trail off':'...', 'e': '!', 'interruption': '+/', 
         "interruption question":'+/?',
-        "quotation next line": ''
+        "quotation next line": '',
+        "quotation precedes": ''
     }
 
     new_shape = {"header":{}, "annotation":{}, "documents":[]} # JSON
@@ -124,9 +125,12 @@ def parse_xml(d:dict):
     # storing participant
     for locutor in d["CHAT"]["Participants"]["participant"]:
         if locutor["@id"] == "CHI":
-            new_shape["header"]["target_child"] = locutor["@name"]
+            if "@name" in locutor.keys():
+                new_shape["header"]["target_child"] = locutor["@name"]
+            else:
+                new_shape["header"]["target_child"] = "Unknown"
     # storing annotator
-    for cmt in d["CHAT"]["comment"]:
+    for cmt in (d["CHAT"]["comment"] if isinstance(d["CHAT"]["comment"], list) else [d["CHAT"]["comment"]]):
         if cmt["@type"] == "Transcriber":
             new_shape["header"]["transcriber"] = cmt["#text"]
     # counter for names
