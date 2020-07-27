@@ -59,14 +59,15 @@ def loop_over(input_dir, output_dir, reading_function, input_format, child_analy
             tmp = pd.DataFrame(lines)
             tmp["file_id"] = out_file
             tmp["errors"] = " ".join(errors)
-            tmp["child"] = new_shape["header"]["target_child"].lower()
+            tmp["child"] = new_shape["header"]["target_child"]["name"].lower()
+            tmp["age_months"] = new_shape["header"]["target_child"]["age"]
             if 'time_stamp' in tmp.columns:
                 tmp['time_stamp'] = tmp['time_stamp'].fillna(method='ffill').fillna("00:00:00")
             else:
                 tmp['time_stamp'] = "00:00:00"
             df.append(tmp)
             # Analysis
-            child_counter.append(new_shape["header"]["target_child"].lower())
+            child_counter.append(new_shape["header"]["target_child"]["name"].lower())
             
             #except KeyError as e:
             #    if str(e) == "'u'":

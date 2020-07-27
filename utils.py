@@ -10,6 +10,7 @@ from collections import Counter, OrderedDict
 import numpy as np
 import pandas as pd
 import time, datetime
+import re
 
 # Read/Write JSON
 def get_xml_as_dict(filepath:str):
@@ -58,17 +59,18 @@ def parse_w(d:dict, replace_name=False):
         try:
             lemma = d["mor"]["mw"]["stem"]
             pos = "_".join(list(d["mor"]["mw"]["pos"].values()))
-            if "mor-post" in d["mor"].keys():
-                lemma += " "+d["mor"]["mor-post"]["mw"]["stem"]
-                pos += " "+"_".join(list(d["mor"]["mor-post"]["mw"]["pos"].values()))
         except KeyError as e:
             if str(e) == "'mw'": # sometimes mw is a list - compound words such as "butterfly", "raincoat"...
                 # in this case, mwc only contains whole pos, but mw is a list with individual pos and stem
                 lemma = "".join([x["stem"] for x in d["mor"]["mwc"]["mw"]])
                 pos = "_".join(list(d["mor"]["mwc"]["pos"].values()))
-                if "mor-post" in d["mor"].keys():
-                    lemma += " "+d["mor"]["mor-post"]["mw"]['stem']
-                    pos += " "+"_".join(list(d["mor"]["mor-post"]["mw"]["pos"].values()))
+        if "mor-post" in d["mor"].keys(): # can be a list too
+            if isinstance(d["mor"]["mor-post"], list):
+                lemma += " "+" ".join([mp_x["mw"]["stem"] for mp_x in d["mor"]["mor-post"]])
+                pos += " "+" ".join(["_".join(list(mp_x["mw"]["pos"].values())) for mp_x in d["mor"]["mor-post"]])
+            else: # OrderedDict
+                lemma += " "+d["mor"]["mor-post"]["mw"]["stem"]
+                pos += " "+"_".join(list(d["mor"]["mor-post"]["mw"]["pos"].values()))
     elif "@type" in kys and d["@type"] == "fragment":
         # TODO: see u327 # cannot be taken into account
         loc = None
@@ -88,6 +90,24 @@ def missing_position(d:dict): # TODO: see u258
     else:
         mx = max(d.keys())
         return sorted(list(set(range(0,mx+1)) - set(d.keys())))+[mx+1] # same as "0" above if no difference
+
+def age_months(s:str):
+    """Age stored under format: "P1Y08M" or "P1Y01M14D"; returning age in months
+
+    Input:
+    -------
+    s: `str`
+        formatted age in raw data
+
+    Output:
+    -------
+    age: `int`
+    """
+    pat = re.compile("^P([0-9]{1,2})Y([0-9]{2})M")
+    age = re.findall(pat, s)[0]
+    age = int(age[0])*12 + int(age[1])
+    return age
+
 
 def parse_xml(d:dict):
     """
@@ -126,9 +146,15 @@ def parse_xml(d:dict):
     for locutor in d["CHAT"]["Participants"]["participant"]:
         if locutor["@id"] == "CHI":
             if "@name" in locutor.keys():
-                new_shape["header"]["target_child"] = locutor["@name"]
+                new_shape["header"]["target_child"] = {
+                    'name': locutor["@name"],
+                    'age': age_months(locutor["@age"])
+                }
             else:
-                new_shape["header"]["target_child"] = "Unknown"
+                new_shape["header"]["target_child"] = {
+                    'name': "Unknown",
+                    'age': age_months(locutor["@age"])
+                }
     # storing annotator
     for cmt in (d["CHAT"]["comment"] if isinstance(d["CHAT"]["comment"], list) else [d["CHAT"]["comment"]]):
         if cmt["@type"] == "Transcriber":
@@ -291,12 +317,12 @@ def select_tag(s:str, keep_part='all'):
 def adapt_tag(s:str):
 	return None if s not in ILLOC.index.tolist() else ILLOC.loc[s]['Name'][:3].upper()
 
-def check_interchange(tag):
+def check_interchange(tag:str):
     int_errors={"DJ6F":"DJF", "DCCA":"DCC", "RN":None}
     if tag in int_errors.keys():
         return int_errors[tag]
     return tag
-def check_illocutionary(tag):
+def check_illocutionary(tag:str):
     il_errors={"AS":"SA", "CTP":"CT"} 
     if tag in il_errors.keys():
         return il_errors[tag]
@@ -309,9 +335,9 @@ def replace_pnoun(word):
     children = ['Sarah', 'Bryce', 'James', 'Colin', 'Liam', 'Christina', 'Elena', 'Christopher', 'Matthew', 'Margaret', 'Corrina', 'Michael', 'Erin', 'Kate', 'Zachary', 'Andrew', 'John', 'David', 'Jamie', 'Erica', 'Nathan', 'Max', 'Abigail', 'Sara', 'Jenessa', 'Benjamin', 'Rory', 'Amanda', 'Alexandra', 'Daniel', 'Norman', 'Lindsay', 'Rachel', 'Paula', 'Zackary', 'Kristen', 'Joanna', 'Laura', 'Meghan', 'Krystal', 'Elana', 'Anne', 'Elizabeth', 'Chi', 'Corinna', 'Eleanora', 'John', 'Laurie'] # firstnames - full
     children += ['Maggie', 'Zack', 'Brycie', 'Chrissie', 'Zach', 'Annie', 'El', 'Dan', 'Matt', 'Matty', 'Johnny', 'Mika', 'Elly', 'Micha', 'Mikey', 'Mickey', 'Chrissy', 'Chris', 'Abbie', 'Lexy', 'Meg', 'Andy', 'Liz', 'Mike', 'Abby', 'Danny', 'Col', 'Kryst', 'Ben'] # nicknames
     if word in parents:
-        return '__PARENT_NAME__'
+        return '__MOT__'
     if word in children:
-        return '__CHILD_NAME__'
+        return '__CHI__'
     return word
 
 

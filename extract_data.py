@@ -52,7 +52,8 @@ if __name__ == '__main__':
     # Extraction parameters
     argparser.add_argument('--keep_empty_text', action='store_true', help='whether to keep segments without any speech (might have acts) in final data')
     argparser.add_argument('--keep_empty_spa', action='store_true', help="whether to keep segments without spa tags (analyzing unlabeled corpuses)")
-    argparser.add_argument('--select_data', choices=["utterance", "spa_all", "spa_1", "spa_2", "spa_2a", "time_stamp", "speaker", "sentence", "lemmas", "pos", "file_id"], nargs='+', help="ordered features for output - will be adapted to generate 3 files for ")
+    argparser.add_argument('--select_data', choices=["utterance", "spa_all", "spa_1", "spa_2", "spa_2a", "time_stamp", "speaker", "sentence", "lemmas", "pos", "action", "file_id"], nargs='+', help="ordered features for output - will be adapted to generate 3 files for ")
+    argparser.add_argument('--replace_names', action='store_true', help="whether to replace locutors callings by tag; applicable on columns 'sentence' and 'lemmas'")
     # Train/test/validation
     argparser.add_argument('--ttv_split', nargs=3, type=float, default=[0.6, 0.3, 0.1], help="percentage of files going to train/test/validation sets; if --keep_empty_spa is False, test is all of the data")
     argparser.add_argument('--ttv_filepattern', type=str, default="list_{}_conv", help="file pattern (filled with train/test/valid + other patterns if need be) for ttv files - default 'list_{}_conv'.format(XXX)")
@@ -82,6 +83,12 @@ if __name__ == '__main__':
 
     print(args)
     
+    if args.replace_names:
+        for col in ['sentence', 'lemmas']:
+            # replace words with capital letter aka proper nouns
+            data[col] = data[col].apply(lambda x: x if not isinstance(x, str) else ' '.join([w if (w.capitalize() != w) else replace_pnoun(w) for w in x.split()]))
+
+
     if args.output_format == 'sep_txt':
         ttv_writer = { 
                 0: open(os.path.join('ttv', args.ttv_filepattern.format("train")), 'w'),
