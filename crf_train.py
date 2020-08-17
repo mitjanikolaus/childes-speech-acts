@@ -42,7 +42,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 from sklearn.preprocessing import LabelBinarizer
 import pycrfsuite
 
@@ -103,6 +103,52 @@ def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'spea
 	# Return
 	return p
 
+def take_percent(data:pd.DataFrame, fraction:float, conv_column:str, 
+					split_avg_lgth:int = 50, split_var_lgth:int=10) -> pd.DataFrame:
+	"""Split the data into segments of average length split_avg_lgth, and randomize the extraction of data from the dataset only to keep a given fraction of data. 
+	column containing file references is updated to include splits, so that the algorithm doesn't later group data from one file all together despite splits.
+	"""
+	if (fraction > 1 or fraction < 0):
+		raise ValueError("Fraction {fraction} must be between 0. and 1..")
+	
+	n = data.shape[0]
+	split_index = np.cumsum(np.random.normal(split_avg_lgth, split_var_lgth, int(n/split_avg_lgth)).astype(int))
+	# update split index with data file changes index
+	file_idx = data[data[conv_column] != data[conv_column].shift(1)].index.tolist()
+	for f_idx in file_idx:
+		split_index[min(range(len(split_index)), key = lambda i: abs(split_index[i]-f_idx))] = f_idx
+	
+	# split and shuffle
+	tmp = []
+	for i, idx in enumerate(split_index[:-1]):
+		subset = data.iloc[idx:split_index[i+1], :]
+		subset[conv_column] = subset[conv_column].apply(lambda x: x+'_'+str(i))
+		tmp.append(subset)
+	tmp = sklearn.utils.shuffle(tmp)
+	tmp = pd.concat(tmp, axis=0)
+
+	# compute fraction and return
+	return tmp.iloc[:int(n*fraction), :]
+
+def create_rw_data(data:pd.DataFrame, conv_column:str, split_lgth:int = 50) -> pd.DataFrame:
+	"""Split the data into segments of length split_avg_lgth, and use a rolling window to create more training data. 
+	column containing file references is updated to include splits, so that the algorithm doesn't later group data from one file all together despite splits.
+	"""
+	# index of file change in data
+	file_idx = data[data[conv_column] != data[conv_column].shift(1)].index.tolist()
+	# create rolling windows
+	rw_idx = [[(a, min(a+split_lgth, file_idx[i+1])) for a in range(idx, file_idx[i+1], split_lgth)] for i, idx in enumerate(file_idx[:-1])]
+	rw_idx = [y for x in rw_idx for y in x] # flatten
+	tmp = []
+	for i, (idx_start, idx_end) in enumerate(rw_idx):
+		subset = data.iloc[idx_start:idx_end, :]
+		subset[conv_column] = subset[conv_column].apply(lambda x: x+'_'+str(i))
+		tmp.append(subset)
+	tmp = sklearn.utils.shuffle(tmp)
+	tmp = pd.concat(tmp, axis=0)
+
+	# return data
+	return tmp
 
 #### Features functions
 def data_add_features(p:pd.DataFrame, use_action=False, match_age=None, check_repetition=False):
@@ -249,10 +295,36 @@ def bio_classification_report(y_true, y_pred):
 	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
 	cm = confusion_matrix(y_true, y_pred, normalize='true')
 	acc = sklearn.metrics.accuracy_score(y_true, y_pred, normalize = True)
+	cks = cohen_kappa_score(y_true, y_pred)
 
 	print("==> Accuracy: {0:.3f}".format(acc))
+	print("==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(cks, 1./len(set(y_true))))
 	# using both as index in case not the same labels in it
-	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc
+	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc, cks
+
+def plot_testing(test_df:pd.DataFrame, file_location:str, col_ages):
+	"""Separating CHI/MOT and ages to plot accuracy, annotator agreement and number of categories over age.
+	"""
+	tmp = []
+	speakers = test_df["speaker"].unique().tolist()
+	for age in sorted(test_df[col_ages].unique().tolist()): # remove < 1Y?
+		for spks in ([[x] for x in speakers]+[speakers]):
+			age_loc_sub = test_df[(test_df[col_ages] == age) & (test_df.speaker.isin(spks))]
+			acc = sklearn.metrics.accuracy_score(age_loc_sub.y_true, age_loc_sub.y_pred, normalize=True)
+			cks = cohen_kappa_score(age_loc_sub.y_true, age_loc_sub.y_pred)
+			tmp.append({'age':age, 'locutor':'&'.join(spks), 'accuracy':acc, 'agreement': cks, 'nb_labels': len(age_loc_sub.y_true.unique().tolist())})
+		# also do CHI/MOT separately
+	tmp = pd.DataFrame(tmp)
+	speakers = tmp.locutor.unique().tolist()
+	# plot
+	fig, ax = plt.subplots(nrows=3, sharex=True, figsize=(18,10))
+	for i, col in enumerate(['accuracy', 'agreement', 'nb_labels']):
+		for spks in speakers:
+			ax[i].plot(tmp[tmp.locutor == spks].age, tmp[tmp.locutor == spks][col], label=spks)
+			ax[i].set_ylabel(col)
+	ax[2].set_xlabel('age (in months)')
+	ax[2].legend()
+	plt.savefig(file_location)
 
 def report_to_file(dfs:dict, file_location:str):
 	"""Looping on each pd.DataFrame to log to excel
@@ -286,8 +358,6 @@ if __name__ == '__main__':
 	# Operations on data
 	argparser.add_argument('--keep_tag', choices=['all', '1', '2', '2a'], default="all", help="keep first part / second part / all tag")
 	argparser.add_argument('--cut', type=int, default=1000000, help="if specified, use the first n train dialogs instead of all.")
-	argparser.add_argument('--split_ages', type=bool, default=False, help="if True, training separately the different group ages")
-	argparser.add_argument('--split_loc', type=bool, default=False, help="if True, training separately adult and child dialogs")
 	argparser.add_argument('--out', type=str, default='results', help="where to write .crfsuite model file")
 	argparser.add_argument('--error', action='store_true')
 	# parameters for training/testing:
@@ -295,15 +365,24 @@ if __name__ == '__main__':
 	argparser.add_argument('--use_action', '-act', action='store_true', help="whether to use action features to train the algorithm, if they are in the data")
 	argparser.add_argument('--use_repetitions', '-rep', action='store_true', help="whether to check in data if words were repeated from previous sentence, to train the algorithm")
 	argparser.add_argument('--weights_loc', '-w', type=str, default=None, help="pattern name for the previous learning parameters")
+	argparser.add_argument('--col_ages', type=str, default=None, help="if not None, plot evolution of accuracy over age groups")
+	argparser.add_argument('--train_percentage', type=float, default=1., help="percentage (as fraction) of data to use for training. If --conv_split_length is not set, whole conversations will be used.")
+	argparser.add_argument('--conv_split_length', type=int, default=None, help="if not None, conversations will be split for training using argument as length of splits")
+	argparser.add_argument('--conv_split_repeat', action="store_true", help="if passed along --conv_split_length, conversations will be split and repeated to create more data (rolling window); ")
+
 
 	args = argparser.parse_args()
 	print(args)
+	if (args.train_percentage is not None) and (args.train_percentage <=0. and args.train_percentage > 1.):
+		raise ValueError("--train_percentage must be between 0. and 1. (strictly superior to 0, otherwise no data to train on). Current value: {0}.".format(args.train_percentage))
+
 	print("Training starts.")
 
 	# Definitions
 	number_words_for_feature = args.nb_occurrences # default 5
 	number_segments_length_feature = 10
 	#number_segments_turn_position = 10 # not used for now
+	training_tag = 'spa_'+args.keep_tag
 
 	if args.format == 'txt':
 		if args.txt_columns == []:
@@ -313,15 +392,16 @@ if __name__ == '__main__':
 		data_test = openData(args.test, column_names=args.txt_columns, match_age=args.match_age, use_action = use_action, check_repetition=args.use_repetitions)
 		data_dev = openData(args.dev, column_names=args.txt_columns, match_age=args.match_age, use_action = use_action, check_repetition=args.use_repetitions)
 	elif args.format == 'tsv':
-		data_train = pd.read_csv(args.train, sep='\t')
-		data_test = pd.read_csv(args.test, sep='\t')
-		data_dev = pd.read_csv(args.dev, sep='\t')
-		use_action = args.use_action & ('action' in data.columns)
+		data_train = pd.read_csv(args.train, sep='\t').reset_index(drop=False)
+		data_test = pd.read_csv(args.test, sep='\t').reset_index(drop=False)
+		data_dev = pd.read_csv(args.dev, sep='\t').reset_index(drop=False)
+		use_action = args.use_action & ('action' in data_train.columns)
 		for data in [data_train, data_dev, data_test]:
-			data.rename(columns={col:col.lower() for col in data.columns})
-			data = data_add_features(data, action=use_action, match_age=args.match_age, check_repetition=args.use_repetitions)
+			data.rename(columns={col:col.lower() for col in data.columns}, inplace=True)
+			data = data_add_features(data, use_action=use_action, match_age=args.match_age, check_repetition=args.use_repetitions)
+		training_tag = [x for x in data_train.columns if 'spa_' in x][0]
 	
-	training_tag = 'spa_'+args.keep_tag
+	
 	count_tags = data_train[training_tag].value_counts().to_dict()
 	# printing log data:
 	print("\nTag counts: ")
@@ -396,6 +476,18 @@ if __name__ == '__main__':
 	for data in [data_train, data_dev, data_test]:
 		data['features'] = data.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
 
+	if args.conv_split_length is not None:
+		if args.conv_split_repeat:
+			data_train = create_rw_data(data_train, 'file_id', args.conv_split_length)
+		else:
+			data_train = take_percent(data_train, args.train_percentage, 'file_id', args.conv_split_length, split_var_lgth=10)
+	elif args.train_percentage < 1:
+		# only take x % of the files
+		train_files = data_train['file_id'].unique().tolist()
+		train_subset = np.random.choice(len(train_files), size=int(len(train_files)*args.train_percentage), replace=False)
+		train_files = [train_files[x] for x in train_subset]
+		data_train = data_train[data_train['file_id'].isin(train_files)]
+
 	# Once the features are done, groupby name and extract a list of lists
 	# some "None" appear bc some illocutionary codes missing - however creating separations between data...
 	grouped_train = data_train.dropna(subset=[training_tag]).groupby(by=['file_id']).agg({
@@ -425,7 +517,7 @@ if __name__ == '__main__':
 		})
 		# Location for weight save
 		name = os.path.join(os.getcwd(),('' if args.out is None else args.out), 
-				'_'.join([ x for x in [training_tag, 'sa' if args.split_ages else None, 'sl' if args.split_loc else None, datetime.datetime.now().strftime('%Y-%m-%d-%H%M')] if x ])) # creating name with arguments, removing Nones in list
+				'_'.join([ x for x in [training_tag, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')] if x ])) # creating name with arguments, removing Nones in list
 		os.mkdir(name)
 		trainer.train(os.path.join(name, 'model.pycrfsuite'))
 		# plotting training curves
@@ -456,13 +548,18 @@ if __name__ == '__main__':
 	data_dev['y_true'] = data_dev[training_tag]
 	data_dev['pred_OK'] = data_dev.apply(lambda x: (x.y_pred == x.y_true), axis=1)
 	# reports
-	report, mat, acc = bio_classification_report(data_dev['y_true'].tolist(), data_dev['y_pred'].tolist())
+	report, mat, acc, cks = bio_classification_report(data_dev['y_true'].tolist(), data_dev['y_pred'].tolist())
 	states, transitions = features_report(tagger)
 	
+	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_dev.columns if 'spa_' in x] + ['y_true', 'y_pred', 'pred_OK']
+
 	report_to_file({
-		'test_data': data_dev[['file_id', 'speaker', 'spa_1', 'spa_2', 'spa_2a', 'y_true', 'y_pred', 'pred_OK']],
+		'test_data': data_dev[int_cols],
 		'classification_report': report.T,
 		'confusion_matrix': mat,
 		'weights': states, 
 		'learned_transitions': transitions.pivot(index='label_from', columns='label', values='likelihood') 
 	}, name+'/report.xlsx')
+
+	if args.col_ages is not None:
+		plot_testing(data_dev, name+'/testing.png', args.col_ages)
