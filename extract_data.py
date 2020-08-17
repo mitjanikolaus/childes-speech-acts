@@ -17,6 +17,8 @@ import re
 
 from utils import *
 
+
+### WRITE DATA
 def sep_loop(df, line_function, ttv_writer, remove_empty_tags=True):
     # extract file <-> ttv columns, set as index, series to dict
     sets = df[['file_id', 'ttv']].drop_duplicates().set_index('file_id').to_dict()['ttv']
@@ -41,24 +43,60 @@ def one_loop(df, line_function, ttv_writer, remove_empty_tags=True):
                 sub_data[k][tag] = sub_data[k][tag].fillna(value='None')
             sub_data[k][columns].rename(columns={col:col.upper() for col in columns}).to_csv(filepath, sep='\t', index=False)
 
+### READ DATA
+def read_lines_from_folder(folder:str) -> pd.DataFrame:
+    """Read all json files in the given folder, locate required fields and return data as pd.DataFrame
+    """
+    p = []
+    for (root, dirs, files) in os.walk(folder):
+        if dirs == []: # no more subfolders
+            for file in sorted([x for x in files if x.split('.')[-1] == 'json']):
+                json_fn = os.path.join(root, file)
+                json_file = json.load(json_fn)
+                for doc in json_file["documents"]:
+                    # read all segments as sentence
+                    sentence = " ".join([ x["word"] for x in doc["tokens"]])
+                    d = {
+                        'file_id': json_fn, 
+                        "sentence": sentence, 
+                        "time_stamp": "00:00:00" if "time" not in doc.keys() else doc["time"],
+                        "spa_all": doc["segments"]["label"],
+                        "speaker": doc["by"],
+                        # add spa_1, spa_2, spa_2a
+                        # pos = '' if "pos" not in doc["tokens"][0].keys() else " ".join([ x["pos"] for x in doc["tokens"]])
+                        # lemmas = '' if "lemmas" not in doc["tokens"][0].keys() else " ".join([ x["lemmas"] for x in doc["tokens"]])
+                        # action = 
+                    }
+                p.append(d)
+    return pd.DataFrame(p)
+
+### MAIN
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Extract and transform data.', formatter_class=argparse.RawTextHelpFormatter)
     # Data files
-    argparser.add_argument('csv_loc', type=str, help='location of the previously extracted data')
+    argparser.add_argument('--csv_loc', type=str, default=None, help='location of the previously extracted data - csv file')
+    argparser.add_argument('--json_loc', type=str, default=None, help='location of json files with extracted data - MACANNOT files')
     argparser.add_argument('--output_format', choices=['one_tsv', 'sep_txt'], help="""how to output the data based on the algorithm that will be applied next: 
         * 'one_tsv': HDF5 preparation for RNN
         * 'sep_txt': TXT preparation for CRF
     """)
     # Extraction parameters
     argparser.add_argument('--keep_empty_text', action='store_true', help='whether to keep segments without any speech (might have acts) in final data')
-    argparser.add_argument('--keep_empty_spa', action='store_true', help="whether to keep segments without spa tags (analyzing unlabeled corpuses)")
-    argparser.add_argument('--select_data', choices=["utterance", "spa_all", "spa_1", "spa_2", "spa_2a", "time_stamp", "speaker", "sentence", "lemmas", "pos", "action", "file_id"], nargs='+', help="ordered features for output - will be adapted to generate 3 files for ")
+    argparser.add_argument('--keep_empty_spa', action='store_true', help="whether to keep segments without spa tags")
+    argparser.add_argument('--select_data', choices=["utterance", "spa_all", "spa_1", "spa_2", "spa_2a", "time_stamp", "speaker", "sentence", "lemmas", "pos", "action", "file_id", "age_months", "translation"], nargs='+', help="ordered features for output - will be adapted to generate 3 files for ")
     argparser.add_argument('--replace_names', action='store_true', help="whether to replace locutors callings by tag; applicable on columns 'sentence' and 'lemmas'")
     # Train/test/validation
-    argparser.add_argument('--ttv_split', nargs=3, type=float, default=[0.6, 0.3, 0.1], help="percentage of files going to train/test/validation sets; if --keep_empty_spa is False, test is all of the data")
+    argparser.add_argument('--ttv_split', nargs=3, type=float, default=[0.7, 0.25, 0.05], help="percentage of files going to train/test/validation sets; if --keep_empty_spa is False, test is all of the data")
     argparser.add_argument('--ttv_filepattern', type=str, default="list_{}_conv", help="file pattern (filled with train/test/valid + other patterns if need be) for ttv files - default 'list_{}_conv'.format(XXX)")
+    argparser.add_argument('--test_only', action='store_true', help="analysis of unlabeled corpuses (takes precedence over --ttv_split)")
 
     args = argparser.parse_args()
+    if args.csv_loc is None and args.json_loc is None:
+        raise ValueError("Data location must be given either through the --csv_loc or the --json_loc argument.")
+    elif args.json_loc is not None and not os.path.isdir(args.json_loc):
+        raise ValueError("{args.json_loc} is not a folder.")
+    # not checking csv file, could have other extension but correct format
+
     if args.select_data is None:
         if args.output_format == 'sep_txt':
             args.select_data = ["spa_all", "utterance", "time_stamp", "speaker", "sentence"]
@@ -72,11 +110,17 @@ if __name__ == '__main__':
         else:
             args.select_data = [args.select_data]
             spa_subtags = ['spa_all']
+    if args.csv_loc is not None:
+        data = pd.read_csv(args.csv_loc)
+    else: # args.json_loc is None
+        data = read_lines_from_folder(args.json_loc)
 
-    data = pd.read_csv(args.csv_loc)
     if not args.keep_empty_text:
         data.dropna(subset=["sentence"], inplace=True)
-    if args.keep_empty_spa:
+        data.drop(data[data["sentence"] =='.'].index, inplace=True)
+    if not (args.keep_empty_spa or args.test_only):
+        data.dropna(subset=[x for x in data.columns if 'spa_' in x], how='any')
+    if args.test_only:
         args.ttv_split = [0., 1., 0.]
     ttv_rep = {f:np.random.choice([0,1,2], p=args.ttv_split) for f in data['file_id'].unique()}
     data["ttv"] = data["file_id"].apply(lambda x: ttv_rep[x])

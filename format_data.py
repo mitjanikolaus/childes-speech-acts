@@ -50,28 +50,34 @@ def loop_over(input_dir, output_dir, reading_function, input_format, child_analy
             print(in_file)
             d = reading_function(in_file)
             out_file = os.path.join(out_dir, file).replace('xml', 'json')
-            #try:
-            new_shape, lines, errors, n_prop = parse_xml(d)
-            n_prop_all += n_prop
-            # write to file 
-            dump_json(new_shape, out_file)
-            # add metadata to df
-            tmp = pd.DataFrame(lines)
-            tmp["file_id"] = out_file
-            tmp["errors"] = " ".join(errors)
-            tmp["child"] = new_shape["header"]["target_child"]["name"].lower()
-            tmp["age_months"] = new_shape["header"]["target_child"]["age"]
-            if 'time_stamp' in tmp.columns:
-                tmp['time_stamp'] = tmp['time_stamp'].fillna(method='ffill').fillna("00:00:00")
-            else:
-                tmp['time_stamp'] = "00:00:00"
-            df.append(tmp)
-            # Analysis
-            child_counter.append(new_shape["header"]["target_child"]["name"].lower())
-            
-            #except KeyError as e:
-            #    if str(e) == "'u'":
-            #        dummy_files.append(in_file)
+            try:
+                new_shape, lines, errors, n_prop = parse_xml(d)
+                n_prop_all += n_prop
+                # write to file 
+                dump_json(new_shape, out_file)
+                # add metadata to df
+                tmp = pd.DataFrame(lines)
+                tmp["file_id"] = out_file
+                tmp["errors"] = " ".join(errors)
+                tmp["child"] = new_shape["header"]["target_child"]["name"].lower()
+                tmp["age_months"] = new_shape["header"]["target_child"]["age"]
+                if 'time_stamp' in tmp.columns:
+                    tmp['time_stamp'] = tmp['time_stamp'].fillna(method='ffill').fillna("00:00:00")
+                else:
+                    tmp['time_stamp'] = "00:00:00"
+                if 'translation' in tmp.columns:
+                    tmp['translation'].fillna(tmp.sentence, inplace=True)
+                df.append(tmp)
+                # Analysis
+                child_counter.append(new_shape["header"]["target_child"]["name"].lower())
+                
+            except KeyError as e:
+                if str(e) == "'u'":
+                    dummy_files.append(in_file)
+            except: # raise other exceptions
+                print("Unexpected error:", sys.exc_info()[0])
+                raise
+    
     df = pd.concat(df)
     # Analysis
     if child_analysis:
