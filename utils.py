@@ -91,8 +91,8 @@ def missing_position(d:dict): # TODO: see u258
         mx = max(d.keys())
         return sorted(list(set(range(0,mx+1)) - set(d.keys())))+[mx+1] # same as "0" above if no difference
 
-def age_months(s:str):
-    """Age stored under format: "P1Y08M" or "P1Y01M14D"; returning age in months
+def age_months(s:str) -> int:
+    """Age stored under format: "P1Y08M" or "P1Y01M14D" (or just "P1Y"); returning age in months
 
     Input:
     -------
@@ -104,9 +104,20 @@ def age_months(s:str):
     age: `int`
     """
     pat = re.compile("^P([0-9]{1,2})Y([0-9]{2})M")
-    age = re.findall(pat, s)[0]
-    age = int(age[0])*12 + int(age[1])
+    try:
+        age = re.findall(pat, s)[0]
+        age = int(age[0])*12 + int(age[1])
+    except IndexError as e:
+        #if "list index out of range" in str(e):
+        pat = re.compile("^P([0-9]{1,2})Y")
+        age = re.findall(pat, s)[0]
+        age = int(age)*12 # only 1 argument
     return age
+
+def adapt_punct(s:str) -> str:
+    """Add space before punctuation group (==> tokens) if punctuation is ? ! .
+    """
+    return re.sub(re.compile("([a-z]+)([.?!]+)"), r'\1 \2',s)
 
 
 def parse_xml(d:dict):
@@ -114,7 +125,7 @@ def parse_xml(d:dict):
     Input:
     -------
     d: dict
-        JSON data read from XML file from childes interaction
+        JSON data read from XML file from childes interaction 
 
     Output:
     -------
@@ -131,7 +142,11 @@ def parse_xml(d:dict):
         'p':'.', 'q':'?', 'trail off':'...', 'e': '!', 'interruption': '+/', 
         "interruption question":'+/?',
         "quotation next line": '',
-        "quotation precedes": ''
+        "quotation precedes": '',
+        "trail off question":'...?',
+        "comma": ',',
+        "broken for coding": '',
+        "self interruption": '-'
     }
 
     new_shape = {"header":{}, "annotation":{}, "documents":[]} # JSON
@@ -145,16 +160,12 @@ def parse_xml(d:dict):
     # storing participant
     for locutor in d["CHAT"]["Participants"]["participant"]:
         if locutor["@id"] == "CHI":
-            if "@name" in locutor.keys():
-                new_shape["header"]["target_child"] = {
-                    'name': locutor["@name"],
-                    'age': age_months(locutor["@age"])
-                }
-            else:
-                new_shape["header"]["target_child"] = {
-                    'name': "Unknown",
-                    'age': age_months(locutor["@age"])
-                }
+            new_shape["header"]["target_child"] = {
+                'name': locutor["@name"] if "@name" in locutor.keys() else "Unknown", 
+                'age': age_months(locutor["@age"]) if "@age" in locutor.keys() else 0
+            }
+            if "@language" in locutor.keys():
+                new_shape["header"]['language'] = locutor["@language"]
     # storing annotator
     for cmt in (d["CHAT"]["comment"] if isinstance(d["CHAT"]["comment"], list) else [d["CHAT"]["comment"]]):
         if cmt["@type"] == "Transcriber":
@@ -169,62 +180,17 @@ def parse_xml(d:dict):
         l_words = {}
         l_lemmas = {}
         l_pos = {}
-        if "w" in utterance.keys():
-            # either dict, list of non existent
-            if type(utterance["w"]) == list:
-                for d_word in utterance["w"]:
-                    loc, word, lemma, pos, _ = parse_w(d_word) # is_shortened not used rn
-                    if loc is not None:
-                        l_words[loc] = word
-                        l_lemmas[loc] = lemma
-                        l_pos[loc] = pos
-                        if pos == 'n_prop':
-                            n_prop.append(word)
-                    else:
-                        errors.append(utterance["@uID"])
-            elif (type(utterance["w"]) == dict) or (type(utterance["w"]) == OrderedDict):
-                loc, word, lemma, pos, _ = parse_w(utterance["w"]) # is_shortened not used rn
-                if loc is not None:
-                    l_words[loc] = word
-                    l_lemmas[loc] = lemma
-                    l_pos[loc] = pos
-                    if pos == 'n_prop':
-                        n_prop.append(word)
-                else:
-                    errors.append(utterance["@uID"])
-        if "g" in utterance.keys():
-            # either dict, list of non existent
-            l_g = utterance["g"] if type(utterance["g"]) == list else [utterance["g"]]
-            for utter_g in l_g:
-                if ("g" in utter_g.keys()):
-                    if type(utter_g["g"]) == list: # see u253
-                        l_g += utter_g["g"]
-                    elif (type(utter_g["g"]) == dict) or (type(utter_g["g"]) == OrderedDict): # see u7
-                        utter_g = utter_g["g"]
-                if ("w" in utter_g.keys()):
-                    if type(utter_g["w"]) == list:
-                        try:
-                            for d_word in utter_g["w"]:
-                                loc, word, lemma, pos, _ = parse_w(d_word) # is_shortened not used rn
-                                if loc is not None:
-                                    l_words[loc] = word
-                                    l_lemmas[loc] = lemma
-                                    l_pos[loc] = pos
-                                    if pos == 'n_prop':
-                                        n_prop.append(word)
-                                else:
-                                    errors.append(utterance["@uID"])
-                        except AttributeError as e:
-                            if str(e) == "'str' object has no attribute 'keys'":
-                                print("Error at {}: g.w is list".format(utterance["@uID"]))
-                                loc = missing_position(l_words)[0] # TODO: check - see u258
-                                word = " ".join([x for x in utter_g["w"] if isinstance(x, str)])
-                                if loc is not None:
-                                    l_words[loc] = word
-                                else:
-                                    errors.append(utterance["@uID"])
-                    elif (type(utter_g["w"]) == dict) or (type(utter_g["w"]) == OrderedDict):
-                        loc, word, lemma, pos, _ = parse_w(utter_g["w"]) # is_shortened not used rn
+
+        ut_keys = utterance.keys()
+        for key in ut_keys:
+            if key == "w":
+                for w_word in (utterance["w"] if type(utterance["w"]) == list else [utterance["w"]]): # str or dict/OrderedDict transformed
+                    if isinstance(w_word, str):
+                        loc = 1 if (len(l_words) == 0) else (max(l_words.keys())+1)
+                        l_words[loc] = w_word
+                    elif isinstance(w_word, dict) or isinstance(w_word, OrderedDict):
+                        # if the word has a location, it can replace words with _no_ location. 
+                        loc, word, lemma, pos, _ = parse_w(w_word) # is_shortened not used rn
                         if loc is not None:
                             l_words[loc] = word
                             l_lemmas[loc] = lemma
@@ -233,13 +199,67 @@ def parse_xml(d:dict):
                                 n_prop.append(word)
                         else:
                             errors.append(utterance["@uID"])
-        # punctuation only taken into account when in sentences
-        if "t" in utterance.keys():
-            if ("mor" in utterance["t"].keys()) and ("gra" in utterance["t"]["mor"].keys()) and (utterance["t"]["mor"]["gra"]["@relation"] == "PUNCT"):
-                loc = int(utterance["t"]["mor"]["gra"]["@index"]) -1 
-                l_words[loc] = punct[utterance["t"]["@type"]]
-                l_lemmas[loc] = punct[utterance["t"]["@type"]]
 
+            if key == "g":
+                l_g = (utterance["g"] if isinstance(utterance["g"], list) else [utterance["g"]])
+                for utter_g in l_g:
+                    # no respect of order
+                    if ("g" in utter_g.keys()): # nested g ==> take into account later
+                        l_g += utter_g["g"] if isinstance(utter_g["g"], list) else [utter_g["g"]]
+                    if ("w" in utter_g.keys()): # nested w
+                        utter_gw = utter_g["w"] if isinstance(utter_g["w"], list) else [utter_g["w"]]
+                        for w_word in utter_gw:
+                            if isinstance(w_word, str): # TODO: check place in sentence (could be overwritten)
+                                loc = 1 if (len(l_words) == 0) else (max(l_words.keys())+1)
+                                l_words[loc] = w_word
+                            else:
+                                loc, word, lemma, pos, _ = parse_w(w_word) # is_shortened not used rn
+                                if loc is not None:
+                                    l_words[loc] = word
+                                    l_lemmas[loc] = lemma
+                                    l_pos[loc] = pos
+                                    if pos == 'n_prop':
+                                        n_prop.append(word)
+                                else:
+                                    errors.append(utterance["@uID"])
+
+            if key == "a": # either dict, list of non existent
+                for l in (utterance["a"] if type(utterance["a"]) == list else [utterance["a"]]):
+                    if l["@type"] == "time stamp":
+                        doc["time"] = l["#text"]
+                    elif l["@type"] == "speech act":
+                        # warning: l["#text"] == TAG is not necessary clean
+                        try:
+                            tag = l["#text"].upper().strip().replace('0', 'O').replace(';',':').replace('-',':')
+                            tag = tag.replace('|','') # extra pipe found 
+                        except:
+                            print("\tTag Error:", l["#text"], utterance["@uID"])
+                        if tag[:2] == '$ ':
+                            tag = tag[2:]
+                        doc["segments"]["label"] = tag
+                    elif l["@type"] == "gesture":
+                        doc["segments"]["action"] = l["#text"]
+                    elif l["@type"] == "action":
+                        doc["segments"]["action"] = l["#text"]
+                    elif l["@type"] == "actions": # same as previous :|
+                        doc["segments"]["action"] = l["#text"]
+                    # translations
+                    elif l["@type"] == "english translation":
+                        doc["segments"]["translation"] = adapt_punct(l["#text"])
+
+            if key == "t" or key == "tagMarker": 
+                # either punctuation location is specified or is added when it appears in the sentence
+                pct = punct[utterance["t"]["@type"]]
+                if ("mor" in utterance["t"].keys()) and ("gra" in utterance["t"]["mor"].keys()) and (utterance["t"]["mor"]["gra"]["@relation"] == "PUNCT"):
+                    loc = int(utterance["t"]["mor"]["gra"]["@index"]) -1 
+                    l_words[loc] = pct
+                    l_lemmas[loc] = pct
+                else:
+                    # TODO append to rest of the sentence
+                    loc = 1 if (len(l_words) == 0) else (max(l_words.keys())+1)
+                    l_words[loc] = pct
+
+        # Once the utterance has been cleared: create list of tokens
         # TODO: before doing that check that all ranks are accounted for
         for i,k in enumerate(sorted(list(l_words.keys()))):
             doc["tokens"].append({
@@ -255,28 +275,6 @@ def parse_xml(d:dict):
         doc["segments"]["lemmas"] = " ".join([x["lemma"] for x in doc["tokens"] if x["lemma"] is not None])
         doc["segments"]["pos"] = " ".join([x["pos"] for x in doc["tokens"] if x["pos"] is not None])
 
-        if "a" in utterance.keys():
-            # either dict, list of non existent
-            for l in (utterance["a"] if type(utterance["a"]) == list else [utterance["a"]]):
-                if l["@type"] == "time stamp":
-                    doc["time"] = l["#text"]
-                elif l["@type"] == "speech act":
-                    # do stuff l["#text"]
-                    # warning: l["#text"] is not necessary clean
-                    try:
-                        tag = l["#text"].upper().strip().replace('0', 'O')
-                    except:
-                        print(l["#text"], utterance["@uID"])
-                        time.sleep(10)
-                    if tag[:2] == '$ ':
-                        tag = tag[2:]
-                    doc["segments"]["label"] = tag
-                elif l["@type"] == "gesture":
-                    doc["segments"]["action"] = l["#text"]
-                elif l["@type"] == "action":
-                    doc["segments"]["action"] = l["#text"]
-
-        # TODO: log different activity / missing data
         # split tags
         if "label" in doc["segments"].keys():
             doc["segments"]["label_int"] = select_tag(doc["segments"]["label"], keep_part='first')
@@ -300,25 +298,32 @@ def parse_xml(d:dict):
 ILLOC = pd.read_csv('illocutionary_force_code.csv', sep=' ', header=0, keep_default_na=False).set_index('Code')
 
 def select_tag(s:str, keep_part='all'):
-	if s[:2] == '$ ': # some tags have errors
-		s = s[2:]
-	if keep_part == 'all':
-		return s.strip()
-	# tag must start by '$'; otherwise remore space.
-	# split on ' ' if more than one tag - keep the first
-	l = s.strip().replace('$', '').split(' ')[0].split(':')
-	if keep_part == 'first': # aka 'interchange'
-		return check_interchange(l[0])
-	elif keep_part == 'second': # aka 'illocutionary'
-		return None if len(l) <2 else check_illocutionary(l[1])
-	else: # keep_part == 'illocutionary_category
-		return None if len(l) < 2 else adapt_tag(check_illocutionary(l[1]))
+    if s[:2] == '$ ': # some tags have errors
+        s = s[2:]
+    if keep_part == 'all':
+        return s.strip()
+    # tag must start by '$'; otherwise remore space.
+    # split on ' ' if more than one tag - keep the first
+    s = s.strip().replace('$', '').split(' ')[0]
+    if len(s) == 5:
+        s = s[:3]+':'+s[3:] # a few instances in Gaeltacht of unsplitted tags
+    l = s.split(':')
+    if keep_part == 'first': # aka 'interchange'
+        return check_interchange(l[0])
+    elif keep_part == 'second': # aka 'illocutionary'
+        return None if len(l) <2 else check_illocutionary(l[1])
+    else: # keep_part == 'illocutionary_category
+        return None if len(l) < 2 else adapt_tag(check_illocutionary(l[1]))
 
 def adapt_tag(s:str):
-	return None if s not in ILLOC.index.tolist() else ILLOC.loc[s]['Name'][:3].upper()
+    return None if s not in ILLOC.index.tolist() else ILLOC.loc[s]['Name'][:3].upper()
 
 def check_interchange(tag:str):
-    int_errors={"DJ6F":"DJF", "DCCA":"DCC", "RN":None}
+    int_errors={
+        "DJ6F":"DJF", "DCCA":"DCC", "RN":None,
+        'D':None, 'DJFA':"DJF", 'DCJF':"DJF", 'DNIA':"NIA", 
+        'YY':"YYY", 'DCCC':"DCC", 'DDJF':"DJF", 'DC':"DCC", "SDS":"DSS"
+    }
     if tag in int_errors.keys():
         return int_errors[tag]
     return tag
@@ -373,6 +378,7 @@ def format_line(document):
         "sentence": document["segments"]["sentence"],
         "lemmas": document["segments"]["lemmas"],
         "pos": document["segments"]["pos"],
+        "translation": None if 'translation' not in document["segments"].keys() else document["segments"]["translation"],
         "action": None if 'action' not in document["segments"].keys() else document["segments"]["action"]
     }
     return locations 
