@@ -11,8 +11,9 @@ import numpy as np
 import pandas as pd
 import time, datetime
 import re
+from bidict import bidict # bidirectional dictionary - allows for looking up key from value
 
-# Read/Write JSON
+### Read/Write JSON
 def get_xml_as_dict(filepath:str):
     with open(filepath) as in_file:
         xml = in_file.read()
@@ -28,7 +29,7 @@ def dump_json(d:dict, filepath:str):
     with open(filepath, 'w') as out_file:
         json.dump(d, out_file)
 
-# Parse XML
+### Parse XML
 def parse_w(d:dict, replace_name=False):
     """
     Input:
@@ -294,7 +295,7 @@ def parse_xml(d:dict):
     return new_shape, lines, errors, n_prop
 
 
-# Tag modification
+### Tag modification
 ILLOC = pd.read_csv('illocutionary_force_code.csv', sep=' ', header=0, keep_default_na=False).set_index('Code')
 
 def select_tag(s:str, keep_part='all'):
@@ -332,6 +333,30 @@ def check_illocutionary(tag:str):
     if tag in il_errors.keys():
         return il_errors[tag]
     return tag
+
+def dataset_labels(dataname:str) -> bidict: 
+    """For a given tag, return all possible labels; order will be used to index labels in data
+
+    Input:
+    -------
+    dataname: `str`
+        column name, must be in `SPA_1`, `SPA_2`, `SPA_2A`
+
+    Output:
+    -------
+    b: `bidict`
+        dictionary `{label: index}` to be used to transform data
+    """
+    if dataname == "SPA_1":
+        labels = ['DRP','DSS','NCS','NFA','NIN','NMA','PRO','PSS','SAT','TXT','OOO','YYY','MRK','NIA','CMO','DCA','DFW','DHA','DHS','DRE','DCC','DJF','DNP']
+    elif dataname == "SPA_2":
+        labels = [ "AC", "AD", "AL", "CL", "CS", "DR", "GI", "GR", "RD", "RP", "RQ", "SS", "WD", "CX", "EA", "EI", "EC", "EX", "RT", "SC", "FP", "PA", "PD", "PF", "SI", "TD", "DC", "DP", "ND", "YD", "CM", "EM", "EN", "ES", "MK", "TO", "XA", "AP", "CN", "DW", "ST", "WS", "AQ", "AA", "AN", "EQ", "NA", "QA", "QN", "RA", "SA", "TA", "TQ", "YQ", "YA", "PR", "TX", "AB", "CR", "DS", "ED", "ET", "PM", "RR", "CT", "YY", "OO"]
+    elif dataname == "SPA_2A":
+        labels = ['DIR', 'SPE', 'VOC', 'STA', 'QUE', 'TEX', 'MAR', 'PER', 'COM', 'EVA', 'DEC', 'DEM']
+    else:
+        raise RuntimeError(f"Unknown indexer: {dataname}")
+    labels.append("NOL") # No label for this sentence
+    return bidict({label:i for i,label in enumerate(labels)})
 
 
 #### name_change

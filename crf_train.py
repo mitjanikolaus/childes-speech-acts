@@ -308,6 +308,73 @@ def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 
 	return features_full
 
+def generate_features(data:pd.DataFrame, tag:str, 
+						nb_occ:int, use_action:bool, use_repetitions:bool,
+						bin_cut:int = 10) -> dict:
+	"""Analyse data according to arguments passed and generate features_idx dictionary. Printing log data to console.
+	"""
+	# Also counting tags for knowledge's sake
+	print("\nTag counts: ")
+	count_tags = data[tag].value_counts().to_dict()
+	for k in sorted(count_tags.keys()):
+		print("{}: {}".format(k,count_tags[k]), end=" ; ")
+
+	# Features: vocabulary (spoken)
+	count_vocabulary = [y for x in data.tokens.tolist() for y in x] # flatten
+	count_vocabulary = dict(Counter(count_vocabulary))
+	# filtering features
+	count_vocabulary = {k:v for k,v in count_vocabulary.items() if v > nb_occ}
+	# turning vocabulary into numbered features - ordered vocabulary
+	features_idx = {'words': {k:i for i, k in enumerate(sorted(count_vocabulary.keys()))}}
+	print("\nThere are {} words in the features".format(len(features_idx['words'])))
+
+	# Features: Speakers (+ logging counts)
+	count_spk = dict(Counter(data['speaker'].tolist()))
+	print("\nSpeaker counts: ")
+	for k in sorted(count_spk.keys()):
+		print("{}: {}".format(k,count_spk[k]), end=" ; ")
+	features_idx['speaker'] = {k:(len(features_idx['words'])+i) for i, k in enumerate(sorted(count_spk.keys()))}
+	
+	# Features: sentence length (+ logging counts)
+	data['len_bin'], bins = pd.qcut(data.turn_length, q=bin_cut, duplicates='drop', labels=False, retbins=True)
+	print("\nTurn length splits: ")
+	for i,k in enumerate(bins[:-1]):
+		print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
+
+	nb_feat = max([max(v.values()) for v in features_idx.values()])
+	features_idx['length_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
+	features_idx['length'] = {i:(nb_feat+i) for i, _ in enumerate(bins[:-1]) }
+	# parameters: duplicates: 'raise' raises error if bins are identical, 'drop' just ignores them (leading to the creation of larger bins by fusing those with identical cuts)
+	# retbins = return bins (for debug) ; labels=False: only yield the position in the binning, not the name (simpler to create features)
+
+	# Features: actions
+	if use_action:
+		count_actions = [y for x in data.action_tokens.tolist() for y in x] # flatten
+		count_actions = dict(Counter(count_actions))
+		# filtering features
+		count_actions = {k:v for k,v in count_actions.items() if v > nb_occ}
+		# turning vocabulary into numbered features - ordered vocabulary
+		nb_feat = max([max(v.values()) for v in features_idx.values()])
+		features_idx['action'] = {k:i+nb_feat for i, k in enumerate(sorted(count_actions.keys()))}
+		print("\nThere are {} words in the actions".format(len(features_idx['action'])))	
+
+	# Features: repetitions (reusing word from speech)
+	if use_repetitions:
+		nb_feat = max([max(v.values()) for v in features_idx.values()])
+		# features esp for length & ratio - repeated words can use previously defined features
+		# lengths
+		_, bins = pd.qcut(data.nb_repwords, q=bin_cut, duplicates='drop', labels=False, retbins=True)
+		features_idx['rep_length_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
+		# ratios
+		_, bins = pd.qcut(data.ratio_repwords, q=bin_cut, duplicates='drop', labels=False, retbins=True)
+		features_idx['rep_ratio_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
+		print("\nRepetition ratio splits: ")
+		for i,k in enumerate(bins[:-1]):
+			print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
+	
+	return features_idx
+
+
 
 ### REPORT
 def plot_training(trainer, file_name):
@@ -350,64 +417,7 @@ if __name__ == '__main__':
 		training_tag = [x for x in data_train.columns if 'spa_' in x][0]
 		args.training_tag = training_tag
 	
-	# printing log data
-	print("\nTag counts: ")
-	count_tags = data_train[training_tag].value_counts().to_dict()
-	for k in sorted(count_tags.keys()):
-		print("{}: {}".format(k,count_tags[k]), end=" ; ")
-
-	count_vocabulary = [y for x in data_train.tokens.tolist() for y in x] # flatten
-	count_vocabulary = dict(Counter(count_vocabulary))
-	# filtering features
-	count_vocabulary = {k:v for k,v in count_vocabulary.items() if v > args.nb_occurrences}
-	# turning vocabulary into numbered features - ordered vocabulary
-	features_idx = {'words': {k:i for i, k in enumerate(sorted(count_vocabulary.keys()))}}
-	print("\nThere are {} words in the features".format(len(features_idx['words'])))
-
-	# adding other features:
-	count_spk = dict(Counter(data_train['speaker'].tolist()))
-	# printing log data:
-	print("\nSpeaker counts: ")
-	for k in sorted(count_spk.keys()):
-		print("{}: {}".format(k,count_spk[k]), end=" ; ")
-	#features_idx = {**features_idx, **{k:(len(features_idx)+i) for i, k in enumerate(sorted(count_spk.keys()))}}
-	features_idx['speaker'] = {k:(len(features_idx['words'])+i) for i, k in enumerate(sorted(count_spk.keys()))}
-	
-	data_train['len_bin'], bins = pd.qcut(data_train.turn_length, q=number_segments_length_feature, duplicates='drop', labels=False, retbins=True)
-	# printing log data:
-	print("\nTurn length splits: ")
-	for i,k in enumerate(bins[:-1]):
-		print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
-
-	nb_feat = max([max(v.values()) for v in features_idx.values()])
-	features_idx['length_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
-	features_idx['length'] = {i:(nb_feat+i) for i, _ in enumerate(bins[:-1]) }
-	# parameters: duplicates: 'raise' raises error if bins are identical, 'drop' just ignores them (leading to the creation of larger bins by fusing those with identical cuts)
-	# retbins = return bins (for debug) ; labels=False: only yield the position in the binning, not the name (simpler to create features)
-
-	# features: actions
-	if args.use_action:
-		count_actions = [y for x in data_train.action_tokens.tolist() for y in x] # flatten
-		count_actions = dict(Counter(count_actions))
-		# filtering features
-		count_actions = {k:v for k,v in count_actions.items() if v > args.nb_occurrences}
-		# turning vocabulary into numbered features - ordered vocabulary
-		nb_feat = max([max(v.values()) for v in features_idx.values()])
-		features_idx['action'] = {k:i+nb_feat for i, k in enumerate(sorted(count_actions.keys()))}
-		print("\nThere are {} words in the actions".format(len(features_idx['action'])))	
-
-	if args.use_repetitions:
-		nb_feat = max([max(v.values()) for v in features_idx.values()])
-		# features esp for length & ratio - repeated words can use previously defined features
-		# lengths
-		_, bins = pd.qcut(data_train.nb_repwords, q=number_segments_length_feature, duplicates='drop', labels=False, retbins=True)
-		features_idx['rep_length_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
-		# ratios
-		_, bins = pd.qcut(data_train.ratio_repwords, q=number_segments_length_feature, duplicates='drop', labels=False, retbins=True)
-		features_idx['rep_ratio_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
-		print("\nRepetition ratio splits: ")
-		for i,k in enumerate(bins[:-1]):
-			print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
+	features_idx = generate_features(data_train, training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature)
 
 	# creating crf features set for train
 	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
