@@ -20,12 +20,10 @@ TODO:
 
 COLUMN NAMES IN FILES:
 FILE_ID SPA_X SPEAKER SENTENCE for tsv
-SPA_ALL IT TIME SPEAKER SENTENCE for txt - then ACTION and PREV_SENTENCE ?
-
+SPA_ALL IT TIME SPEAKER SENTENCE for txt - then ACTION
 
 Execute training:
-	$ python crf_train.py --train ttv/list_train_conv --test ttv/list_test_conv --dev ttv/list_dev_conv --format txt --keep_tag 2
-	$ python crf_train.py --train ttv/list_train_conv --test ttv/list_test_conv --dev ttv/list_valid_conv --format txt --keep_tag 2 --use_action --txt_columns spa_all utterance time_stamp speaker sentence action --use_repetitions
+	$ python crf_train.py ttv/childes_ne_train_spa_2.tsv -act  -f tsv
 """
 import os
 import sys
@@ -42,15 +40,43 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
+from sklearn import svm, naive_bayes, ensemble
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 from sklearn.preprocessing import LabelBinarizer
 import pycrfsuite
+from joblib import dump
 
 ### Tag functions
-from utils import *
+from utils import dataset_labels
 
 
 #### Read Data functions
+def argparser():
+	"""Creating arparse.ArgumentParser and returning arguments
+	"""
+	argparser = argparse.ArgumentParser(description='Train a CRF and test it.', formatter_class=argparse.RawTextHelpFormatter)
+	# Data files
+	argparser.add_argument('train', type=str, help="file listing train dialogs")
+	argparser.add_argument('--format', '-f', choices=['txt', 'tsv'], required=True, help="data file format - adapt reading")
+	argparser.add_argument('--txt_columns', nargs='+', type=str, default=[], help=""".txt columns name (in order); most basic txt is ['spa_all', 'ut', 'time', 'speaker', 'sentence']""")
+	# Operations on data
+	argparser.add_argument('--match_age', type=int, nargs='+', default=None, help="ages to match data to - for split analysis")
+	argparser.add_argument('--keep_tag', choices=['all', '1', '2', '2a'], default="all", help="keep first part / second part / all tag")
+	argparser.add_argument('--cut', type=int, default=1000000, help="if specified, use the first n train dialogs instead of all.")
+	argparser.add_argument('--out', type=str, default='results', help="where to write .crfsuite model file")
+	# parameters for training:
+	argparser.add_argument('--nb_occurrences', '-noc', type=int, default=5, help="number of minimum occurrences for word to appear in features")
+	argparser.add_argument('--use_action', '-act', action='store_true', help="whether to use action features to train the algorithm, if they are in the data")
+	argparser.add_argument('--use_repetitions', '-rep', action='store_true', help="whether to check in data if words were repeated from previous sentence, to train the algorithm")
+	argparser.add_argument('--train_percentage', type=float, default=1., help="percentage (as fraction) of data to use for training. If --conv_split_length is not set, whole conversations will be used.")
+	argparser.add_argument('--verbose', action="store_true", help="Whether to display training iterations output.")
+	# Baseline model
+	argparser.add_argument('--baseline', type=str, choices=['SVC','LSVC', 'NB', 'RF'], default=None, help="which algorithm to use for baseline: SVM (classifier ou linear classifier), NaiveBayes, RandomForest(100 trees)")
+
+	args = argparser.parse_args()
+	return args
+
+
 def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'speaker', 'sentence'], match_age=None, use_action=False, check_repetition=False):
 	"""
 	Input:
@@ -217,12 +243,10 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 	feat_glob: `dict`
 		dictionary of same shape as feature, but only containing features relevant to data line
 	"""
-	#feat_glob = {'words': Counter([w for w in spoken_tokens if (w in features['words'].keys())]) if (features['words'] is not None) else Counter(spoken_tokens)} # Can unknown words be included (test/dev) in this?
-	feat_glob = { 'words': Counter([w for w in spoken_tokens if (w in features['words'].keys())]) }
+	feat_glob = { 'words': Counter([w for w in spoken_tokens if (w in features['words'].keys())]) } # TODO: add 'UNK' token
 	feat_glob['speaker'] = {speaker:1.0}
 	feat_glob['length'] = {k:(1 if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]) else 0) for k in features['length_bins'].keys()}
-	#feat_glob['length<=i'] = {k:(1 if ln <= float(k.split('-')[1]) else 0) for k in feat_subset.keys()}
-	#feat_glob['length>=i'] = {k:(1 if ln >= float(k.split('-')[0]) else 0) for k in feat_subset.keys()}
+
 	if action_tokens is not None:
 		# actions are descriptions just like 'words'
 		feat_glob['actions'] = Counter([w for w in action_tokens if (w in features['action'].keys())]) #if (features['action'] is not None) else Counter(action_tokens)
@@ -233,107 +257,59 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 		feat_glob['rep_ratio'] = {k:(1 if ratio_rep <= float(k.split('-')[1]) and ratio_rep >= float(k.split('-')[0]) else 0) for k in features['rep_ratio_bins'].keys()}
 
 	return feat_glob
-#	# words
-#	for w in l:
-#		if w in features.keys():
-#			s.add(features[w])
-#	# locutor
-#	s.add(features[locutor])
-#	# sentence length bin
-#	feat_subset = {k: v for k, v in features.items() if isinstance(k, str) and (re.search(re.compile('[0-9]{1,2}_[0-9]{1,2}'), k) is not None)}
-#	for i, (k,v) in enumerate(feat_subset.items()):
-#		min_len, max_len = k.split('_')
-#		if i == 0 and ln <= int(min_len):
-#			s.add(v)
-#		elif ln <= int(max_len) and ln > int(min_len):
-#			s.add(v)
-#		elif i == len(feat_subset) and ln > int(max_len):
-#			s.add(v)
-#	return s
-	
 
 
-#### Report functions
-def features_report(tagg):
-	""" Extracts weights and transitions learned from training
-	From: https://github.com/scrapinghub/python-crfsuite/blob/master/examples/CoNLL%202002.ipynb
+def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, action_tokens=None, repetitions=None):
+	"""Replacing input list tokens with feature index
 
 	Input:
-	--------
-	tagg: pycrfsuite.Tagger
+	-------
+	features: `dict`
+		dictionary of all features used, by type: {'words':Counter(), ...}
 
-	Output:
-	--------
-	states: pd.DataFrame
+	spoken_tokens: `list`
+		data sentence
 	
-	transitions: pd.DataFrame
-	"""
-	info = tagg.info()
-	# Feature weights
-	state_features = Counter(info.state_features)
-	states = pd.DataFrame([{'weight':weight, 'label':label, 'attribute':attr} for (attr, label), weight in state_features.items()]).sort_values(by=['weight'], ascending=False)
-	# Transitions
-	trans_features = Counter(info.transitions)
-	transitions = pd.DataFrame([{'label_from':label_from, 'label':label_to, 'likelihood':weight} for (label_from, label_to), weight in trans_features.items()]).sort_values(by=['likelihood'], ascending=False)
-	# return
-	return states, transitions
-
-def bio_classification_report(y_true, y_pred):
-	"""
-	Classification report for a list of BIO-encoded sequences.
-	It computes token-level metrics and discards "O" labels.
-	Requires scikit-learn 0.20+ 
-
+	speaker: `str`
+		MOT/CHI
+	
+	ln: `int`
+		sentence length
+	
+	action_tokens: `list`
+		data action, default None if actions are not taken into account
+	
 	Output:
-	--------
-	cr: pd.DataFrame
-
-	cm: np.array
-
-	acc: float
-	"""	
-	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
-	cm = confusion_matrix(y_true, y_pred, normalize='true')
-	acc = sklearn.metrics.accuracy_score(y_true, y_pred, normalize = True)
-	cks = cohen_kappa_score(y_true, y_pred)
-
-	print("==> Accuracy: {0:.3f}".format(acc))
-	print("==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(cks, 1./len(set(y_true))))
-	# using both as index in case not the same labels in it
-	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc, cks
-
-def plot_testing(test_df:pd.DataFrame, file_location:str, col_ages):
-	"""Separating CHI/MOT and ages to plot accuracy, annotator agreement and number of categories over age.
+	-------
+	features_glob: `list`
+		list of size nb_features, dummy of whether feature is contained or not
 	"""
-	tmp = []
-	speakers = test_df["speaker"].unique().tolist()
-	for age in sorted(test_df[col_ages].unique().tolist()): # remove < 1Y?
-		for spks in ([[x] for x in speakers]+[speakers]):
-			age_loc_sub = test_df[(test_df[col_ages] == age) & (test_df.speaker.isin(spks))]
-			acc = sklearn.metrics.accuracy_score(age_loc_sub.y_true, age_loc_sub.y_pred, normalize=True)
-			cks = cohen_kappa_score(age_loc_sub.y_true, age_loc_sub.y_pred)
-			tmp.append({'age':age, 'locutor':'&'.join(spks), 'accuracy':acc, 'agreement': cks, 'nb_labels': len(age_loc_sub.y_true.unique().tolist())})
-		# also do CHI/MOT separately
-	tmp = pd.DataFrame(tmp)
-	speakers = tmp.locutor.unique().tolist()
-	# plot
-	fig, ax = plt.subplots(nrows=3, sharex=True, figsize=(18,10))
-	for i, col in enumerate(['accuracy', 'agreement', 'nb_labels']):
-		for spks in speakers:
-			ax[i].plot(tmp[tmp.locutor == spks].age, tmp[tmp.locutor == spks][col], label=spks)
-			ax[i].set_ylabel(col)
-	ax[2].set_xlabel('age (in months)')
-	ax[2].legend()
-	plt.savefig(file_location)
+	nb_features = max([max([int(x) for x in v.values()]) for v in features.values()])+1
+	# list features
+	features_sparse = [features['words'][w] for w in spoken_tokens if w in features['words'].keys()] # words
+	features_sparse.append(features['speaker'][speaker]) # locutor
+	for k in features['length_bins'].keys(): # length
+		if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]):
+			features_sparse.append(features['length_bins'][k])
 
-def report_to_file(dfs:dict, file_location:str):
-	"""Looping on each pd.DataFrame to log to excel
-	"""
-	writer = pd.ExcelWriter(file_location)
-	for name, data in dfs.items():
-		data.to_excel(writer, sheet_name=name)
-	writer.save()
+	if action_tokens is not None: # actions are descriptions just like 'words'
+		features_sparse += [features['action'][w] for w in spoken_tokens if w in features['action'].keys()]
+	if repetitions is not None: # not using words, only ratio+len
+		(_, len_rep, ratio_rep) = repetitions
+		for k in features['rep_length_bins'].keys():
+			if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]):
+				features_sparse.append(features['rep_length_bins'][k])
+		for k in features['rep_ratio_bins'].keys():
+			if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]):
+				features_sparse.append(features['rep_ratio_bins'][k])
+	
+	# transforming features
+	features_full = [1 if i in features_sparse else 0 for i in range(nb_features)]
 
+	return features_full
+
+
+### REPORT
 def plot_training(trainer, file_name):
 	logs = pd.DataFrame(trainer.logparser.iterations) # initially list of dicts
 	# columns: {'loss', 'error_norm', 'linesearch_trials', 'active_features', 'num', 'time', 'scores', 'linesearch_step', 'feature_norm'}
@@ -347,36 +323,12 @@ def plot_training(trainer, file_name):
 
 #### MAIN
 if __name__ == '__main__':
-	argparser = argparse.ArgumentParser(description='Train a CRF and test it.', formatter_class=argparse.RawTextHelpFormatter)
-	# Data files
-	argparser.add_argument('--test', type=str, required=True, help="file listing test dialogs")
-	argparser.add_argument('--train', type=str, required=True, help="file listing train dialogs")
-	argparser.add_argument('--dev', type=str, required=True, help="file listing dev dialogs")
-	argparser.add_argument('--format', '-f', choices=['txt', 'tsv'], required=True, help="data file format - adapt reading")
-	argparser.add_argument('--txt_columns', nargs='+', type=str, default=[], help=""".txt columns name (in order); most basic txt is ['spa_all', 'ut', 'time', 'speaker', 'sentence']""")
-	argparser.add_argument('--match_age', type=int, nargs='+', default=None, help="ages to match data to - for split analysis")
-	# Operations on data
-	argparser.add_argument('--keep_tag', choices=['all', '1', '2', '2a'], default="all", help="keep first part / second part / all tag")
-	argparser.add_argument('--cut', type=int, default=1000000, help="if specified, use the first n train dialogs instead of all.")
-	argparser.add_argument('--out', type=str, default='results', help="where to write .crfsuite model file")
-	argparser.add_argument('--error', action='store_true')
-	# parameters for training/testing:
-	argparser.add_argument('--nb_occurrences', '-noc', type=int, default=5, help="number of minimum occurrences for word to appear in features")
-	argparser.add_argument('--use_action', '-act', action='store_true', help="whether to use action features to train the algorithm, if they are in the data")
-	argparser.add_argument('--use_repetitions', '-rep', action='store_true', help="whether to check in data if words were repeated from previous sentence, to train the algorithm")
-	argparser.add_argument('--weights_loc', '-w', type=str, default=None, help="pattern name for the previous learning parameters")
-	argparser.add_argument('--col_ages', type=str, default=None, help="if not None, plot evolution of accuracy over age groups")
-	argparser.add_argument('--train_percentage', type=float, default=1., help="percentage (as fraction) of data to use for training. If --conv_split_length is not set, whole conversations will be used.")
-	argparser.add_argument('--conv_split_length', type=int, default=None, help="if not None, conversations will be split for training using argument as length of splits")
-	argparser.add_argument('--conv_split_repeat', action="store_true", help="if passed along --conv_split_length, conversations will be split and repeated to create more data (rolling window); ")
-
-
-	args = argparser.parse_args()
+	args = argparser()
 	print(args)
 	if (args.train_percentage is not None) and (args.train_percentage <=0. and args.train_percentage > 1.):
 		raise ValueError("--train_percentage must be between 0. and 1. (strictly superior to 0, otherwise no data to train on). Current value: {0}.".format(args.train_percentage))
 
-	print("Training starts.")
+	print("### Creating features:".upper())
 
 	# Definitions
 	number_words_for_feature = args.nb_occurrences # default 5
@@ -387,24 +339,20 @@ if __name__ == '__main__':
 	if args.format == 'txt':
 		if args.txt_columns == []:
 			raise TypeError('--txt_columns [col0] [col1] ... is required with format txt')
-		use_action = args.use_action & ('action' in args.txt_columns)
-		data_train = openData(args.train, cut=args.cut, column_names=args.txt_columns, match_age=args.match_age, use_action = use_action, check_repetition=args.use_repetitions)
-		data_test = openData(args.test, column_names=args.txt_columns, match_age=args.match_age, use_action = use_action, check_repetition=args.use_repetitions)
-		data_dev = openData(args.dev, column_names=args.txt_columns, match_age=args.match_age, use_action = use_action, check_repetition=args.use_repetitions)
+		args.use_action = args.use_action & ('action' in args.txt_columns)
+		data_train = openData(args.train, cut=args.cut, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions)
+
 	elif args.format == 'tsv':
 		data_train = pd.read_csv(args.train, sep='\t').reset_index(drop=False)
-		data_test = pd.read_csv(args.test, sep='\t').reset_index(drop=False)
-		data_dev = pd.read_csv(args.dev, sep='\t').reset_index(drop=False)
-		use_action = args.use_action & ('action' in data_train.columns)
-		for data in [data_train, data_dev, data_test]:
-			data.rename(columns={col:col.lower() for col in data.columns}, inplace=True)
-			data = data_add_features(data, use_action=use_action, match_age=args.match_age, check_repetition=args.use_repetitions)
+		args.use_action = args.use_action & ('action' in data_train.columns.str.lower())
+		data_train.rename(columns={col:col.lower() for col in data_train.columns}, inplace=True)
+		data_train = data_add_features(data_train, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions)
 		training_tag = [x for x in data_train.columns if 'spa_' in x][0]
+		args.training_tag = training_tag
 	
-	
-	count_tags = data_train[training_tag].value_counts().to_dict()
-	# printing log data:
+	# printing log data
 	print("\nTag counts: ")
+	count_tags = data_train[training_tag].value_counts().to_dict()
 	for k in sorted(count_tags.keys()):
 		print("{}: {}".format(k,count_tags[k]), end=" ; ")
 
@@ -425,18 +373,12 @@ if __name__ == '__main__':
 	#features_idx = {**features_idx, **{k:(len(features_idx)+i) for i, k in enumerate(sorted(count_spk.keys()))}}
 	features_idx['speaker'] = {k:(len(features_idx['words'])+i) for i, k in enumerate(sorted(count_spk.keys()))}
 	
-	#max_turn_length = data_train.turn_length.max()
-	#count_turn_length = dict(Counter(data_train.turn_length.tolist()))
 	data_train['len_bin'], bins = pd.qcut(data_train.turn_length, q=number_segments_length_feature, duplicates='drop', labels=False, retbins=True)
 	# printing log data:
 	print("\nTurn length splits: ")
 	for i,k in enumerate(bins[:-1]):
 		print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
-	#features_idx = {
-	#	**features_idx, 
-	#	**{"{}-{}".format(k, bins[i+1]):(len(features_idx)+i) for i, k in enumerate(bins[:-1])}, # bin labels (FYI)
-	#	**{i:(len(features_idx)+i) for i, _ in enumerate(bins[:-1]) } # actual labels (in data)
-	#}
+
 	nb_feat = max([max(v.values()) for v in features_idx.values()])
 	features_idx['length_bins'] = {"{}-{}".format(k, bins[i+1]):(nb_feat+i) for i, k in enumerate(bins[:-1])}
 	features_idx['length'] = {i:(nb_feat+i) for i, _ in enumerate(bins[:-1]) }
@@ -444,17 +386,12 @@ if __name__ == '__main__':
 	# retbins = return bins (for debug) ; labels=False: only yield the position in the binning, not the name (simpler to create features)
 
 	# features: actions
-	if use_action:
+	if args.use_action:
 		count_actions = [y for x in data_train.action_tokens.tolist() for y in x] # flatten
 		count_actions = dict(Counter(count_actions))
 		# filtering features
 		count_actions = {k:v for k,v in count_actions.items() if v > args.nb_occurrences}
 		# turning vocabulary into numbered features - ordered vocabulary
-		#action_features = {k:i+len(features_idx) for i, k in enumerate(sorted(count_actions.keys()))}
-		#features_idx = {
-		#	**features_idx, 
-		#	**action_features
-		#} 
 		nb_feat = max([max(v.values()) for v in features_idx.values()])
 		features_idx['action'] = {k:i+nb_feat for i, k in enumerate(sorted(count_actions.keys()))}
 		print("\nThere are {} words in the actions".format(len(features_idx['action'])))	
@@ -472,16 +409,10 @@ if __name__ == '__main__':
 		for i,k in enumerate(bins[:-1]):
 			print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
 
-	# creating features set for train, dev, test
-	for data in [data_train, data_dev, data_test]:
-		data['features'] = data.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
+	# creating crf features set for train
+	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
 
-	if args.conv_split_length is not None:
-		if args.conv_split_repeat:
-			data_train = create_rw_data(data_train, 'file_id', args.conv_split_length)
-		else:
-			data_train = take_percent(data_train, args.train_percentage, 'file_id', args.conv_split_length, split_var_lgth=10)
-	elif args.train_percentage < 1:
+	if args.train_percentage < 1:
 		# only take x % of the files
 		train_files = data_train['file_id'].unique().tolist()
 		train_subset = np.random.choice(len(train_files), size=int(len(train_files)*args.train_percentage), replace=False)
@@ -496,70 +427,54 @@ if __name__ == '__main__':
 		'index': min
 	}) # listed by apparition order
 	grouped_train = sklearn.utils.shuffle(grouped_train)
-	grouped_train.to_excel('test.xlsx')
 
-	if args.weights_loc is None:
-		# After that, train ---
-		trainer = pycrfsuite.Trainer(verbose=True)
-		# Adding data
-		for idx, file_data in grouped_train.iterrows():
-			try:
-				trainer.append(file_data['features'], file_data[training_tag]) # X_train, y_train
-			except:
-				data_train[data_train.file == idx].to_excel('error_{}.xlsx'.format(idx.replace('/', '_')))
-				print(idx)
-		# Parameters
-		trainer.set_params({
-				'c1': 1,   # coefficient for L1 penalty
-				'c2': 1e-3,  # coefficient for L2 penalty
-				'max_iterations': 50,  # stop earlier
-				'feature.possible_transitions': True # include transitions that are possible, but not observed
-		})
-		# Location for weight save
-		name = os.path.join(os.getcwd(),('' if args.out is None else args.out), 
-				'_'.join([ x for x in [training_tag, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')] if x ])) # creating name with arguments, removing Nones in list
-		os.mkdir(name)
-		trainer.train(os.path.join(name, 'model.pycrfsuite'))
-		# plotting training curves
-		plot_training(trainer, name)
-		# dumpin features
-		with open(os.path.join(name, 'features.json'), 'w') as json_file:
-			json.dump(features_idx, json_file)
-	else:
-		name = args.weights_loc
-		# loading features
-		with open(os.path.join(name, 'features.json'), 'r') as json_file:
-			features_idx = json.load(json_file)
-		for data in [data_dev, data_test]:
-			data['features'] = data.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
-
-	# Predictions
-	tagger = pycrfsuite.Tagger()
-	tagger.open(os.path.join(name,'model.pycrfsuite'))
-	
-	# creating data
-	data_dev.dropna(subset=[training_tag], inplace=True)
-	X_dev = data_dev.groupby(by=['file_id']).agg({ 
-		'features' : lambda x: [y for y in x],
-		'index': min
+	# After that, train ---
+	print("\n### Training starts.".upper())
+	trainer = pycrfsuite.Trainer(verbose=args.verbose)
+	# Adding data
+	for idx, file_data in grouped_train.iterrows():
+		trainer.append(file_data['features'], file_data[training_tag]) # X_train, y_train
+	# Parameters
+	trainer.set_params({
+			'c1': 1,   # coefficient for L1 penalty
+			'c2': 1e-3,  # coefficient for L2 penalty
+			'max_iterations': 50,  # stop earlier
+			'feature.possible_transitions': True # include transitions that are possible, but not observed
 	})
-	y_pred = [tagger.tag(xseq) for xseq in X_dev.sort_values('index', ascending=True)['features']]
-	data_dev['y_pred'] = [y for x in y_pred for y in x] # flatten
-	data_dev['y_true'] = data_dev[training_tag]
-	data_dev['pred_OK'] = data_dev.apply(lambda x: (x.y_pred == x.y_true), axis=1)
-	# reports
-	report, mat, acc, cks = bio_classification_report(data_dev['y_true'].tolist(), data_dev['y_pred'].tolist())
-	states, transitions = features_report(tagger)
+
+	# Location for weight save
+	name = os.path.join(os.getcwd(),('' if args.out is None else args.out), 
+				'_'.join([ x for x in [training_tag, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')] if x ])) # creating name with arguments, removing Nones in list
+	print("Saving model at: {}".format(name))
+	os.mkdir(name)
+	trainer.train(os.path.join(name, 'model.pycrfsuite'))
+	# plotting training curves
+	plot_training(trainer, name)
+	# dumping features
+	with open(os.path.join(name, 'features.json'), 'w') as json_file:
+		json.dump(features_idx, json_file)
+	# dumping metadata
+	with open(os.path.join(name, 'metadata.txt'), 'w') as meta_file:
+		for arg in vars(args):
+			meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
 	
-	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_dev.columns if 'spa_' in x] + ['y_true', 'y_pred', 'pred_OK']
+	# Baseline
+	if args.baseline is not None:
+		print("\nTraining and saving baseline model for comparison.")
+		X = data_train.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
+		y = data_train.dropna(subset=[training_tag])[training_tag].tolist()
+		# ID from label - bidict
+		labels = dataset_labels(training_tag.upper())
+		# transforming
+		X = np.array(X.tolist())
+		y = np.array([labels[lab] for lab in y]) # to ID
+		# TODO: take imbalance into account
+		models = {
+			'SVC': svm.SVC(),
+			'LSVC': svm.LinearSVC(), 
+			'NB': naive_bayes.GaussianNB(), 
+			'RF': ensemble.RandomForestClassifier(n_estimators=100)
+		}
 
-	report_to_file({
-		'test_data': data_dev[int_cols],
-		'classification_report': report.T,
-		'confusion_matrix': mat,
-		'weights': states, 
-		'learned_transitions': transitions.pivot(index='label_from', columns='label', values='likelihood') 
-	}, name+'/report.xlsx')
-
-	if args.col_ages is not None:
-		plot_testing(data_dev, name+'/testing.png', args.col_ages)
+		models[args.baseline].fit(X,y)
+		dump(models[args.baseline], os.path.join(name, 'baseline.joblib'))
