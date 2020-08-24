@@ -33,6 +33,7 @@ import argparse
 import time, datetime
 from collections import Counter
 import json
+from typing import Union, Tuple
 
 import re
 import nltk
@@ -47,7 +48,7 @@ import pycrfsuite
 from joblib import dump
 
 ### Tag functions
-from utils import dataset_labels
+from utils import dataset_labels, select_tag
 
 
 #### Read Data functions
@@ -67,17 +68,23 @@ def argparser():
 	# parameters for training:
 	argparser.add_argument('--nb_occurrences', '-noc', type=int, default=5, help="number of minimum occurrences for word to appear in features")
 	argparser.add_argument('--use_action', '-act', action='store_true', help="whether to use action features to train the algorithm, if they are in the data")
+	argparser.add_argument('--use_past', '-past', action='store_true', help="whether to add previous sentence as features")
 	argparser.add_argument('--use_repetitions', '-rep', action='store_true', help="whether to check in data if words were repeated from previous sentence, to train the algorithm")
+	argparser.add_argument('--use_past_actions', '-pa', action='store_true', help="whether to add actions from the previous sentence to features")
 	argparser.add_argument('--train_percentage', type=float, default=1., help="percentage (as fraction) of data to use for training. If --conv_split_length is not set, whole conversations will be used.")
 	argparser.add_argument('--verbose', action="store_true", help="Whether to display training iterations output.")
 	# Baseline model
 	argparser.add_argument('--baseline', type=str, choices=['SVC','LSVC', 'NB', 'RF'], default=None, help="which algorithm to use for baseline: SVM (classifier ou linear classifier), NaiveBayes, RandomForest(100 trees)")
+	argparser.add_argument('--balance_ex', action="store_true", help="whether to take proportion of each class into account when training (imbalanced dataset).")
 
 	args = argparser.parse_args()
+	if (args.train_percentage is not None) and (args.train_percentage <=0. and args.train_percentage > 1.):
+		raise ValueError("--train_percentage must be between 0. and 1. (strictly superior to 0, otherwise no data to train on). Current value: {0}.".format(args.train_percentage))
+
 	return args
 
 
-def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'speaker', 'sentence'], match_age=None, use_action=False, check_repetition=False):
+def openData(list_file:str, cut:int=100000, column_names:list=['all', 'ut', 'time', 'speaker', 'sentence'], **kwargs):
 	"""
 	Input:
 	------
@@ -90,10 +97,18 @@ def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'spea
 	column_names: `list`
 		list of features in the text file
 	
-	match_age: `list`
+	Kwargs:
+	-------
+	match_age: `Union[str,list]`
 		list of ages to match column age_months to - if needed by later analysis. Matching column to closest value in list.
 	
 	use_action: `bool`
+		whether to add actions to features
+	
+	use_past: `bool`
+		whether to add previous sentence (full, unlike repetitions) to features
+	
+	use_pastact: `bool`
 		whether to add actions to features
 	
 	check_repetition: `bool`
@@ -111,10 +126,7 @@ def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'spea
 	p = []
 	for i in range(min(len(lines), cut)):
 		file_name = lines[i][:-1]
-		tmp = pd.read_csv(file_name, sep="\t", names=column_names)
-		# either removing empty sentences or replacing with ""
-		tmp = tmp[~pd.isna(tmp.sentence)]
-		#tmp['sentence'] = tmp.sentence.fillna("")
+		tmp = pd.read_csv(file_name, sep="\t", names=column_names, keep_default_na=False)
 		tmp['file_id'] = file_name
 		tmp['index'] = i
 		p.append(tmp)
@@ -122,71 +134,26 @@ def openData(list_file:str, cut=100000, column_names=['all', 'ut', 'time', 'spea
 	# Changing locutors: INV/FAT become mother
 	p['speaker'] = p['speaker'].apply(lambda x: x if x in ['CHI', 'MOT'] else 'MOT')
 	# Adding features
-	p = data_add_features(p, use_action=use_action, match_age=match_age, check_repetition=check_repetition)
+	p = data_add_features(p, **kwargs)
 	# Splitting tags
 	for col_name, t in zip(['spa_1', 'spa_2', 'spa_2a'], ['first', 'second', 'adapt_second']):
 		p[col_name] = p['spa_all'].apply(lambda x: select_tag(x, keep_part=t)) # creating columns with different tags
 	# Return
 	return p
 
-def take_percent(data:pd.DataFrame, fraction:float, conv_column:str, 
-					split_avg_lgth:int = 50, split_var_lgth:int=10) -> pd.DataFrame:
-	"""Split the data into segments of average length split_avg_lgth, and randomize the extraction of data from the dataset only to keep a given fraction of data. 
-	column containing file references is updated to include splits, so that the algorithm doesn't later group data from one file all together despite splits.
-	"""
-	if (fraction > 1 or fraction < 0):
-		raise ValueError("Fraction {fraction} must be between 0. and 1..")
-	
-	n = data.shape[0]
-	split_index = np.cumsum(np.random.normal(split_avg_lgth, split_var_lgth, int(n/split_avg_lgth)).astype(int))
-	# update split index with data file changes index
-	file_idx = data[data[conv_column] != data[conv_column].shift(1)].index.tolist()
-	for f_idx in file_idx:
-		split_index[min(range(len(split_index)), key = lambda i: abs(split_index[i]-f_idx))] = f_idx
-	
-	# split and shuffle
-	tmp = []
-	for i, idx in enumerate(split_index[:-1]):
-		subset = data.iloc[idx:split_index[i+1], :]
-		subset[conv_column] = subset[conv_column].apply(lambda x: x+'_'+str(i))
-		tmp.append(subset)
-	tmp = sklearn.utils.shuffle(tmp)
-	tmp = pd.concat(tmp, axis=0)
-
-	# compute fraction and return
-	return tmp.iloc[:int(n*fraction), :]
-
-def create_rw_data(data:pd.DataFrame, conv_column:str, split_lgth:int = 50) -> pd.DataFrame:
-	"""Split the data into segments of length split_avg_lgth, and use a rolling window to create more training data. 
-	column containing file references is updated to include splits, so that the algorithm doesn't later group data from one file all together despite splits.
-	"""
-	# index of file change in data
-	file_idx = data[data[conv_column] != data[conv_column].shift(1)].index.tolist()
-	# create rolling windows
-	rw_idx = [[(a, min(a+split_lgth, file_idx[i+1])) for a in range(idx, file_idx[i+1], split_lgth)] for i, idx in enumerate(file_idx[:-1])]
-	rw_idx = [y for x in rw_idx for y in x] # flatten
-	tmp = []
-	for i, (idx_start, idx_end) in enumerate(rw_idx):
-		subset = data.iloc[idx_start:idx_end, :]
-		subset[conv_column] = subset[conv_column].apply(lambda x: x+'_'+str(i))
-		tmp.append(subset)
-	tmp = sklearn.utils.shuffle(tmp)
-	tmp = pd.concat(tmp, axis=0)
-
-	# return data
-	return tmp
-
 #### Features functions
-def data_add_features(p:pd.DataFrame, use_action=False, match_age=None, check_repetition=False):
+def data_add_features(p:pd.DataFrame, match_age:Union[str,list] = None, 
+						use_action:bool = False, use_past:bool = False, use_pastact:bool = False, 
+						check_repetition:bool = False):
 	"""Function adding features to the data:
-	* tokens: splitting spoken sentence into individual words
-	* turn_length
-	* tags (if necessary): extract interchange/illocutionary from general tag
-	* action_tokens (if necessary): splitting action sentence into individual words
-	* age_months: matching age to experimental labels
-	* repeted_words:
-	* number of repeated words
-	* ratio of words that were repeated from previous sentence over sentence length
+		* tokens: splitting spoken sentence into individual words
+		* turn_length
+		* tags (if necessary): extract interchange/illocutionary from general tag
+		* action_tokens (if necessary): splitting action sentence into individual words
+		* age_months: matching age to experimental labels
+		* repeted_words:
+		* number of repeated words
+		* ratio of words that were repeated from previous sentence over sentence length
 	"""
 	# sentence: using tokens to count & all
 	p['tokens'] = p.sentence.apply(lambda x: x.lower().split())
@@ -201,20 +168,28 @@ def data_add_features(p:pd.DataFrame, use_action=False, match_age=None, check_re
 		match_age = match_age if isinstance(match_age, list) else [match_age]
 		p['age_months'] = p.age_months.apply(lambda age: min(match_age, key=lambda x:abs(x-age)))
 	# repetition features
-	if check_repetition:
+	if check_repetition or use_past or use_pastact:
 		p['prev_file'] = p.file_id.shift(1).fillna(p.file_id.iloc[0])
 		p['prev_spk'] = p.speaker.shift(1).fillna(p.speaker.iloc[0])
 		p['prev_st'] = p.tokens.shift(1)#.fillna(p.tokens.iloc[0]) # doesn't work - fillna doesn't accept a list as value
 		p['prev_st'].iloc[0] = p.tokens.iloc[0]
+	if check_repetition:
 		p['repeated_words'] = p.apply(lambda x: [w for w in x.tokens if w in x.prev_st] if (x.prev_spk != x.speaker) and (x.file_id == x.prev_file) else [], axis=1)
 		p['nb_repwords'] = p.repeated_words.apply(len)
 		p['ratio_repwords'] = p.nb_repwords/p.turn_length
-		p = p[[col for col in p.columns if col not in ['prev_spk', 'prev_st', 'prev_file']]]
+	if use_past:
+		p['past'] = p.apply(lambda x: x.prev_st if (x.file_id == x.prev_file) else [], axis=1)
+	if use_action and use_pastact:
+		p['prev_act'] = p['action_tokens'].shift(1)
+		p['prev_act'].iloc[0] = p['action_tokens'].iloc[0]
+		p['past_act'] = p.apply(lambda x: x.prev_act if (x.file_id == x.prev_file) else [], axis=1)
+	# remove useless columns
+	p = p[[col for col in p.columns if col not in ['prev_spk', 'prev_st', 'prev_file', 'prev_act']]]
 	# return Dataframe
 	return p
 
 
-def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, action_tokens=None, repetitions=None):
+def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kwargs):
 	"""Replacing input list tokens with feature index
 
 	Features should be of type:
@@ -234,9 +209,18 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 	
 	ln: `int`
 		sentence length
-	
+
+	Kwargs:
+	--------
 	action_tokens: `list`
-		data action, default None if actions are not taken into account
+		data action if actions are not taken into account
+	
+	past_tokens: `list`
+
+	pastact_tokens: `list`
+
+	repetitions: `Tuple[list, float, float]`
+		contains the list of repeated words, number of words repeated, ratio of repeated words over sequence
 	
 	Output:
 	-------
@@ -247,19 +231,23 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 	feat_glob['speaker'] = {speaker:1.0}
 	feat_glob['length'] = {k:(1 if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]) else 0) for k in features['length_bins'].keys()}
 
-	if action_tokens is not None:
+	if 'action_tokens' in kwargs:
 		# actions are descriptions just like 'words'
-		feat_glob['actions'] = Counter([w for w in action_tokens if (w in features['action'].keys())]) #if (features['action'] is not None) else Counter(action_tokens)
-	if repetitions is not None:
-		(rep_words, len_rep, ratio_rep) = repetitions
+		feat_glob['actions'] = Counter([w for w in kwargs['action_tokens'] if (w in features['action'].keys())]) #if (features['action'] is not None) else Counter(action_tokens)
+	if 'repetitions' in kwargs:
+		(rep_words, len_rep, ratio_rep) = kwargs['repetitions']
 		feat_glob['repeated_words'] = Counter([w for w in rep_words if (w in features['words'].keys())])
 		feat_glob['rep_length'] = {k:(1 if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]) else 0) for k in features['rep_length_bins'].keys()}
 		feat_glob['rep_ratio'] = {k:(1 if ratio_rep <= float(k.split('-')[1]) and ratio_rep >= float(k.split('-')[0]) else 0) for k in features['rep_ratio_bins'].keys()}
+	if 'past_tokens' in kwargs:
+		feat_glob['past'] = Counter([w for w in kwargs['past_tokens'] if (w in features['words'].keys())])
+	if 'pastact_tokens' in kwargs:
+		feat_glob['past_actions'] = Counter([w for w in kwargs['pastact_tokens'] if (w in features['action'].keys())])
 
 	return feat_glob
 
 
-def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, action_tokens=None, repetitions=None):
+def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kwargs):
 	"""Replacing input list tokens with feature index
 
 	Input:
@@ -276,8 +264,13 @@ def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 	ln: `int`
 		sentence length
 	
+	Kwargs:
+	-------
 	action_tokens: `list`
 		data action, default None if actions are not taken into account
+	
+	repetitions: `Tuple[list, float, float]`
+		contains the list of repeated words, number of words repeated, ratio of repeated words over sequence
 	
 	Output:
 	-------
@@ -292,10 +285,10 @@ def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, acti
 		if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]):
 			features_sparse.append(features['length_bins'][k])
 
-	if action_tokens is not None: # actions are descriptions just like 'words'
-		features_sparse += [features['action'][w] for w in spoken_tokens if w in features['action'].keys()]
-	if repetitions is not None: # not using words, only ratio+len
-		(_, len_rep, ratio_rep) = repetitions
+	if 'action_tokens' in kwargs: # actions are descriptions just like 'words'
+		features_sparse += [features['action'][w] for w in kwargs['action_tokens'] if w in features['action'].keys()]
+	if 'repetitions' in kwargs: # not using words, only ratio+len
+		(_, len_rep, ratio_rep) = kwargs['repetitions']
 		for k in features['rep_length_bins'].keys():
 			if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]):
 				features_sparse.append(features['rep_length_bins'][k])
@@ -392,10 +385,6 @@ def plot_training(trainer, file_name):
 if __name__ == '__main__':
 	args = argparser()
 	print(args)
-	if (args.train_percentage is not None) and (args.train_percentage <=0. and args.train_percentage > 1.):
-		raise ValueError("--train_percentage must be between 0. and 1. (strictly superior to 0, otherwise no data to train on). Current value: {0}.".format(args.train_percentage))
-
-	print("### Creating features:".upper())
 
 	# Definitions
 	number_words_for_feature = args.nb_occurrences # default 5
@@ -403,24 +392,32 @@ if __name__ == '__main__':
 	#number_segments_turn_position = 10 # not used for now
 	training_tag = 'spa_'+args.keep_tag
 
+	print("### Loading data:".upper())
 	if args.format == 'txt':
 		if args.txt_columns == []:
 			raise TypeError('--txt_columns [col0] [col1] ... is required with format txt')
 		args.use_action = args.use_action & ('action' in args.txt_columns)
-		data_train = openData(args.train, cut=args.cut, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions)
+		args.use_past_actions = args.use_past_actions & args.use_action
+		data_train = openData(args.train, cut=args.cut, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 
 	elif args.format == 'tsv':
-		data_train = pd.read_csv(args.train, sep='\t').reset_index(drop=False)
+		data_train = pd.read_csv(args.train, sep='\t', keep_default_na=False).reset_index(drop=False)
 		args.use_action = args.use_action & ('action' in data_train.columns.str.lower())
+		args.use_past_actions = args.use_past_actions & args.use_action
 		data_train.rename(columns={col:col.lower() for col in data_train.columns}, inplace=True)
-		data_train = data_add_features(data_train, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions)
+		data_train = data_add_features(data_train, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 		training_tag = [x for x in data_train.columns if 'spa_' in x][0]
 		args.training_tag = training_tag
 	
+	print("### Creating features:".upper())
 	features_idx = generate_features(data_train, training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature)
 
 	# creating crf features set for train
-	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
+	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, 
+												action_tokens=None if not args.use_action else x.action_tokens, 
+												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+												past_tokens=None if not args.use_past else x.past,
+												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
 
 	if args.train_percentage < 1:
 		# only take x % of the files
@@ -471,13 +468,19 @@ if __name__ == '__main__':
 	# Baseline
 	if args.baseline is not None:
 		print("\nTraining and saving baseline model for comparison.")
-		X = data_train.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
+		X = data_train.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
+															x.turn_length, 
+															action_tokens=None if not args.use_action else x.action_tokens, 
+															repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)
+															), axis=1)
 		y = data_train.dropna(subset=[training_tag])[training_tag].tolist()
+		weights = dict(Counter(y))
 		# ID from label - bidict
-		labels = dataset_labels(training_tag.upper())
+		labels = dataset_labels(training_tag.upper(), add_empty_labels=True)
 		# transforming
 		X = np.array(X.tolist())
 		y = np.array([labels[lab] for lab in y]) # to ID
+		weights = {labels[lab]:v/len(y) for lab, v in weights.items()} # update weights as proportion, ID as labels
 		# TODO: take imbalance into account
 		models = {
 			'SVC': svm.SVC(),
@@ -485,6 +488,16 @@ if __name__ == '__main__':
 			'NB': naive_bayes.GaussianNB(), 
 			'RF': ensemble.RandomForestClassifier(n_estimators=100)
 		}
-
+		if args.balance_ex:
+			try:
+				models[args.baseline].set_params(class_weight=weights)
+			except ValueError as e:
+				if "Invalid parameter class_weight for estimator" in str(e): # GaussianNB has no such parameter for instance
+					pass
+				else: 
+					raise e
+			except Exception as e:
+				raise e
 		models[args.baseline].fit(X,y)
 		dump(models[args.baseline], os.path.join(name, 'baseline.joblib'))
+		print("Done.")

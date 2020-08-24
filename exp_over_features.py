@@ -25,7 +25,7 @@ from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa
 import pycrfsuite
 
 ### Tag functions
-from utils import dataset_labels
+from utils import dataset_labels, ILLOC
 from crf_train import openData, data_add_features, word_to_feature, word_bs_feature, generate_features
 from crf_test import bio_classification_report, report_to_file
 
@@ -49,6 +49,46 @@ def argparser():
 
     args = argparser.parse_args()
     return args
+
+#### Report
+def plot_evolution(report: pd.DataFrame, location:str, reference:str, kind:str = 'f1-score', figsize:tuple = (20,5)):
+    """Generates and saves two graphs: 
+        * one with overall accuracy for each label for each experiment (between 0 and 1)
+        * one with accuracy relative to the first experiment (between -1 and 1)
+    
+    Further reading: 
+        * artists: https://stackoverflow.com/questions/10101700/moving-matplotlib-legend-outside-of-the-axis-makes-it-cutoff-by-the-figure-box
+    """
+    if kind not in ['precision', 'recall', 'f1-score']:
+        raise ValueError("'kind' must be one of 'precision', 'recall', 'f1-score'")
+    # select and rename columns
+    cols = [col.replace(kind+'_', '') for col in report.columns if kind in col]
+    report.rename(columns={col:col.replace(kind+'_', '') for col in report.columns if kind in col}, inplace=True)
+    report.sort_values(by=reference, ascending=False, inplace=True)
+    # drop non labels in rows
+    try:
+        report.drop(['accuracy', 'macro avg', 'weighted avg'], inplace=True)
+    except:
+        pass
+    
+    styles = {col:('.-' if col == reference else '.') for col in cols}
+    # Figure 1
+    fig, ax = plt.subplots(figsize=figsize)
+    # xticks set manually - pandas bug
+    report[cols].fillna(0).reset_index(drop=True).plot(ax = ax, style=styles)
+    ax.set_xticks(range(len(report.index)))
+    xtext = ax.set_xticklabels(report.index, rotation=270) 
+    plt.savefig(os.path.join(location, 'evol'+'.png'), bbox_extra_artists=(xtext), bbox_inches='tight')
+    
+    # Figure 2
+    fig, ax = plt.subplots(figsize=figsize)
+    ref = report[reference].tolist()
+    for col in cols:
+        report[col] = report[col] - ref
+    report[cols].fillna(0).reset_index(drop=True).plot(ax = ax, style=styles)
+    ax.set_xticks(range(len(report.index)))
+    xtext = ax.set_xticklabels(report.index, rotation=270)
+    plt.savefig(os.path.join(location, 'evol_comparison'+'.png'), bbox_extra_artists=(xtext), bbox_inches='tight')
 
 
 #### MAIN
@@ -111,7 +151,7 @@ if __name__ == '__main__':
             grouped_train = sklearn.utils.shuffle(grouped_train)
 
             ### Training
-            print("\n### Training starts.".upper())
+            print(f"\n### Training {pat}: start.".upper())
             trainer = pycrfsuite.Trainer(verbose=args.verbose)
             # Adding data
             for idx, file_data in grouped_train.iterrows():
@@ -152,12 +192,21 @@ if __name__ == '__main__':
     
     res_comp = pd.DataFrame(logger)
     rep_comp = pd.concat(freport, axis=1)
+    rep_comp = pd.concat([rep_comp, ILLOC], axis=1)
     report_to_file({ 
         'comparison': res_comp.set_index('mode'),
         'precision_evolution': rep_comp[[col for col in rep_comp.columns if 'precision' in col]],
         'recall_evolution': rep_comp[[col for col in rep_comp.columns if 'recall' in col]],
         'f1_evolution': rep_comp[[col for col in rep_comp.columns if 'f1' in col]],
     }, os.path.join(name, 'report.xlsx'))
+
+    # operations on rep_comp before plotting - adding detailed index
+    rep_comp.drop(['accuracy', 'macro avg', 'weighted avg'], inplace=True)
+    rep_comp.reset_index(inplace=True, drop=False)
+    rep_comp['concat'] = rep_comp.apply(lambda x: x['index'] + ' - ' + x['Name'] + ' (' + x['Description'] + ')', axis=1)
+    rep_comp.set_index('concat', inplace=True)
+    # plot evolution
+    plot_evolution(rep_comp, name, 'no-act_no-rep') 
 
     with open(os.path.join(name, 'metadata.txt'), 'w') as meta_file: # dumping metadata
         for arg in vars(args):
