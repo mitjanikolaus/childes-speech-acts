@@ -35,6 +35,8 @@ import time, datetime
 from collections import Counter
 import json
 import ast
+from typing import Union, Tuple
+from bidict import bidict
 
 import re
 import nltk
@@ -63,6 +65,8 @@ def argparser():
 	argparser.add_argument('--model', '-m', required=True, type=str, default=None, help="folder containing model, features and metadata")
 	# parameters for training/testing:
 	argparser.add_argument('--col_ages', type=str, default=None, help="if not None, plot evolution of accuracy over age groups")
+	argparser.add_argument('--consistency_check', action="store_true", help="whether 'child' column matters in testing data.")
+	argparser.add_argument('--prediction_mode', choices=["raw", "exclude_ool"], default="exclude_ool", type=str, help="Whether to predict with NOL/NAT/NEE labels or not.")
 
 	args = argparser.parse_args()
 
@@ -80,6 +84,62 @@ def argparser():
 					
 	return args
 
+#### Check predictions
+def crf_predict(tagger:pycrfsuite.Tagger, gp_data:list, mode:str='raw', 
+			exclude_labels:list = ['NOL', 'NAT', 'NEE']) -> Union[list, Tuple[list, pd.DataFrame]]:
+	"""Return predictions for the test data, grouped by file. 3 modes for return:
+		* Return raw predictions (raw)
+		* Return predictions with only valid tags (exclude_ool)
+		* Return predictions (valid tags) and probabilities for each class (rt_proba)
+
+	Predictions are returned unflattened
+	
+	https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html
+	"""
+	if mode not in ['raw', 'exclude_ool', 'rt_proba']:
+		raise ValueError(f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}")
+	if mode == 'raw':
+		return [tagger.tag(xseq) for xseq in gp_data]
+	labels = tagger.labels()
+
+	res = []
+	y_pred = []
+	for fi, xseq in enumerate(gp_data):
+		tagger.set(xseq)
+		file_proba = pd.DataFrame({label:[tagger.marginal(label, i) for i in range(len(xseq))] for label in labels})
+		y_pred.append(
+			file_proba[[col for col in file_proba.columns if col not in exclude_labels]].idxmax(axis=1).tolist()
+		)
+		file_proba['file_id'] = fi
+		res.append(file_proba)
+	
+	if mode == 'rt_proba':
+		return y_pred, pd.concat(res, axis=0)
+	return y_pred # else
+
+def baseline_predict(model, data, labels:bidict, mode:str='raw',
+				exclude_labels:list = ['NOL', 'NAT', 'NEE']) -> Union[list, Tuple[list, pd.DataFrame]]:
+	"""Return predictions for the test data. 3 modes for return:
+		* Return raw predictions (raw)
+		* Return predictions with only valid tags (exclude_ool)
+		* Return predictions (valid tags) and probabilities for each class (rt_proba)
+	"""
+	if mode not in ['raw', 'exclude_ool', 'rt_proba']:
+		raise ValueError(f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}")
+	
+	if mode == 'raw':
+		# still need to transform class to label
+		return [labels.inverse[x] for x in model.predict(data)] # predicting int version of labels, not ordered number
+
+	y_proba = model.predict_proba(data) # predict proba to remove extra labels
+	classes_names = [labels.inverse[x] for x in model.classes_] # proba ordered by classes_ => label
+	y_proba = pd.DataFrame(y_proba, columns=classes_names)
+	# filter & predict
+	y_pred = y_proba[[col for col in y_proba.columns if col not in exclude_labels]].idxmax(axis=1).tolist()
+
+	if mode == 'rt_proba':
+		return y_pred, y_proba
+	return y_pred # else
 
 #### Report functions
 def features_report(tagg):
@@ -173,19 +233,26 @@ if __name__ == '__main__':
 	if args.format == 'txt':
 		if args.txt_columns == []:
 			raise TypeError('--txt_columns [col0] [col1] ... is required with format txt')
-		data_test = openData(args.test, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions)
+		data_test = openData(args.test, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 	elif args.format == 'tsv':
-		data_test = pd.read_csv(args.test, sep='\t').reset_index(drop=False)
+		data_test = pd.read_csv(args.test, sep='\t', keep_default_na=False).reset_index(drop=False)
 		data_test.rename(columns={col:col.lower() for col in data_test.columns}, inplace=True)
 		data_test['speaker'] = data_test['speaker'].apply(lambda x: x if x in ['CHI', 'MOT'] else 'MOT')
-		data_test = data_add_features(data_test, use_action=args.use_action , match_age=args.match_age, check_repetition=args.use_repetitions)
+		data_test = data_add_features(data_test, use_action=args.use_action , match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
+	# Check child consistency possible
+	if args.consistency_check and ("child" not in data_test.columns):
+		raise IndexError("Cannot check consistency if children names are not in the data.")
 	
 	# Loading model
 	name = args.model
 	# loading features
 	with open(os.path.join(name, 'features.json'), 'r') as json_file:
 		features_idx = json.load(json_file)
-	data_test['features'] = data_test.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
+	data_test['features'] = data_test.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, 
+												action_tokens=None if not args.use_action else x.action_tokens, 
+												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+												past_tokens=None if not args.use_past else x.past,
+												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
 
 	# Predictions
 	tagger = pycrfsuite.Tagger()
@@ -197,39 +264,55 @@ if __name__ == '__main__':
 		'features' : lambda x: [y for y in x],
 		'index': min
 	})
-	y_pred = [tagger.tag(xseq) for xseq in X_dev.sort_values('index', ascending=True)['features']]
+	# parameter 'raw' vs 'exclude_ool': remove ['NOL', 'NAT', 'NEE'] from predictions, predict closest label
+	y_pred = crf_predict(tagger, X_dev.sort_values('index', ascending=True)['features'], mode=args.prediction_mode) 
 	data_test['y_pred'] = [y for x in y_pred for y in x] # flatten
 	data_test['y_true'] = data_test[training_tag]
 	data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
+	# only report on tags where y_true != NOL, NAT, NEE
+	data_crf = data_test[~data_test['y_true'].isin(['NOL', 'NAT', 'NEE'])]
 	# reports
-	report, mat, acc, cks = bio_classification_report(data_test['y_true'].tolist(), data_test['y_pred'].tolist())
+	report, mat, acc, cks = bio_classification_report(data_crf['y_true'].tolist(), data_crf['y_pred'].tolist())
 	states, transitions = features_report(tagger)
 	
-	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_test.columns if 'spa_' in x] + ['y_true', 'y_pred', 'pred_OK']
+	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_test.columns if 'spa_' in x] + (['child'] if args.consistency_check else [])+ ['y_true', 'y_pred', 'pred_OK']
 
-	report_to_file({
-		'test_data': data_test[int_cols],
+	report_d = {
+		'test_data': data_crf[int_cols],
 		'classification_report': report.T,
 		'confusion_matrix': mat,
 		'weights': states, 
 		'learned_transitions': transitions.pivot(index='label_from', columns='label', values='likelihood') 
-	}, os.path.join(name, args.test.replace('/', '_')+'_report.xlsx'))
+	}
 
 	if args.col_ages is not None:
-		plot_testing(data_test, os.path.join(name, args.test+'_agesevol.png'), args.col_ages)
+		plot_testing(data_test, os.path.join(name, args.test.split('/')[-1]+'_agesevol.png'), args.col_ages)
 
 	# Test baseline
 	if args.baseline is not None:
 		bs_model = load(os.path.join(name, 'baseline.joblib'))
 
 		print("\nBaseline model for comparison:")
-		X = data_test.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], x.turn_length, None if not args.use_action else x.action_tokens, None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)), axis=1)
-		y = data_test.dropna(subset=[training_tag])[training_tag].tolist()
+		X = data_test.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
+															x.turn_length, 
+															action_tokens=None if not args.use_action else x.action_tokens, 
+															repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)
+															), axis=1)
 		# ID from label - bidict
-		labels = dataset_labels(training_tag.upper())
+		labels = dataset_labels(training_tag.upper(), add_empty_labels=True) # empty labels removed either way
 		# transforming
 		X = np.array(X.tolist())
-		y = np.array([labels[lab] for lab in y]) # to ID
+		# y = data_test.dropna(subset=[training_tag])[training_tag].tolist()
+		# y = np.array([labels[lab] for lab in y]) # to ID 			# No need for ID
+		y_pred = baseline_predict(bs_model, X, labels, mode=args.prediction_mode)
+		data_test['y_pred'] = y_pred
+		data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
+		data_bs = data_test[~data_test['y_true'].isin(['NOL', 'NAT', 'NEE'])]
 
-		y_pred = bs_model.predict(X)
-		_ = bio_classification_report(y.tolist(), y_pred.tolist())
+		report, _, _, _ = bio_classification_report(data_bs['y_true'].tolist(), data_bs['y_pred'].tolist())
+		# Add to report
+		report_d[args.baseline+'_predictions'] = data_bs[int_cols]
+		report_d[args.baseline+'_classification_report'] = report.T
+
+	# Write excel with all reports
+	report_to_file(report_d, os.path.join(name, args.test.replace('/', '_')+'_report.xlsx'))

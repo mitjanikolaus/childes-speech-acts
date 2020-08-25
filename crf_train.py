@@ -231,17 +231,17 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kw
 	feat_glob['speaker'] = {speaker:1.0}
 	feat_glob['length'] = {k:(1 if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]) else 0) for k in features['length_bins'].keys()}
 
-	if 'action_tokens' in kwargs:
+	if ('action_tokens' in kwargs) and (kwargs['action_tokens'] is not None):
 		# actions are descriptions just like 'words'
 		feat_glob['actions'] = Counter([w for w in kwargs['action_tokens'] if (w in features['action'].keys())]) #if (features['action'] is not None) else Counter(action_tokens)
-	if 'repetitions' in kwargs:
+	if ('repetitions' in kwargs) and (kwargs['repetitions'] is not None):
 		(rep_words, len_rep, ratio_rep) = kwargs['repetitions']
 		feat_glob['repeated_words'] = Counter([w for w in rep_words if (w in features['words'].keys())])
 		feat_glob['rep_length'] = {k:(1 if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]) else 0) for k in features['rep_length_bins'].keys()}
 		feat_glob['rep_ratio'] = {k:(1 if ratio_rep <= float(k.split('-')[1]) and ratio_rep >= float(k.split('-')[0]) else 0) for k in features['rep_ratio_bins'].keys()}
-	if 'past_tokens' in kwargs:
+	if ('past_tokens' in kwargs) and (kwargs['past_tokens'] is not None):
 		feat_glob['past'] = Counter([w for w in kwargs['past_tokens'] if (w in features['words'].keys())])
-	if 'pastact_tokens' in kwargs:
+	if ('pastact_tokens' in kwargs) and (kwargs['pastact_tokens'] is not None):
 		feat_glob['past_actions'] = Counter([w for w in kwargs['pastact_tokens'] if (w in features['action'].keys())])
 
 	return feat_glob
@@ -285,9 +285,9 @@ def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kw
 		if ln <= float(k.split('-')[1]) and ln >= float(k.split('-')[0]):
 			features_sparse.append(features['length_bins'][k])
 
-	if 'action_tokens' in kwargs: # actions are descriptions just like 'words'
+	if ('action_tokens' in kwargs) and (kwargs['action_tokens'] is not None): # actions are descriptions just like 'words'
 		features_sparse += [features['action'][w] for w in kwargs['action_tokens'] if w in features['action'].keys()]
-	if 'repetitions' in kwargs: # not using words, only ratio+len
+	if ('repetitions' in kwargs) and (kwargs['repetitions'] is not None): # not using words, only ratio+len
 		(_, len_rep, ratio_rep) = kwargs['repetitions']
 		for k in features['rep_length_bins'].keys():
 			if len_rep <= float(k.split('-')[1]) and len_rep >= float(k.split('-')[0]):
@@ -367,6 +367,27 @@ def generate_features(data:pd.DataFrame, tag:str,
 	
 	return features_idx
 
+### BASELINE
+def baseline_model(name:str, weights:dict, balance:bool):
+	"""Create and update (if need be) model with weights
+	"""
+	models = {
+		'SVC': svm.SVC(),
+		'LSVC': svm.LinearSVC(), 
+		'NB': naive_bayes.GaussianNB(), 
+		'RF': ensemble.RandomForestClassifier(n_estimators=100)
+	}
+	if balance:
+		try:
+			models[name].set_params(class_weight=weights)
+		except ValueError as e:
+			if "Invalid parameter class_weight for estimator" in str(e): # GaussianNB has no such parameter for instance
+				pass
+			else: 
+				raise e
+		except Exception as e:
+			raise e
+	return models[name]
 
 
 ### REPORT
@@ -476,28 +497,12 @@ if __name__ == '__main__':
 		y = data_train.dropna(subset=[training_tag])[training_tag].tolist()
 		weights = dict(Counter(y))
 		# ID from label - bidict
-		labels = dataset_labels(training_tag.upper(), add_empty_labels=True)
+		labels = dataset_labels(training_tag.upper(), add_empty_labels=True) # TODO: remove line with unreadable labels
 		# transforming
 		X = np.array(X.tolist())
 		y = np.array([labels[lab] for lab in y]) # to ID
 		weights = {labels[lab]:v/len(y) for lab, v in weights.items()} # update weights as proportion, ID as labels
-		# TODO: take imbalance into account
-		models = {
-			'SVC': svm.SVC(),
-			'LSVC': svm.LinearSVC(), 
-			'NB': naive_bayes.GaussianNB(), 
-			'RF': ensemble.RandomForestClassifier(n_estimators=100)
-		}
-		if args.balance_ex:
-			try:
-				models[args.baseline].set_params(class_weight=weights)
-			except ValueError as e:
-				if "Invalid parameter class_weight for estimator" in str(e): # GaussianNB has no such parameter for instance
-					pass
-				else: 
-					raise e
-			except Exception as e:
-				raise e
-		models[args.baseline].fit(X,y)
-		dump(models[args.baseline], os.path.join(name, 'baseline.joblib'))
+		mdl = baseline_model(args.baseline, weights, args.balance_ex) # Taking imbalance into account
+		mdl.fit(X,y)
+		dump(mdl, os.path.join(name, 'baseline.joblib'))
 		print("Done.")
