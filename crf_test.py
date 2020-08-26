@@ -50,7 +50,7 @@ import pycrfsuite
 from joblib import load
 
 ### Tag functions
-from utils import dataset_labels
+from utils import dataset_labels, check_tag_pattern
 from crf_train import openData, data_add_features, word_to_feature, word_bs_feature
 
 
@@ -71,16 +71,26 @@ def argparser():
 	args = argparser.parse_args()
 
 	# Load training arguments
-	text_file = open(os.path.join(args.model, 'metadata.txt'), "r")
-	lines = text_file.readlines() # lines ending with "\n"
-	for line in lines:
-		arg_name, value = line[:-1].split(":\t")
-		if arg_name not in ['format', 'txt_columns', 'match_age']: # don't replace existing arguments!
-			try:
-				setattr(args, arg_name, ast.literal_eval(value))
-			except ValueError as e:
-				if "malformed node or string" in str(e):
-					setattr(args, arg_name, value)
+	try:
+		text_file = open(os.path.join(args.model, 'metadata.txt'), "r")
+		lines = text_file.readlines() # lines ending with "\n"
+		for line in lines:
+			arg_name, value = line[:-1].split(":\t")
+			if arg_name not in ['format', 'txt_columns', 'match_age']: # don't replace existing arguments!
+				try:
+					setattr(args, arg_name, ast.literal_eval(value))
+				except ValueError as e:
+					if "malformed node or string" in str(e):
+						setattr(args, arg_name, value)
+				except Exception as e:
+					raise e
+	except FileNotFoundError as e:
+		if "No such file or directory" in str(e):
+			print("No metadata file for this model.")
+			# set tag
+			tag_from_file = check_tag_pattern(args.test)
+			if tag_from_file is not None:
+				args.training_tag = tag_from_file
 					
 	return args
 
@@ -230,6 +240,30 @@ if __name__ == '__main__':
 	# Definitions
 	training_tag = args.training_tag
 
+	# Loading model
+	name = args.model
+	if os.path.isdir(name):
+		linker = '/'
+		if name[-1] == '/':
+			name = name[:-1]
+	elif os.path.isfile(name + '_model.pycrfsuite'):
+		linker = '_'
+		# get args from name if possible
+		try:
+			rp, args.use_action, args.use_repetitions, args.use_past, args.use_past_actions = name.split('/')[-1].split('_')
+		except ValueError as e:
+			if 'unpack' in str(e):
+				raise AttributeError("Cannot find model metadata - args need to be set.")
+		args.baseline = None # default
+	else:
+		raise FileNotFoundError(f"Cannot find model {name}.")
+	# update paths for input/output
+	features_path = name + linker + 'features.json'
+	model_path = name + linker + 'model.pycrfsuite'
+	report_path = name + linker + args.test.replace('/', '_')+'_report.xlsx'
+	plot_path = name + linker + args.test.split('/')[-1]+'_agesevol.png'
+
+	# Loading data
 	if args.format == 'txt':
 		if args.txt_columns == []:
 			raise TypeError('--txt_columns [col0] [col1] ... is required with format txt')
@@ -243,10 +277,9 @@ if __name__ == '__main__':
 	if args.consistency_check and ("child" not in data_test.columns):
 		raise IndexError("Cannot check consistency if children names are not in the data.")
 	
-	# Loading model
-	name = args.model
-	# loading features
-	with open(os.path.join(name, 'features.json'), 'r') as json_file:
+	
+	# Loading features
+	with open(features_path, 'r') as json_file:
 		features_idx = json.load(json_file)
 	data_test['features'] = data_test.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, 
 												action_tokens=None if not args.use_action else x.action_tokens, 
@@ -256,7 +289,7 @@ if __name__ == '__main__':
 
 	# Predictions
 	tagger = pycrfsuite.Tagger()
-	tagger.open(os.path.join(name,'model.pycrfsuite'))
+	tagger.open(model_path)
 	
 	# creating data - TODO: dropna???
 	data_test.dropna(subset=[training_tag], inplace=True)
@@ -286,7 +319,7 @@ if __name__ == '__main__':
 	}
 
 	if args.col_ages is not None:
-		plot_testing(data_test, os.path.join(name, args.test.split('/')[-1]+'_agesevol.png'), args.col_ages)
+		plot_testing(data_test, plot_path, args.col_ages)
 
 	# Test baseline
 	if args.baseline is not None:
@@ -315,4 +348,4 @@ if __name__ == '__main__':
 		report_d[args.baseline+'_classification_report'] = report.T
 
 	# Write excel with all reports
-	report_to_file(report_d, os.path.join(name, args.test.replace('/', '_')+'_report.xlsx'))
+	report_to_file(report_d, report_path)

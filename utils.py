@@ -334,7 +334,7 @@ def check_illocutionary(tag:str):
         return il_errors[tag]
     return tag
 
-def dataset_labels(dataname:str) -> bidict: 
+def dataset_labels(dataname:str, add_empty_labels:bool=False) -> bidict: 
     """For a given tag, return all possible labels; order will be used to index labels in data
 
     Input:
@@ -355,8 +355,20 @@ def dataset_labels(dataname:str) -> bidict:
         labels = ['DIR', 'SPE', 'VOC', 'STA', 'QUE', 'TEX', 'MAR', 'PER', 'COM', 'EVA', 'DEC', 'DEM']
     else:
         raise RuntimeError(f"Unknown indexer: {dataname}")
-    labels.append("NOL") # No label for this sentence
+    if add_empty_labels:
+        labels.append("NOL") # No label for this sentence
+        labels.append("NAT") # Not a valid tag
+        labels.append("NEE") # Not enough examples
     return bidict({label:i for i,label in enumerate(labels)})
+
+def check_tag_pattern(data_path:str) -> str:
+    """Deduce tag from dataset name.
+    """
+    j = re.compile('spa_[0-9]{1}[a]{0,1}')
+    pat = re.findall(j, data_path)
+    if len(pat) > 0:
+        return pat[0]
+    return None
 
 
 #### name_change

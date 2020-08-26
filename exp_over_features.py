@@ -143,6 +143,9 @@ if __name__ == '__main__':
     name = os.path.join(os.getcwd(),('' if args.out is None else args.out), 
                 '_'.join([ x for x in [os.path.basename(__file__).replace('.py',''), training_tag, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')] if x ])) # Location for weight save
     os.mkdir(name)
+    # generating features - same features for all executions
+    features_idx = generate_features(data_train, training_tag, args.nb_occurrences, use_action=True, use_repetitions=True, bin_cut=number_segments_length_feature)
+
     print("\nTraining and saving CRF model with all features combinations.")
     # generating all permutations of True/False values for parameters
     l_perm = generate_tf_combi(4)
@@ -158,8 +161,6 @@ if __name__ == '__main__':
             print("\tSkipping this model, can only have past action if we have actions.")
             continue
         else:
-            # generating features
-            features_idx = generate_features(data_train, training_tag, args.nb_occurrences, use_action, use_rep, bin_cut=number_segments_length_feature)
             # creating crf features for train
             data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, 
                                         x['speaker'], x.turn_length, 
@@ -231,8 +232,7 @@ if __name__ == '__main__':
                             'rep' if use_rep else 'no-rep',
                             'bal' if use_weights else 'unbal'])
             print(f"\n### Training {pat}: start.".upper())
-            # re-generating features
-            features_idx = generate_features(data_train, training_tag, args.nb_occurrences, use_action, use_rep, bin_cut=number_segments_length_feature)
+
             # Training
             X = data_train.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
                                                                 x.turn_length, 
@@ -252,8 +252,8 @@ if __name__ == '__main__':
 
             # Predictions
             X = data_test.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
-															x.turn_length, 
-															action_tokens=None if not use_action else x.action_tokens, 
+                                                                x.turn_length, 
+                                                                action_tokens=None if not use_action else x.action_tokens, 
                                                                 repetitions=None if not use_rep else (x.repeated_words, x.nb_repwords, x.ratio_repwords)
 															), axis=1)
             # transforming
