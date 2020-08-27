@@ -32,9 +32,11 @@ def fill_cm(cm:pd.DataFrame) -> pd.DataFrame:
     cm.sort_index(inplace=True) # order rows with new data
     return cm
 
-def display_cm(cm:np.array, labels:list, figsize:tuple=(20,20), savefig_loc:str=None):
+def display_cm(cm:np.array, labels:list, figsize:Tuple[int,int]=(20,20), savefig_loc:str=None):
     """Plot any confusion-matrix like array
     """
+    if isinstance(cm, pd.DataFrame):
+        cm = cm.values
     fig, ax = plt.subplots(figsize=figsize)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
     disp.plot(cmap='viridis', ax=ax)
@@ -220,8 +222,10 @@ class SPAAnalysis():
         p = data.groupby(by=[self.age_col, spa_col]).agg({ spa_col: 'count' }).rename(columns={spa_col:'count'}
                 ).reset_index().pivot_table(columns=self.age_col, index=spa_col, values='count').fillna(0)
         p = p/p.sum()
+        p['sum'] = p.sum(axis=1)
+        p = p.sort_values('sum', ascending=False)[[col for col in p.columns if col != 'sum']] # sort index
         # plotting
-        p.plot.bar(figsize=figsize, ax=ax)
+        p.plot.bar(stacked=True, figsize=figsize, ax=ax)
         if savefig_loc is not None:
             plt.savefig(savefig_loc)
     
@@ -428,7 +432,8 @@ class PredAnalysis(SPAAnalysis):
                                 normalize = True
                     )
         # Style and return
-        cc = pd.DataFrame(cc).T
+        cc = pd.DataFrame(cc).T.fillna(0)
+        cc = cc[sorted(cc.columns, key= (lambda x: str(x)))]
         if styler: # to be used in excel
             return (cc.style
                         .format("{:.2%}")
@@ -436,3 +441,22 @@ class PredAnalysis(SPAAnalysis):
                     )
         return cc
 
+    ### Confusion matrix
+    def plot_cm(self, speaker:str = None, age:str = None, remove_ool:bool = True, normalize:str = "true", **kwargs):
+        """
+        """
+        cm_data = self.remove_ool()
+        if speaker is not None and speaker in cm_data[self.speaker_col].unique().tolist():
+            print(f"Filtering for speaker {speaker}")
+            cm_data = cm_data[cm_data[self.speaker_col] == speaker]
+        if age is not None and age in cm_data[self.age_col].unique().tolist():
+            print(f"Filtering for age {age}")
+            cm_data = cm_data[cm_data[self.age_col] == age]
+        
+        y_true = cm_data.y_true.tolist()
+        y_pred = cm_data.y_pred.tolist()
+        cm = pd.DataFrame(confusion_matrix(y_true, y_pred, normalize=normalize), 
+                            index=sorted(set(y_true+y_pred)), 
+                            columns=sorted(set(y_true+y_pred)))
+        cm = fill_cm(cm)
+        display_cm(cm.values, labels=cm.columns, **kwargs)

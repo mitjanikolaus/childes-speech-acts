@@ -4,7 +4,7 @@
 Comparing training depending on features
 
 Execute:
-    $ ttchildes_ne_train_spa_2.tsv ttv/childes_ne_test_spa_2.tsv -f tsv
+    $ python exp_over_features.py ttv/childes_ne_train_spa_2.tsv ttv/childes_ne_test_spa_2.tsv -f tsv
 """
 import os
 import sys
