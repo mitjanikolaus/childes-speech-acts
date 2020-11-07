@@ -17,6 +17,7 @@ class LSTMClassifier(nn.Module):
         self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
         self.decoder = nn.Linear(n_hidden_units, label_size)
+        self.softmax = nn.LogSoftmax(dim=2)
 
         self.init_weights()
 
@@ -35,8 +36,7 @@ class LSTMClassifier(nn.Module):
         output, hidden = self.lstm(emb, hidden)
         output = self.drop(output)
         decoded = self.decoder(output)
-        # decoded = decoded.view(-1, self.ntoken)
-        return F.log_softmax(decoded, dim=1), hidden
+        return self.softmax(decoded), hidden
 
     def init_hidden(self, batch_size):
         weight = next(self.parameters())

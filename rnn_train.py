@@ -161,7 +161,7 @@ def train(args):
         # after load the rnn params are not a continuous chunk of memory
         # this makes them a continuous chunk, and will speed up forward pass
         # Currently, only rnn model supports flatten_parameters function.
-        model.rnn.flatten_parameters()
+        model.lstm.flatten_parameters()
 
     # Run on test data.
     test_loss = evaluate(test_labels, test_features)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         "--batch-size", type=int, default=50, metavar="N", help="batch size"
     )
     parser.add_argument(
-        "--eval-batch_size",
+        "--eval-batch-size",
         type=int,
         default=10,
         metavar="N",
