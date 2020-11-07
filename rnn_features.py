@@ -19,6 +19,7 @@ nltk.download('punkt')
 
 DATA_PATH = "data/"
 
+PADDING = "<pad>"
 UNKNOWN = "<unk>"
 SPEAKER_CHILD = "<chi>"
 SPEAKER_ADULT = "<adu>"
@@ -61,7 +62,7 @@ def build_vocabulary(data):
 	vocabulary = vocab.Vocab(
 		word_counter,
 		max_size=10000,
-		specials=[SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
+		specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
 	)
 	pickle.dump(vocabulary, open(DATA_PATH + "vocab.p", "wb"))
 

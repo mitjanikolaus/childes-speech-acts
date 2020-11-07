@@ -95,7 +95,7 @@ def train(args):
                 cur_loss = total_loss / args.log_interval
                 elapsed = time.time() - start_time
                 print(
-                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | "
+                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | "
                     "loss {:5.2f}".format(
                         epoch,
                         batch,
@@ -167,8 +167,8 @@ def train(args):
     test_loss = evaluate(test_labels, test_features)
     print("=" * 89)
     print(
-        "| End of training | test loss {:5.2f} | test ppl {:8.2f}".format(
-            test_loss, math.exp(test_loss)
+        "| End of training | test loss {:5.2f}".format(
+            test_loss
         )
     )
     print("=" * 89)
@@ -202,9 +202,6 @@ if __name__ == "__main__":
         default=10,
         metavar="N",
         help="Evaluation batch size",
-    )
-    parser.add_argument(
-        "--sequence-length", type=int, default=20, help="sequence length"
     )
     parser.add_argument(
         "--dropout",

@@ -36,7 +36,7 @@ class LSTMClassifier(nn.Module):
         output = self.drop(output)
         decoded = self.decoder(output)
         # decoded = decoded.view(-1, self.ntoken)
-        return F.log_softmax(decoded, dim=1), hidden #, dim=1), hidden
+        return F.log_softmax(decoded, dim=1), hidden
 
     def init_hidden(self, batch_size):
         weight = next(self.parameters())
