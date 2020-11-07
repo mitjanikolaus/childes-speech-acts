@@ -1,33 +1,18 @@
-import os
 import pickle
-import sys
-import random
-import codecs
 import argparse
-import time, datetime
 from collections import Counter
-import json
-from typing import Union, Tuple
 
 import torch
 from nltk import word_tokenize
 
-import re
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import sklearn
-from sklearn import svm, naive_bayes, ensemble
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
-from sklearn.preprocessing import LabelBinarizer
-import pycrfsuite
-from joblib import dump
 
 ### Tag functions
 from torchtext import vocab
 from tqdm import tqdm
 
-from utils import dataset_labels, select_tag
+from utils import dataset_labels
 
 DATA_PATH = "data/"
 
