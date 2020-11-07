@@ -3,6 +3,7 @@ import argparse
 from collections import Counter
 
 import torch
+import nltk
 from nltk import word_tokenize
 
 import pandas as pd
@@ -13,6 +14,8 @@ from torchtext import vocab
 from tqdm import tqdm
 
 from utils import dataset_labels
+
+nltk.download('punkt')
 
 DATA_PATH = "data/"
 
