@@ -69,7 +69,6 @@ def train(args):
             samples = [sample for sample, _ in batch]
             labels = torch.tensor([label for _, label in batch]).to(device)
 
-
             sequence_lengths = [len(sample) for sample in samples]
             samples = pad_sequence(samples).to(device)
 
@@ -100,7 +99,7 @@ def train(args):
                     "loss {:5.2f}".format(
                         epoch,
                         batch_id,
-                        len(train_features),
+                        num_batches,
                         current_learning_rate,
                         elapsed * 1000 / args.log_interval,
                         cur_loss,
@@ -144,7 +143,7 @@ def train(args):
                 predicted_labels = torch.argmax(output,dim=1)
 
                 num_correct += torch.sum(predicted_labels == labels)
-                num_total += len(samples)
+                num_total += len(batch)
 
         return total_loss / (len(dataset) - 1), num_correct/num_total
 

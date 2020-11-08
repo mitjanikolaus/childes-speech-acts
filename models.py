@@ -26,6 +26,7 @@ class LSTMClassifier(nn.Module):
         self.nlayers = n_layers
 
     def init_weights(self):
+        # TODO check initrange
         initrange = 0.1
         nn.init.uniform_(self.embeddings.weight, -initrange, initrange)
         nn.init.zeros_(self.decoder.weight)
