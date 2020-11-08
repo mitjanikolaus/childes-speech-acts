@@ -17,8 +17,6 @@ from utils import dataset_labels
 
 nltk.download("punkt")
 
-DATA_PATH = "data/"
-
 PADDING = "<pad>"
 UNKNOWN = "<unk>"
 SPEAKER_CHILD = "<chi>"
@@ -65,7 +63,7 @@ def argparser():
         help="if specified, use the first n train dialogs instead of all.",
     )
     argparser.add_argument(
-        "--out", type=str, default="results", help="where to write .crfsuite model file"
+        "--out", type=str, default="data/", help="path for output files"
     )
     # parameters for training:
     argparser.add_argument(
@@ -128,7 +126,7 @@ def build_vocabulary(data):
         max_size=10000,
         specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
     )
-    pickle.dump(vocabulary, open(DATA_PATH + "vocab.p", "wb"))
+    pickle.dump(vocabulary, open(args.out + "vocab.p", "wb"))
 
     return vocabulary
 
@@ -179,7 +177,7 @@ if __name__ == "__main__":
         vocab = build_vocabulary(tokenized_sentences)
 
     label_vocab = dataset_labels(target_label.upper())
-    pickle.dump(label_vocab, open(DATA_PATH + "vocab_labels.p", "wb"))
+    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
 
     features = []
     labels = []
@@ -195,5 +193,5 @@ if __name__ == "__main__":
     elif "test" in args.input_file:
         file_ending = "test"
 
-    pickle.dump(features, open(DATA_PATH + f"features_{file_ending}.p", "wb"))
-    pickle.dump(labels, open(DATA_PATH + f"labels_{file_ending}.p", "wb"))
+    pickle.dump(features, open(args.out + f"features_{file_ending}.p", "wb"))
+    pickle.dump(labels, open(args.out + f"labels_{file_ending}.p", "wb"))

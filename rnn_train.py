@@ -7,7 +7,6 @@ from torch import nn, optim
 from torch.nn.utils.rnn import pad_sequence
 
 from models import LSTMClassifier
-from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,19 +24,19 @@ def train(args):
     print("Start training with args: ", args)
     print("Device: ", device)
     # Load data
-    vocab = pickle.load(open(DATA_PATH + "vocab.p", "rb"))
-    label_vocab = pickle.load(open(DATA_PATH + "vocab_labels.p", "rb"))
+    vocab = pickle.load(open(args.data + "vocab.p", "rb"))
+    label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
-    train_features = pickle.load(open(DATA_PATH + "features_train.p", "rb"))
-    train_labels = pickle.load(open(DATA_PATH + "labels_train.p", "rb"))
+    train_features = pickle.load(open(args.data + "features_train.p", "rb"))
+    train_labels = pickle.load(open(args.data + "labels_train.p", "rb"))
     dataset_train = list(zip(train_features, train_labels))
 
-    val_features = pickle.load(open(DATA_PATH + "features_val.p", "rb"))
-    val_labels = pickle.load(open(DATA_PATH + "labels_val.p", "rb"))
+    val_features = pickle.load(open(args.data + "features_val.p", "rb"))
+    val_labels = pickle.load(open(args.data + "labels_val.p", "rb"))
     dataset_val = list(zip(val_features, val_labels))
 
-    test_features = pickle.load(open(DATA_PATH + "features_test.p", "rb"))
-    test_labels = pickle.load(open(DATA_PATH + "labels_test.p", "rb"))
+    test_features = pickle.load(open(args.data + "features_test.p", "rb"))
+    test_labels = pickle.load(open(args.data + "labels_test.p", "rb"))
     dataset_test = list(zip(test_features, test_labels))
 
     print("Loaded data.")
@@ -187,7 +186,7 @@ if __name__ == "__main__":
         "--data",
         type=str,
         default="./data/",
-        help="location of the data corpus",
+        help="location of the data corpus and vocabs",
     )
     parser.add_argument(
         "--emsize", type=int, default=300, help="size of word embeddings"

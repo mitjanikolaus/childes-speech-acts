@@ -1,15 +1,9 @@
 import argparse
-import math
 import pickle
-import random
-import time
 
 import torch
-from torch import nn, optim
-from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
+from torch.nn.utils.rnn import pad_sequence
 
-from models import LSTMClassifier
-from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -22,12 +16,12 @@ def test(args):
     print("Start training with args: ", args)
     print("Device: ", device)
     # Load data
-    vocab = pickle.load(open(DATA_PATH + "vocab.p", "rb"))
-    label_vocab = pickle.load(open(DATA_PATH + "vocab_labels.p", "rb"))
+    vocab = pickle.load(open(args.data + "vocab.p", "rb"))
+    label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    test_features = pickle.load(open(DATA_PATH + "features_test.p", "rb"))
-    test_labels = pickle.load(open(DATA_PATH + "labels_test.p", "rb"))
+    test_features = pickle.load(open(args.data + "features_test.p", "rb"))
+    test_labels = pickle.load(open(args.data + "labels_test.p", "rb"))
     dataset_test = list(zip(test_features, test_labels))
     print("Test samples: ", len(dataset_test))
 
@@ -87,8 +81,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="./data/",
-        help="location of the data corpus",
+        default="data/",
+        help="location of the data corpus and vocabs",
     )
     parser.add_argument(
         "--batch-size", type=int, default=50, metavar="N", help="batch size"
