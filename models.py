@@ -9,7 +9,13 @@ class LSTMClassifier(nn.Module):
     """LSTM Language Model."""
 
     def __init__(
-        self, vocab_size, n_input_layer_units, n_hidden_units, n_layers, dropout, label_size
+        self,
+        vocab_size,
+        n_input_layer_units,
+        n_hidden_units,
+        n_layers,
+        dropout,
+        label_size,
     ):
         super(LSTMClassifier, self).__init__()
         self.ntoken = vocab_size

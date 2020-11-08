@@ -12,6 +12,7 @@ from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def detach_hidden(h):
     """Detach hidden states from their history."""
 
@@ -19,6 +20,7 @@ def detach_hidden(h):
         return h.detach()
     else:
         return tuple(detach_hidden(v) for v in h)
+
 
 def train(args):
     print("Start training with args: ", args)
@@ -42,12 +44,7 @@ def train(args):
     print("Loaded data.")
 
     model = LSTMClassifier(
-        len(vocab),
-        args.emsize,
-        args.nhid,
-        args.nlayers,
-        args.dropout,
-        len(label_vocab)
+        len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
     ).to(device)
 
     criterion = nn.NLLLoss()
@@ -62,7 +59,9 @@ def train(args):
         random.shuffle(dataset_train)
         num_batches = len(train_features) // args.batch_size
         for batch_id in range(num_batches):
-            batch = dataset_train[batch_id*args.batch_size:(batch_id+1)*args.batch_size]
+            batch = dataset_train[
+                batch_id * args.batch_size : (batch_id + 1) * args.batch_size
+            ]
             batch.sort(key=lambda x: len(x[0]), reverse=True)
 
             samples = [sample for sample, _ in batch]
@@ -92,7 +91,9 @@ def train(args):
             if batch_id % args.log_interval == 0 and batch_id > 0:
                 cur_loss = total_loss / args.log_interval
                 elapsed = time.time() - start_time
-                current_learning_rate = [param_group['lr'] for param_group in optimizer.param_groups][0]
+                current_learning_rate = [
+                    param_group["lr"] for param_group in optimizer.param_groups
+                ][0]
                 print(
                     "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | "
                     "loss {:5.2f}".format(
@@ -120,7 +121,9 @@ def train(args):
             num_batches = len(dataset) // args.batch_size
             for batch_id in range(num_batches):
                 # TODO last small batch is lost at the moment
-                batch = dataset[batch_id * args.batch_size:(batch_id + 1) * args.batch_size]
+                batch = dataset[
+                    batch_id * args.batch_size : (batch_id + 1) * args.batch_size
+                ]
                 batch.sort(key=lambda x: len(x[0]), reverse=True)
 
                 samples = [sample for sample, _ in batch]
@@ -139,12 +142,12 @@ def train(args):
                 loss = criterion(output, labels)
                 total_loss += loss.item()
 
-                predicted_labels = torch.argmax(output,dim=1)
+                predicted_labels = torch.argmax(output, dim=1)
 
                 num_correct += int(torch.sum(predicted_labels == labels))
                 num_total += len(batch)
 
-        return total_loss / (len(dataset) - 1), num_correct/num_total
+        return total_loss / (len(dataset) - 1), num_correct / num_total
 
     # Loop over epochs.
     best_val_loss = None
@@ -157,10 +160,7 @@ def train(args):
             print("-" * 89)
             print(
                 "| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | valid acc {:5.2f} ".format(
-                    epoch,
-                    (time.time() - epoch_start_time),
-                    val_loss,
-                    val_accuracy
+                    epoch, (time.time() - epoch_start_time), val_loss, val_accuracy
                 )
             )
             print("-" * 89)

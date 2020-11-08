@@ -13,8 +13,10 @@ from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def get_words(indices, vocab):
     return " ".join([vocab.itos[i] for i in indices])
+
 
 def test(args):
     print("Start training with args: ", args)
@@ -39,7 +41,9 @@ def test(args):
             num_batches = len(dataset) // args.batch_size
             for batch_id in range(num_batches):
                 # TODO last small batch is lost at the moment
-                batch = dataset[batch_id * args.batch_size:(batch_id + 1) * args.batch_size]
+                batch = dataset[
+                    batch_id * args.batch_size : (batch_id + 1) * args.batch_size
+                ]
                 batch.sort(key=lambda x: len(x[0]), reverse=True)
 
                 samples = [sample for sample, _ in batch]
@@ -54,17 +58,17 @@ def test(args):
                 indices = [s - 1 for s in sequence_lengths]
                 output = output[indices, range(args.batch_size)]
 
-
-                predicted_labels = torch.argmax(output,dim=1)
+                predicted_labels = torch.argmax(output, dim=1)
 
                 for sample, label, predicted in zip(samples, labels, predicted_labels):
-                    print(f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}")
-
+                    print(
+                        f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}"
+                    )
 
                 num_correct += int(torch.sum(predicted_labels == labels))
                 num_total += len(batch)
 
-        return num_correct/num_total
+        return num_correct / num_total
 
     # Load the saved model checkpoint.
     with open(args.checkpoint, "rb") as f:
@@ -74,10 +78,7 @@ def test(args):
     # Run on test data.
     test_accuracy = evaluate(dataset_test)
     print("=" * 89)
-    print("Test acc {:5.2f}".format(
-            test_accuracy
-        )
-    )
+    print("Test acc {:5.2f}".format(test_accuracy))
     print("=" * 89)
 
 
@@ -94,7 +95,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
     parser.add_argument(
-        "--checkpoint", type=str, default="model.pt", help="path to saved model checkpoint"
+        "--checkpoint",
+        type=str,
+        default="model.pt",
+        help="path to saved model checkpoint",
     )
 
     args = parser.parse_args()
