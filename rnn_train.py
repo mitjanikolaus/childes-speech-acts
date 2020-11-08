@@ -67,11 +67,11 @@ def train(args):
             batch.sort(key=lambda x: len(x[0]), reverse=True)
 
             samples = [sample for sample, _ in batch]
-            labels = torch.tensor([label for _, label in batch])
+            labels = torch.tensor([label for _, label in batch]).to(device)
 
 
             sequence_lengths = [len(sample) for sample in samples]
-            samples = pad_sequence(samples)
+            samples = pad_sequence(samples).to(device)
 
             optimizer.zero_grad()
             hidden = detach_hidden(hidden)
@@ -126,10 +126,10 @@ def train(args):
                 batch.sort(key=lambda x: len(x[0]), reverse=True)
 
                 samples = [sample for sample, _ in batch]
-                labels = torch.tensor([label for _, label in batch])
+                labels = torch.tensor([label for _, label in batch]).to(device)
 
                 sequence_lengths = [len(sample) for sample in samples]
-                samples = pad_sequence(samples)
+                samples = pad_sequence(samples).to(device)
 
                 hidden = detach_hidden(hidden)
                 output, hidden = model(samples, hidden, sequence_lengths)
