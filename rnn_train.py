@@ -1,44 +1,25 @@
 import argparse
 import math
 import pickle
+import random
 import time
 
 import torch
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
+from torch import nn, optim
+from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
 
 from models import LSTMClassifier
 from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def categoryFromOutput(output):
-    top_n, top_i = output.topk(1)
-    category_i = top_i[0].item()
-    return category_i
-
-def repackage_hidden(h):
+def detach_hidden(h):
     """Detach hidden states from their history."""
 
     if isinstance(h, torch.Tensor):
         return h.detach()
     else:
-        return tuple(repackage_hidden(v) for v in h)
-
-
-def make_batches(features, labels, batch_size):
-    # Pad sequences so they are of equal length
-    features = pad_sequence(features).T
-    # Calculate number of batches from batch size
-    nbatch = len(features) // batch_size
-    # Trim of data that doesn't fit
-    features = features.narrow(0, 0, nbatch * batch_size)
-    labels = torch.tensor(labels).narrow(0, 0, nbatch * batch_size)
-    # Transform data into shape (num_batches, batch_size)
-    features = features.reshape(-1, features.shape[1], batch_size)
-    # TODO: make sure labels are still aligned with features
-    labels = labels.reshape(-1, batch_size)
-    return features.to(device), labels.to(device)
+        return tuple(detach_hidden(v) for v in h)
 
 def train(args):
     print("Start training with args: ", args)
@@ -49,14 +30,15 @@ def train(args):
 
     train_features = pickle.load(open(DATA_PATH + "features_train.p", "rb"))
     train_labels = pickle.load(open(DATA_PATH + "labels_train.p", "rb"))
-    train_features, train_labels = make_batches(train_features, train_labels, args.batch_size)
+    dataset_train = list(zip(train_features, train_labels))
 
     val_features = pickle.load(open(DATA_PATH + "features_val.p", "rb"))
     val_labels = pickle.load(open(DATA_PATH + "labels_val.p", "rb"))
-    val_features, val_labels = make_batches(val_features, val_labels, args.eval_batch_size)
+    dataset_val = list(zip(val_features, val_labels))
 
     test_features = pickle.load(open(DATA_PATH + "features_test.p", "rb"))
     test_labels = pickle.load(open(DATA_PATH + "labels_test.p", "rb"))
+    dataset_test = list(zip(test_features, test_labels))
 
     print("Loaded data.")
 
@@ -70,37 +52,56 @@ def train(args):
     ).to(device)
 
     criterion = nn.NLLLoss()
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    def train_epoch(epoch, lr):
+    def train_epoch(dataset_train, epoch):
         model.train()
         total_loss = 0.0
         start_time = time.time()
         hidden = model.init_hidden(args.batch_size)
-        for batch, (samples, true_labels) in enumerate(zip(train_features, train_labels)):
-            model.zero_grad()
-            hidden = repackage_hidden(hidden)
-            output, hidden = model(samples, hidden)
-            loss = criterion(output[-1], true_labels)
+
+        random.shuffle(dataset_train)
+        num_batches = len(train_features) // args.batch_size
+        for batch_id in range(num_batches):
+            batch = dataset_train[batch_id*args.batch_size:(batch_id+1)*args.batch_size]
+            batch.sort(key=lambda x: len(x[0]), reverse=True)
+
+            samples = [sample for sample, _ in batch]
+            labels = torch.tensor([label for _, label in batch])
+
+
+            sequence_lengths = [len(sample) for sample in samples]
+            samples = pad_sequence(samples)
+
+            optimizer.zero_grad()
+            hidden = detach_hidden(hidden)
+            output, hidden = model(samples, hidden, sequence_lengths)
+
+            # Take last output for each sample (which depends on the sequence length)
+            indices = [s - 1 for s in sequence_lengths]
+            output = output[indices, range(args.batch_size)]
+            loss = criterion(output, labels)
             loss.backward()
 
             # Clip gradients
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+
             # Update parameter weights
-            for p in model.parameters():
-                p.data.add_(p.grad.data, alpha=-lr)
+            optimizer.step()
 
             total_loss += loss.item()
 
-            if batch % args.log_interval == 0 and batch > 0:
+            if batch_id % args.log_interval == 0 and batch_id > 0:
                 cur_loss = total_loss / args.log_interval
                 elapsed = time.time() - start_time
+                current_learning_rate = [param_group['lr'] for param_group in optimizer.param_groups][0]
                 print(
                     "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | "
                     "loss {:5.2f}".format(
                         epoch,
-                        batch,
+                        batch_id,
                         len(train_features),
-                        lr,
+                        current_learning_rate,
                         elapsed * 1000 / args.log_interval,
                         cur_loss,
                     )
@@ -110,35 +111,58 @@ def train(args):
             if args.dry_run:
                 break
 
-    def evaluate(features, labels):
+    def evaluate(dataset):
         # Turn on evaluation mode which disables dropout.
         model.eval()
         total_loss = 0.0
-        hidden = model.init_hidden(args.eval_batch_size)
+        num_total = 0
+        num_correct = 0
+        hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            for samples, true_labels in zip(features, labels):
-                output, hidden = model(samples, hidden)
-                hidden = repackage_hidden(hidden)
-                total_loss += criterion(output[-1], true_labels).item()
-        return total_loss / (len(features) - 1)
+            num_batches = len(dataset) // args.batch_size
+            for batch_id in range(num_batches):
+                # TODO last small batch is lost at the moment
+                batch = dataset[batch_id * args.batch_size:(batch_id + 1) * args.batch_size]
+                batch.sort(key=lambda x: len(x[0]), reverse=True)
+
+                samples = [sample for sample, _ in batch]
+                labels = torch.tensor([label for _, label in batch])
+
+                sequence_lengths = [len(sample) for sample in samples]
+                samples = pad_sequence(samples)
+
+                hidden = detach_hidden(hidden)
+                output, hidden = model(samples, hidden, sequence_lengths)
+
+                # Take last output for each sample (which depends on the sequence length)
+                indices = [s - 1 for s in sequence_lengths]
+                output = output[indices, range(args.batch_size)]
+                # TODO multiply loss by batch size?
+                loss = criterion(output, labels)
+                total_loss += loss.item()
+
+                predicted_labels = torch.argmax(output,dim=1)
+
+                num_correct += torch.sum(predicted_labels == labels)
+                num_total += len(samples)
+
+        return total_loss / (len(dataset) - 1), num_correct/num_total
 
     # Loop over epochs.
-    lr = args.lr
     best_val_loss = None
 
     try:
         for epoch in range(1, args.epochs + 1):
             epoch_start_time = time.time()
-            train_epoch(epoch, lr)
-            val_loss = evaluate(val_features, val_labels)
+            train_epoch(dataset_train, epoch)
+            val_loss, val_accuracy = evaluate(dataset_val)
             print("-" * 89)
             print(
-                "| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | "
-                "valid ppl {:8.2f}".format(
+                "| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | valid acc {:5.2f} ".format(
                     epoch,
                     (time.time() - epoch_start_time),
                     val_loss,
-                    math.exp(val_loss),
+                    val_accuracy
                 )
             )
             print("-" * 89)
@@ -147,9 +171,6 @@ def train(args):
                 with open(args.save, "wb") as f:
                     torch.save(model, f)
                 best_val_loss = val_loss
-            else:
-                # Anneal the learning rate if no improvement has been seen in the validation dataset.
-                lr /= 4.0
 
     except KeyboardInterrupt:
         print("-" * 89)
@@ -158,17 +179,14 @@ def train(args):
     # Load the best saved model.
     with open(args.save, "rb") as f:
         model = torch.load(f)
-        # after load the rnn params are not a continuous chunk of memory
-        # this makes them a continuous chunk, and will speed up forward pass
-        # Currently, only rnn model supports flatten_parameters function.
         model.lstm.flatten_parameters()
 
     # Run on test data.
-    test_loss = evaluate(test_labels, test_features)
+    test_loss, test_accuracy = evaluate(dataset_test)
     print("=" * 89)
     print(
-        "| End of training | test loss {:5.2f}".format(
-            test_loss
+        "| End of training | test loss {:5.2f} | test acc {:5.2f}".format(
+            test_loss, test_accuracy
         )
     )
     print("=" * 89)
@@ -195,13 +213,6 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
     parser.add_argument(
         "--batch-size", type=int, default=50, metavar="N", help="batch size"
-    )
-    parser.add_argument(
-        "--eval-batch-size",
-        type=int,
-        default=10,
-        metavar="N",
-        help="Evaluation batch size",
     )
     parser.add_argument(
         "--dropout",

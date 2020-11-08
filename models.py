@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 from torch.nn.modules.rnn import LSTM
+from torch.nn.utils.rnn import pack_padded_sequence
 
 
 class LSTMClassifier(nn.Module):
@@ -30,10 +31,13 @@ class LSTMClassifier(nn.Module):
         nn.init.zeros_(self.decoder.weight)
         nn.init.uniform_(self.decoder.weight, -initrange, initrange)
 
-    def forward(self, input: Tensor, hidden):
+    def forward(self, input: Tensor, hidden, sequence_lengths):
         # Expected input dimensions: (sequence_length, batch_size, number_of_features)
         emb = self.embeddings(input)
-        output, hidden = self.lstm(emb, hidden)
+
+        packed_emb = pack_padded_sequence(emb, sequence_lengths)
+        output, hidden = self.lstm(packed_emb, hidden)
+        output, _ = nn.utils.rnn.pad_packed_sequence(output)
         output = self.drop(output)
         decoded = self.decoder(output)
         return self.softmax(decoded), hidden
