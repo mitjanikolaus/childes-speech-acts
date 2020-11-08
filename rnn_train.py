@@ -1,7 +1,6 @@
 import argparse
 import pickle
 import random
-import time
 
 import torch
 from torch import nn, optim
@@ -53,12 +52,12 @@ def train(args):
     def train_epoch(dataset_train, epoch):
         model.train()
         total_loss = 0.0
-        start_time = time.time()
         hidden = model.init_hidden(args.batch_size)
 
         random.shuffle(dataset_train)
         num_batches = len(train_features) // args.batch_size
         for batch_id in range(num_batches):
+            # TODO last small batch is lost at the moment
             batch = dataset_train[
                 batch_id * args.batch_size : (batch_id + 1) * args.batch_size
             ]
@@ -88,25 +87,19 @@ def train(args):
 
             total_loss += loss.item()
 
-            if batch_id % args.log_interval == 0 and batch_id > 0:
-                cur_loss = total_loss / args.log_interval
-                elapsed = time.time() - start_time
-                current_learning_rate = [
-                    param_group["lr"] for param_group in optimizer.param_groups
-                ][0]
+            if batch_id % args.log_interval == 0:
+                cur_loss = total_loss / (args.log_interval * args.batch_size)
+                current_learning_rate = optimizer.param_groups[0]["lr"]
                 print(
-                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | "
-                    "loss {:5.2f}".format(
+                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | loss {:5.5f}".format(
                         epoch,
                         batch_id,
                         num_batches,
                         current_learning_rate,
-                        elapsed * 1000 / args.log_interval,
                         cur_loss,
                     )
                 )
                 total_loss = 0
-                start_time = time.time()
             if args.dry_run:
                 break
 
@@ -138,7 +131,6 @@ def train(args):
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
                 output = output[indices, range(args.batch_size)]
-                # TODO multiply loss by batch size?
                 loss = criterion(output, labels)
                 total_loss += loss.item()
 
@@ -154,13 +146,12 @@ def train(args):
 
     try:
         for epoch in range(1, args.epochs + 1):
-            epoch_start_time = time.time()
             train_epoch(dataset_train, epoch)
             val_loss, val_accuracy = evaluate(dataset_val)
             print("-" * 89)
             print(
-                "| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | valid acc {:5.2f} ".format(
-                    epoch, (time.time() - epoch_start_time), val_loss, val_accuracy
+                "| end of epoch {:3d} | valid loss {:5.5f} | valid acc {:5.2f} ".format(
+                    epoch, val_loss, val_accuracy
                 )
             )
             print("-" * 89)
@@ -205,7 +196,7 @@ if __name__ == "__main__":
         "--nhid", type=int, default=200, help="number of hidden units per layer"
     )
     parser.add_argument("--nlayers", type=int, default=2, help="number of layers")
-    parser.add_argument("--lr", type=float, default=20, help="initial learning rate")
+    parser.add_argument("--lr", type=float, default=.001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
     parser.add_argument(
