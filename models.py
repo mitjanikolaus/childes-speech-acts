@@ -20,17 +20,8 @@ class LSTMClassifier(nn.Module):
         self.decoder = nn.Linear(n_hidden_units, label_size)
         self.softmax = nn.LogSoftmax(dim=2)
 
-        self.init_weights()
-
         self.nhid = n_hidden_units
         self.nlayers = n_layers
-
-    def init_weights(self):
-        # TODO check initrange
-        initrange = 0.1
-        nn.init.uniform_(self.embeddings.weight, -initrange, initrange)
-        nn.init.zeros_(self.decoder.weight)
-        nn.init.uniform_(self.decoder.weight, -initrange, initrange)
 
     def forward(self, input: Tensor, hidden, sequence_lengths):
         # Expected input dimensions: (sequence_length, batch_size, number_of_features)
@@ -44,8 +35,8 @@ class LSTMClassifier(nn.Module):
         return self.softmax(decoded), hidden
 
     def init_hidden(self, batch_size):
-        weight = next(self.parameters())
+        parameters_input = next(self.parameters())
         return (
-            weight.new_zeros(self.nlayers, batch_size, self.nhid),
-            weight.new_zeros(self.nlayers, batch_size, self.nhid),
+            parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
+            parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
         )

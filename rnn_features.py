@@ -88,8 +88,7 @@ if __name__ == '__main__':
 	target_label = [x for x in data_train.columns if 'spa_' in x][0]
 	args.training_tag = target_label
 
-
-	# # TODO dev
+	# limit number of samples for development purposes
 	# data_train = data_train.head()
 
 	tokenized_sentences = []
