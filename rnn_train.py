@@ -142,7 +142,7 @@ def train(args):
 
                 predicted_labels = torch.argmax(output,dim=1)
 
-                num_correct += torch.sum(predicted_labels == labels)
+                num_correct += int(torch.sum(predicted_labels == labels))
                 num_total += len(batch)
 
         return total_loss / (len(dataset) - 1), num_correct/num_total
