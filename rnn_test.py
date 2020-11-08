@@ -13,13 +13,8 @@ from rnn_features import DATA_PATH
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def detach_hidden(h):
-    """Detach hidden states from their history."""
-
-    if isinstance(h, torch.Tensor):
-        return h.detach()
-    else:
-        return tuple(detach_hidden(v) for v in h)
+def get_words(indices, vocab):
+    return " ".join([vocab.itos[i] for i in indices])
 
 def test(args):
     print("Start training with args: ", args)
@@ -51,16 +46,20 @@ def test(args):
                 labels = torch.tensor([label for _, label in batch]).to(device)
 
                 sequence_lengths = [len(sample) for sample in samples]
-                samples = pad_sequence(samples).to(device)
+                padded_samples = pad_sequence(samples).to(device)
 
-                hidden = detach_hidden(hidden)
-                output, hidden = model(samples, hidden, sequence_lengths)
+                output, hidden = model(padded_samples, hidden, sequence_lengths)
 
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
                 output = output[indices, range(args.batch_size)]
 
+
                 predicted_labels = torch.argmax(output,dim=1)
+
+                for sample, label, predicted in zip(samples, labels, predicted_labels):
+                    print(f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}")
+
 
                 num_correct += int(torch.sum(predicted_labels == labels))
                 num_total += len(batch)

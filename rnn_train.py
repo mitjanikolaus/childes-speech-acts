@@ -70,11 +70,11 @@ def train(args):
             labels = torch.tensor([label for _, label in batch]).to(device)
 
             sequence_lengths = [len(sample) for sample in samples]
-            samples = pad_sequence(samples).to(device)
+            padded_samples = pad_sequence(samples).to(device)
 
             optimizer.zero_grad()
             hidden = detach_hidden(hidden)
-            output, hidden = model(samples, hidden, sequence_lengths)
+            output, hidden = model(padded_samples, hidden, sequence_lengths)
 
             # Take last output for each sample (which depends on the sequence length)
             indices = [s - 1 for s in sequence_lengths]
@@ -128,10 +128,10 @@ def train(args):
                 labels = torch.tensor([label for _, label in batch]).to(device)
 
                 sequence_lengths = [len(sample) for sample in samples]
-                samples = pad_sequence(samples).to(device)
+                padded_samples = pad_sequence(samples).to(device)
 
                 hidden = detach_hidden(hidden)
-                output, hidden = model(samples, hidden, sequence_lengths)
+                output, hidden = model(padded_samples, hidden, sequence_lengths)
 
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
