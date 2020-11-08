@@ -73,7 +73,7 @@ def test(args):
         model.lstm.flatten_parameters()
 
     # Run on test data.
-    test_loss, test_accuracy = evaluate(dataset_test)
+    test_accuracy = evaluate(dataset_test)
     print("=" * 89)
     print("Test acc {:5.2f}".format(
             test_accuracy
