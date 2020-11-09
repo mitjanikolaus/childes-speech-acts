@@ -193,6 +193,6 @@ if __name__ == "__main__":
     elif "test" in args.input_file:
         dataset_type = "test"
 
-    data = pd.DataFrame(zip(features, labels))
+    data = pd.DataFrame(data={"features": features, "labels": labels})
     print(data.head())
     data.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)

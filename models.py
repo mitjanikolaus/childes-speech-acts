@@ -51,12 +51,12 @@ class LSTMClassifier(nn.Module):
 
 
 class SpeechActDistilBERT(torch.nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropout):
         super(SpeechActDistilBERT, self).__init__()
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
         # TODO optimize size
         self.pre_classifier = torch.nn.Linear(768, 768)
-        self.dropout = torch.nn.Dropout(0.3)
+        self.dropout = torch.nn.Dropout(dropout)
         self.classifier = torch.nn.Linear(768, num_classes)
 
     def forward(self, input_ids, attention_mask):
