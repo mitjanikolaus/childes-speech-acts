@@ -182,16 +182,17 @@ if __name__ == "__main__":
     features = []
     labels = []
     for tokens, label in zip(tokenized_sentences, data_train[target_label].to_list()):
-        features.append(torch.tensor([vocab.stoi[t] for t in tokens]))
-        labels.append(torch.tensor(label_vocab[label]))
+        features.append([vocab.stoi[t] for t in tokens])
+        labels.append(label_vocab[label])
 
-    file_ending = ""
+    dataset_type = ""
     if "train" in args.input_file:
-        file_ending = "train"
+        dataset_type = "train"
     elif "valid" in args.input_file:
-        file_ending = "val"
+        dataset_type = "val"
     elif "test" in args.input_file:
-        file_ending = "test"
+        dataset_type = "test"
 
-    pickle.dump(features, open(args.out + f"features_{file_ending}.p", "wb"))
-    pickle.dump(labels, open(args.out + f"labels_{file_ending}.p", "wb"))
+    data = pd.DataFrame(zip(features, labels))
+    print(data.head())
+    data.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)
