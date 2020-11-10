@@ -2,14 +2,17 @@ import argparse
 import pickle
 
 import torch
-from torch.nn.utils.rnn import pad_sequence
+import pandas as pd
+from torch.utils.data import DataLoader
 
+from dataset import SpeechActsDataset, pad_batch
+from rnn_features import PADDING
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def get_words(indices, vocab):
-    return " ".join([vocab.itos[i] for i in indices])
+    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
 
 
 def test(args):
@@ -20,47 +23,47 @@ def test(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    test_features = pickle.load(open(args.data + "features_test.p", "rb"))
-    test_labels = pickle.load(open(args.data + "labels_test.p", "rb"))
-    dataset_test = list(zip(test_features, test_labels))
+    test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
+    dataset_test = SpeechActsDataset(test_dataframe)
+    test_loader = DataLoader(
+        dataset_test,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
+    )
     print("Test samples: ", len(dataset_test))
 
-    def evaluate(dataset):
+    def evaluate(data_loader):
         # Turn on evaluation mode which disables dropout.
         model.eval()
         num_total = 0
         num_correct = 0
         hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            num_batches = len(dataset) // args.batch_size
-            for batch_id in range(num_batches):
-                # TODO last small batch is lost at the moment
-                batch = dataset[
-                    batch_id * args.batch_size : (batch_id + 1) * args.batch_size
-                ]
-                batch.sort(key=lambda x: len(x[0]), reverse=True)
+            for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
+                    data_loader
+            ):
+                current_batch_size = len(input_samples)
+                input_samples = input_samples.to(device)
+                targets = targets.to(device)
+                sequence_lengths = sequence_lengths.to(device)
 
-                samples = [sample for sample, _ in batch]
-                labels = torch.tensor([label for _, label in batch]).to(device)
-
-                sequence_lengths = [len(sample) for sample in samples]
-                padded_samples = pad_sequence(samples).to(device)
-
-                output, hidden = model(padded_samples, hidden, sequence_lengths)
+                output, hidden = model(input_samples, hidden, sequence_lengths)
 
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
-                output = output[indices, range(args.batch_size)]
+                output = output[indices, range(current_batch_size)]
 
                 predicted_labels = torch.argmax(output, dim=1)
 
-                for sample, label, predicted in zip(samples, labels, predicted_labels):
+                for sample, label, predicted in zip(input_samples, targets, predicted_labels):
                     print(
                         f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}"
                     )
 
-                num_correct += int(torch.sum(predicted_labels == labels))
-                num_total += len(batch)
+                num_correct += int(torch.sum(predicted_labels == targets))
+                num_total += len(input_samples)
 
         return num_correct / num_total
 
@@ -70,7 +73,7 @@ def test(args):
         model.lstm.flatten_parameters()
 
     # Run on test data.
-    test_accuracy = evaluate(dataset_test)
+    test_accuracy = evaluate(test_loader)
     print("=" * 89)
     print("Test acc {:5.2f}".format(test_accuracy))
     print("=" * 89)
