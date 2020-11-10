@@ -13,8 +13,8 @@ from models import SpeechActDistilBERT
 device = "cuda" if cuda.is_available() else "cpu"
 
 
-def calcuate_accu(big_idx, targets):
-    n_correct = (big_idx == targets).sum().item()
+def calcuate_accu(predicted_labels, targets):
+    n_correct = (predicted_labels == targets).sum().item()
     return n_correct
 
 
@@ -49,12 +49,11 @@ def train(args):
         nb_tr_steps = 0
         nb_tr_examples = 0
         model.train()
-        for _, (features, labels, attention_masks) in enumerate(training_loader, 0):
+        for i, (features, labels, attention_masks) in enumerate(training_loader, 0):
             features = features.to(device)
             labels = labels.to(device)
             attention_masks = attention_masks.to(device)
 
-            # TODO pack sequences?
             outputs = model(features, attention_masks)
 
             # TODO take into account different sequence lengths?
@@ -66,7 +65,7 @@ def train(args):
             nb_tr_steps += 1
             nb_tr_examples += labels.size(0)
 
-            if _ % 5000 == 0:
+            if i % 5000 == 0:
                 loss_step = tr_loss / nb_tr_steps
                 accu_step = (n_correct * 100) / nb_tr_examples
                 print(f"Training Loss per 5000 steps: {loss_step}")
@@ -98,26 +97,26 @@ def train(args):
     def valid(model, testing_loader):
         model.eval()
         n_correct = 0
-        n_wrong = 0
-        total = 0
         tr_loss = 0
         nb_tr_steps = 0
         nb_tr_examples = 0
         with torch.no_grad():
-            for _, data in enumerate(testing_loader, 0):
-                ids = data["ids"].to(device, dtype=torch.long)
-                mask = data["mask"].to(device, dtype=torch.long)
-                targets = data["targets"].to(device, dtype=torch.long)
-                outputs = model(ids, mask).squeeze()
-                loss = loss_function(outputs, targets)
+            for i, (features, labels, attention_masks) in enumerate(testing_loader, 0):
+                features = features.to(device)
+                labels = labels.to(device)
+                attention_masks = attention_masks.to(device)
+
+                outputs = model(features, attention_masks)
+
+                loss = loss_function(outputs, labels)
                 tr_loss += loss.item()
-                big_val, big_idx = torch.max(outputs.data, dim=1)
-                n_correct += calcuate_accu(big_idx, targets)
+                _, predicted_labels = torch.max(outputs.data, dim=1)
+                n_correct += calcuate_accu(predicted_labels, labels)
 
                 nb_tr_steps += 1
-                nb_tr_examples += targets.size(0)
+                nb_tr_examples += labels.size(0)
 
-                if _ % 5000 == 0:
+                if i % 5000 == 0:
                     loss_step = tr_loss / nb_tr_steps
                     accu_step = (n_correct * 100) / nb_tr_examples
                     print(f"Validation Loss per 100 steps: {loss_step}")
@@ -129,12 +128,7 @@ def train(args):
 
         return epoch_accu
 
-    print(
-        "This is the validation section to print the accuracy and see how it performs"
-    )
-    print(
-        "Here we are leveraging on the dataloader crearted for the validation dataset, the approcah is using more of pytorch"
-    )
+    print("\nEvaluation")
 
     acc = valid(model, testing_loader)
     print("Accuracy on test data = %0.2f%%" % acc)
