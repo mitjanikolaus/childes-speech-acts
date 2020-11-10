@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch import Tensor
+from torch import Tensor, cuda
 from torch.nn.modules.rnn import LSTM
 from torch.nn.utils.rnn import pack_padded_sequence
 from transformers import DistilBertModel
 
+device = "cuda" if cuda.is_available() else "cpu"
 
 class LSTMClassifier(nn.Module):
     """LSTM Language Model."""
@@ -32,10 +32,10 @@ class LSTMClassifier(nn.Module):
         self.nlayers = n_layers
 
     def forward(self, input: Tensor, hidden, sequence_lengths):
-        # Expected input dimensions: (sequence_length, batch_size, number_of_features)
+        # Expected input dimensions: (batch_size, sequence_length, number_of_features)
         emb = self.embeddings(input)
 
-        packed_emb = pack_padded_sequence(emb, sequence_lengths)
+        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
         output, hidden = self.lstm(packed_emb, hidden)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
         output = self.drop(output)
@@ -59,8 +59,19 @@ class SpeechActDistilBERT(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
         self.classifier = torch.nn.Linear(768, num_classes)
 
-    def forward(self, input_ids, attention_mask):
-        output_1 = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+    def gen_attention_masks(self, sequence_lengths, max_len):
+        return torch.tensor(
+            [
+                int(s) * [1] + (max_len - int(s)) * [0]
+                for s in sequence_lengths
+            ]
+        ).to(device)
+
+    def forward(self, input, sequence_lengths):
+        # The input should be padded, so all samples should have the same length
+        max_len = len(input[0])
+        attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
+        output_1 = self.bert(input_ids=input, attention_mask=attention_masks)
         hidden_state = output_1[0]
         pooler = hidden_state[:, 0]
         pooler = self.pre_classifier(pooler)

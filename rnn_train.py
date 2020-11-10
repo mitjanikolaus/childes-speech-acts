@@ -1,11 +1,13 @@
 import argparse
 import pickle
-import random
+
+import pandas as pd
 
 import torch
 from torch import nn, optim
-from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import DataLoader
 
+from dataset import SpeechActsDataset
 from models import LSTMClassifier
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,17 +29,17 @@ def train(args):
     vocab = pickle.load(open(args.data + "vocab.p", "rb"))
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
-    train_features = pickle.load(open(args.data + "features_train.p", "rb"))
-    train_labels = pickle.load(open(args.data + "labels_train.p", "rb"))
-    dataset_train = list(zip(train_features, train_labels))
+    train_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "train")
+    val_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "val")
+    test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
 
-    val_features = pickle.load(open(args.data + "features_val.p", "rb"))
-    val_labels = pickle.load(open(args.data + "labels_val.p", "rb"))
-    dataset_val = list(zip(val_features, val_labels))
+    dataset_train = SpeechActsDataset(train_dataframe)
+    dataset_val = SpeechActsDataset(val_dataframe)
+    dataset_test = SpeechActsDataset(test_dataframe)
 
-    test_features = pickle.load(open(args.data + "features_test.p", "rb"))
-    test_labels = pickle.load(open(args.data + "labels_test.p", "rb"))
-    dataset_test = list(zip(test_features, test_labels))
+    train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    valid_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    test_loader = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=0)
 
     print("Loaded data.")
 
@@ -48,33 +50,24 @@ def train(args):
     criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    def train_epoch(dataset_train, epoch):
+    def train_epoch(data_loader, epoch):
         model.train()
         total_loss = 0.0
         hidden = model.init_hidden(args.batch_size)
 
-        random.shuffle(dataset_train)
-        num_batches = len(train_features) // args.batch_size
-        for batch_id in range(num_batches):
-            # TODO last small batch is lost at the moment
-            batch = dataset_train[
-                batch_id * args.batch_size : (batch_id + 1) * args.batch_size
-            ]
-            batch.sort(key=lambda x: len(x[0]), reverse=True)
-
-            samples = [sample for sample, _ in batch]
-            labels = torch.tensor([label for _, label in batch]).to(device)
-
-            sequence_lengths = [len(sample) for sample in samples]
-            padded_samples = pad_sequence(samples).to(device)
+        for batch_id, (features, labels, sequence_lengths) in enumerate(data_loader):
+            current_batch_size = len(features)
+            features = features.to(device)
+            labels = labels.to(device)
+            sequence_lengths = sequence_lengths.to(device)
 
             optimizer.zero_grad()
             hidden = detach_hidden(hidden)
-            output, hidden = model(padded_samples, hidden, sequence_lengths)
+            output, hidden = model(features, hidden, sequence_lengths)
 
             # Take last output for each sample (which depends on the sequence length)
             indices = [s - 1 for s in sequence_lengths]
-            output = output[indices, range(args.batch_size)]
+            output = output[indices, range(current_batch_size)]
             loss = criterion(output, labels)
             loss.backward()
 
@@ -93,7 +86,7 @@ def train(args):
                     "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | loss {:5.5f}".format(
                         epoch,
                         batch_id,
-                        num_batches,
+                        len(data_loader),
                         current_learning_rate,
                         cur_loss,
                     )
@@ -102,7 +95,7 @@ def train(args):
             if args.dry_run:
                 break
 
-    def evaluate(dataset):
+    def evaluate(data_loader):
         # Turn on evaluation mode which disables dropout.
         model.eval()
         total_loss = 0.0
@@ -110,43 +103,35 @@ def train(args):
         num_correct = 0
         hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            num_batches = len(dataset) // args.batch_size
-            for batch_id in range(num_batches):
-                # TODO last small batch is lost at the moment
-                batch = dataset[
-                    batch_id * args.batch_size : (batch_id + 1) * args.batch_size
-                ]
-                batch.sort(key=lambda x: len(x[0]), reverse=True)
-
-                samples = [sample for sample, _ in batch]
-                labels = torch.tensor([label for _, label in batch]).to(device)
-
-                sequence_lengths = [len(sample) for sample in samples]
-                padded_samples = pad_sequence(samples).to(device)
+            for batch_id, (features, labels, sequence_lengths) in enumerate(data_loader):
+                current_batch_size = len(features)
+                features = features.to(device)
+                labels = labels.to(device)
+                sequence_lengths = sequence_lengths.to(device)
 
                 hidden = detach_hidden(hidden)
-                output, hidden = model(padded_samples, hidden, sequence_lengths)
+                output, hidden = model(features, hidden, sequence_lengths)
 
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
-                output = output[indices, range(args.batch_size)]
+                output = output[indices, range(current_batch_size)]
                 loss = criterion(output, labels)
                 total_loss += loss.item()
 
                 predicted_labels = torch.argmax(output, dim=1)
 
                 num_correct += int(torch.sum(predicted_labels == labels))
-                num_total += len(batch)
+                num_total += len(features)
 
-        return total_loss / (len(dataset) - 1), num_correct / num_total
+        return total_loss / (len(data_loader) - 1), num_correct / num_total
 
     # Loop over epochs.
     best_val_loss = None
 
     try:
         for epoch in range(1, args.epochs + 1):
-            train_epoch(dataset_train, epoch)
-            val_loss, val_accuracy = evaluate(dataset_val)
+            train_epoch(train_loader, epoch)
+            val_loss, val_accuracy = evaluate(valid_loader)
             print("-" * 89)
             print(
                 "| end of epoch {:3d} | valid loss {:5.5f} | valid acc {:5.2f} ".format(
@@ -170,7 +155,7 @@ def train(args):
         model.lstm.flatten_parameters()
 
     # Run on test data.
-    test_loss, test_accuracy = evaluate(dataset_test)
+    test_loss, test_accuracy = evaluate(test_loader)
     print("=" * 89)
     print(
         "| End of training | test loss {:5.2f} | test acc {:5.2f}".format(

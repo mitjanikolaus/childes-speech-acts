@@ -16,9 +16,8 @@ class SpeechActsDataset(Dataset):
         label = self.data["labels"][index]
 
         sequence_length = self.sequence_lengths[index]
-        attention_mask = sequence_length * [1] + (self.max_len - sequence_length) * [0]
 
-        return torch.tensor(features), torch.tensor(label), torch.tensor(attention_mask)
+        return torch.tensor(features), torch.tensor(label), torch.tensor(sequence_length)
 
     def __len__(self):
         return self.len

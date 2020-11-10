@@ -23,19 +23,23 @@ def train(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     # TODO use BERT tokenizer?
-    train_dataset = pd.read_hdf(args.data + "speech_acts_data.h5", "train")
+    train_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "train")
+    val_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "val")
+    test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
 
-    test_dataset = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
+    dataset_train = SpeechActsDataset(train_dataframe)
+    dataset_val = SpeechActsDataset(val_dataframe)
+    dataset_test = SpeechActsDataset(test_dataframe)
 
-    training_set = SpeechActsDataset(train_dataset)
-    testing_set = SpeechActsDataset(test_dataset)
-
-    train_params = {"batch_size": args.batch_size, "shuffle": True, "num_workers": 0}
-
-    test_params = {"batch_size": args.batch_size, "shuffle": True, "num_workers": 0}
-
-    training_loader = DataLoader(training_set, **train_params)
-    testing_loader = DataLoader(testing_set, **test_params)
+    train_loader = DataLoader(
+        dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=0
+    )
+    valid_loader = DataLoader(
+        dataset_val, batch_size=args.batch_size, shuffle=True, num_workers=0
+    )
+    test_loader = DataLoader(
+        dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=0
+    )
 
     model = SpeechActDistilBERT(num_classes=len(label_vocab), dropout=args.dropout)
     model.to(device)
@@ -49,18 +53,17 @@ def train(args):
         nb_tr_steps = 0
         nb_tr_examples = 0
         model.train()
-        for i, (features, labels, attention_masks) in enumerate(training_loader, 0):
+        for i, (features, labels, sequence_lengths) in enumerate(train_loader):
             features = features.to(device)
             labels = labels.to(device)
-            attention_masks = attention_masks.to(device)
+            sequence_lengths = sequence_lengths.to(device)
 
-            outputs = model(features, attention_masks)
+            outputs = model(features, sequence_lengths)
 
-            # TODO take into account different sequence lengths?
             loss = loss_function(outputs, labels)
             tr_loss += loss.item()
-            big_val, big_idx = torch.max(outputs.data, dim=1)
-            n_correct += calcuate_accu(big_idx, labels)
+            _, predicted_labels = torch.max(outputs.data, dim=1)
+            n_correct += calcuate_accu(predicted_labels, labels)
 
             nb_tr_steps += 1
             nb_tr_examples += labels.size(0)
@@ -73,7 +76,6 @@ def train(args):
 
             optimizer.zero_grad()
             loss.backward()
-            # # When using GPU
             optimizer.step()
 
         print(
@@ -94,19 +96,19 @@ def train(args):
         torch.save(model, args.save)
         print("Model checkpoint saved")
 
-    def valid(model, testing_loader):
+    def evaluate(model, loader):
         model.eval()
         n_correct = 0
         tr_loss = 0
         nb_tr_steps = 0
         nb_tr_examples = 0
         with torch.no_grad():
-            for i, (features, labels, attention_masks) in enumerate(testing_loader, 0):
+            for i, (features, labels, sequence_lengths) in enumerate(loader):
                 features = features.to(device)
                 labels = labels.to(device)
-                attention_masks = attention_masks.to(device)
+                sequence_lengths = sequence_lengths.to(device)
 
-                outputs = model(features, attention_masks)
+                outputs = model(features, sequence_lengths)
 
                 loss = loss_function(outputs, labels)
                 tr_loss += loss.item()
@@ -130,7 +132,7 @@ def train(args):
 
     print("\nEvaluation")
 
-    acc = valid(model, testing_loader)
+    acc = evaluate(model, test_loader)
     print("Accuracy on test data = %0.2f%%" % acc)
 
 
