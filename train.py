@@ -1,3 +1,5 @@
+"""Training routine for LSTM and Transformer"""
+
 import argparse
 import pickle
 
@@ -73,25 +75,33 @@ def train(args):
 
     model.to(device)
 
-    criterion = nn.NLLLoss()
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     def train_epoch(data_loader, epoch):
         model.train()
         total_loss = 0.0
-        hidden = model.init_hidden(args.batch_size)
+        if args.model == MODEL_LSTM:
+            hidden = model.init_hidden(args.batch_size)
 
         for batch_id, (input_samples, targets, sequence_lengths) in enumerate(data_loader):
+            # Move data to GPU
             input_samples = input_samples.to(device)
             targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
 
+            # Clear gradients
             optimizer.zero_grad()
-            hidden = detach_hidden(hidden)
-            output, hidden = model(input_samples, hidden, sequence_lengths)
 
+            # Perform forward pass of the model
+            if args.model == MODEL_LSTM:
+                output, hidden = model(input_samples, hidden, sequence_lengths)
+            else:
+                output = model(input_samples, sequence_lengths)
+
+            # Calculate loss
             loss = criterion(output, targets)
+            total_loss += loss.item()
             loss.backward()
 
             # Clip gradients
@@ -100,7 +110,8 @@ def train(args):
             # Update parameter weights
             optimizer.step()
 
-            total_loss += loss.item()
+            if args.model == MODEL_LSTM:
+                hidden = detach_hidden(hidden)
 
             if batch_id % args.log_interval == 0:
                 cur_loss = total_loss / (args.log_interval * args.batch_size)
@@ -115,6 +126,7 @@ def train(args):
                     )
                 )
                 total_loss = 0
+
             if args.dry_run:
                 break
 
@@ -122,29 +134,40 @@ def train(args):
         # Turn on evaluation mode which disables dropout.
         model.eval()
         total_loss = 0.0
-        num_total = 0
         num_correct = 0
-        hidden = model.init_hidden(args.batch_size)
+        if args.model == MODEL_LSTM:
+            hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
             for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
                 data_loader
             ):
+                # Move data to GPU
                 input_samples = input_samples.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
 
-                hidden = detach_hidden(hidden)
-                output, hidden = model(input_samples, hidden, sequence_lengths)
+                # Clear gradients
+                optimizer.zero_grad()
 
+                # Perform forward pass of the model
+                if args.model == MODEL_LSTM:
+                    output, hidden = model(input_samples, hidden, sequence_lengths)
+                else:
+                    output = model(input_samples, sequence_lengths)
+
+                # Calculate loss
                 loss = criterion(output, targets)
                 total_loss += loss.item()
 
+                if args.model == MODEL_LSTM:
+                    hidden = detach_hidden(hidden)
+
+                # Compare predicted labels to ground truth
                 predicted_labels = torch.argmax(output, dim=1)
-
                 num_correct += int(torch.sum(predicted_labels == targets))
-                num_total += len(input_samples)
 
-        return total_loss / (len(data_loader) - 1), num_correct / num_total
+
+        return total_loss / len(data_loader), num_correct / len(data_loader)
 
     # Loop over epochs.
     best_val_loss = None
@@ -210,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument("--nlayers", type=int, default=2, help="number of layers")
     parser.add_argument("--lr", type=float, default=0.001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
-    parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
+    parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")
     parser.add_argument(
         "--batch-size", type=int, default=50, metavar="N", help="batch size"
     )
