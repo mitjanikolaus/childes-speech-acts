@@ -7,7 +7,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from dataset import SpeechActsDataset
+from dataset import SpeechActsDataset, pad_batch
 from models import LSTMClassifier
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -37,10 +37,27 @@ def train(args):
     dataset_val = SpeechActsDataset(val_dataframe)
     dataset_test = SpeechActsDataset(test_dataframe)
 
-    train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=0)
-    valid_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=True, num_workers=0)
-    test_loader = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=0)
-
+    train_loader = DataLoader(
+        dataset_train,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
+    )
+    valid_loader = DataLoader(
+        dataset_val,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
+    )
+    test_loader = DataLoader(
+        dataset_test,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
+    )
     print("Loaded data.")
 
     model = LSTMClassifier(
@@ -55,20 +72,20 @@ def train(args):
         total_loss = 0.0
         hidden = model.init_hidden(args.batch_size)
 
-        for batch_id, (features, labels, sequence_lengths) in enumerate(data_loader):
-            current_batch_size = len(features)
-            features = features.to(device)
-            labels = labels.to(device)
+        for batch_id, (input_samples, targets, sequence_lengths) in enumerate(data_loader):
+            current_batch_size = len(input_samples)
+            input_samples = input_samples.to(device)
+            targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
 
             optimizer.zero_grad()
             hidden = detach_hidden(hidden)
-            output, hidden = model(features, hidden, sequence_lengths)
+            output, hidden = model(input_samples, hidden, sequence_lengths)
 
             # Take last output for each sample (which depends on the sequence length)
             indices = [s - 1 for s in sequence_lengths]
             output = output[indices, range(current_batch_size)]
-            loss = criterion(output, labels)
+            loss = criterion(output, targets)
             loss.backward()
 
             # Clip gradients
@@ -103,25 +120,27 @@ def train(args):
         num_correct = 0
         hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            for batch_id, (features, labels, sequence_lengths) in enumerate(data_loader):
-                current_batch_size = len(features)
-                features = features.to(device)
-                labels = labels.to(device)
+            for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
+                data_loader
+            ):
+                current_batch_size = len(input_samples)
+                input_samples = input_samples.to(device)
+                targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
 
                 hidden = detach_hidden(hidden)
-                output, hidden = model(features, hidden, sequence_lengths)
+                output, hidden = model(input_samples, hidden, sequence_lengths)
 
                 # Take last output for each sample (which depends on the sequence length)
                 indices = [s - 1 for s in sequence_lengths]
                 output = output[indices, range(current_batch_size)]
-                loss = criterion(output, labels)
+                loss = criterion(output, targets)
                 total_loss += loss.item()
 
                 predicted_labels = torch.argmax(output, dim=1)
 
-                num_correct += int(torch.sum(predicted_labels == labels))
-                num_total += len(features)
+                num_correct += int(torch.sum(predicted_labels == targets))
+                num_total += len(input_samples)
 
         return total_loss / (len(data_loader) - 1), num_correct / num_total
 
@@ -180,7 +199,7 @@ if __name__ == "__main__":
         "--nhid", type=int, default=200, help="number of hidden units per layer"
     )
     parser.add_argument("--nlayers", type=int, default=2, help="number of layers")
-    parser.add_argument("--lr", type=float, default=.001, help="initial learning rate")
+    parser.add_argument("--lr", type=float, default=0.001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
     parser.add_argument(

@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 from torch import cuda
 
-from dataset import SpeechActsDataset
+from dataset import SpeechActsDataset, pad_batch
 from models import SpeechActDistilBERT
 
 device = "cuda" if cuda.is_available() else "cpu"
@@ -32,13 +32,25 @@ def train(args):
     dataset_test = SpeechActsDataset(test_dataframe)
 
     train_loader = DataLoader(
-        dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=0
+        dataset_train,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
     )
     valid_loader = DataLoader(
-        dataset_val, batch_size=args.batch_size, shuffle=True, num_workers=0
+        dataset_val,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
     )
     test_loader = DataLoader(
-        dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=0
+        dataset_test,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
     )
 
     model = SpeechActDistilBERT(num_classes=len(label_vocab), dropout=args.dropout)
@@ -53,20 +65,20 @@ def train(args):
         nb_tr_steps = 0
         nb_tr_examples = 0
         model.train()
-        for i, (features, labels, sequence_lengths) in enumerate(train_loader):
-            features = features.to(device)
-            labels = labels.to(device)
+        for i, (input_samples, targets, sequence_lengths) in enumerate(train_loader):
+            input_samples = input_samples.to(device)
+            targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
 
-            outputs = model(features, sequence_lengths)
+            outputs = model(input_samples, sequence_lengths)
 
-            loss = loss_function(outputs, labels)
+            loss = loss_function(outputs, targets)
             tr_loss += loss.item()
             _, predicted_labels = torch.max(outputs.data, dim=1)
-            n_correct += calcuate_accu(predicted_labels, labels)
+            n_correct += calcuate_accu(predicted_labels, targets)
 
             nb_tr_steps += 1
-            nb_tr_examples += labels.size(0)
+            nb_tr_examples += targets.size(0)
 
             if i % 5000 == 0:
                 loss_step = tr_loss / nb_tr_steps
@@ -103,20 +115,20 @@ def train(args):
         nb_tr_steps = 0
         nb_tr_examples = 0
         with torch.no_grad():
-            for i, (features, labels, sequence_lengths) in enumerate(loader):
-                features = features.to(device)
-                labels = labels.to(device)
+            for i, (input_samples, targets, sequence_lengths) in enumerate(loader):
+                input_samples = input_samples.to(device)
+                targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
 
-                outputs = model(features, sequence_lengths)
+                outputs = model(input_samples, sequence_lengths)
 
-                loss = loss_function(outputs, labels)
+                loss = loss_function(outputs, targets)
                 tr_loss += loss.item()
                 _, predicted_labels = torch.max(outputs.data, dim=1)
-                n_correct += calcuate_accu(predicted_labels, labels)
+                n_correct += calcuate_accu(predicted_labels, targets)
 
                 nb_tr_steps += 1
-                nb_tr_examples += labels.size(0)
+                nb_tr_examples += targets.size(0)
 
                 if i % 5000 == 0:
                     loss_step = tr_loss / nb_tr_steps
