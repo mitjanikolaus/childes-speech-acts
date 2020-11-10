@@ -7,7 +7,7 @@ from transformers import DistilBertModel
 
 device = "cuda" if cuda.is_available() else "cpu"
 
-class LSTMClassifier(nn.Module):
+class SpeechActLSTM(nn.Module):
     """LSTM Language Model."""
 
     def __init__(
@@ -19,14 +19,13 @@ class LSTMClassifier(nn.Module):
         dropout,
         label_size,
     ):
-        super(LSTMClassifier, self).__init__()
+        super(SpeechActLSTM, self).__init__()
         self.ntoken = vocab_size
         self.drop = nn.Dropout(dropout)
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
         self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
         self.decoder = nn.Linear(n_hidden_units, label_size)
-        self.softmax = nn.LogSoftmax(dim=2)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
@@ -39,8 +38,12 @@ class LSTMClassifier(nn.Module):
         output, hidden = self.lstm(packed_emb, hidden)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
         output = self.drop(output)
-        decoded = self.decoder(output)
-        return self.softmax(decoded), hidden
+        output = self.decoder(output)
+
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths]
+        output = output[indices, range(len(input))]
+        return output, hidden
 
     def init_hidden(self, batch_size):
         parameters_input = next(self.parameters())

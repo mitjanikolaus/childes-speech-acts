@@ -8,10 +8,12 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from dataset import SpeechActsDataset, pad_batch
-from models import LSTMClassifier
+from models import SpeechActLSTM, SpeechActDistilBERT
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+MODEL_TRANSFORMER = "transformer"
+MODEL_LSTM = "lstm"
 
 def detach_hidden(h):
     """Detach hidden states from their history."""
@@ -60,11 +62,19 @@ def train(args):
     )
     print("Loaded data.")
 
-    model = LSTMClassifier(
-        len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
-    ).to(device)
+    if args.model == MODEL_LSTM:
+        model = SpeechActLSTM(
+            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
+        )
+    elif args.model == MODEL_TRANSFORMER:
+        model = SpeechActDistilBERT(num_classes=len(label_vocab), dropout=args.dropout)
+    else:
+        raise RuntimeError("Unknown model type: ",args.model)
+
+    model.to(device)
 
     criterion = nn.NLLLoss()
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     def train_epoch(data_loader, epoch):
@@ -73,7 +83,6 @@ def train(args):
         hidden = model.init_hidden(args.batch_size)
 
         for batch_id, (input_samples, targets, sequence_lengths) in enumerate(data_loader):
-            current_batch_size = len(input_samples)
             input_samples = input_samples.to(device)
             targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
@@ -82,9 +91,6 @@ def train(args):
             hidden = detach_hidden(hidden)
             output, hidden = model(input_samples, hidden, sequence_lengths)
 
-            # Take last output for each sample (which depends on the sequence length)
-            indices = [s - 1 for s in sequence_lengths]
-            output = output[indices, range(current_batch_size)]
             loss = criterion(output, targets)
             loss.backward()
 
@@ -123,7 +129,6 @@ def train(args):
             for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
                 data_loader
             ):
-                current_batch_size = len(input_samples)
                 input_samples = input_samples.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
@@ -131,9 +136,6 @@ def train(args):
                 hidden = detach_hidden(hidden)
                 output, hidden = model(input_samples, hidden, sequence_lengths)
 
-                # Take last output for each sample (which depends on the sequence length)
-                indices = [s - 1 for s in sequence_lengths]
-                output = output[indices, range(current_batch_size)]
                 loss = criterion(output, targets)
                 total_loss += loss.item()
 
@@ -191,6 +193,13 @@ if __name__ == "__main__":
         type=str,
         default="./data/",
         help="location of the data corpus and vocabs",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=MODEL_TRANSFORMER,
+        choices=[MODEL_TRANSFORMER, MODEL_LSTM],
+        help="model architecture",
     )
     parser.add_argument(
         "--emsize", type=int, default=300, help="size of word embeddings"
