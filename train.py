@@ -196,7 +196,8 @@ def train(args):
     # Load the best saved model.
     with open(args.save, "rb") as f:
         model = torch.load(f)
-        model.lstm.flatten_parameters()
+        if args.model == MODEL_LSTM:
+            model.lstm.flatten_parameters()
 
     # Run on test data.
     test_loss, test_accuracy = evaluate(test_loader)
