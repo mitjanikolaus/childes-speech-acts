@@ -6,7 +6,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 
 from dataset import SpeechActsDataset, pad_batch
-from rnn_features import PADDING
+from generate_dataset import PADDING
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

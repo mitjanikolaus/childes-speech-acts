@@ -1,3 +1,4 @@
+"""Generate datasets to be used by the ANNs (LSTM and Transformer)"""
 import pickle
 import argparse
 from collections import Counter
@@ -26,10 +27,7 @@ SPEAKER_ADULT = "<adu>"
 #### Read Data functions
 def argparser():
     """Creating arparse.ArgumentParser and returning arguments"""
-    argparser = argparse.ArgumentParser(
-        description="Train a CRF and test it.",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
+    argparser = argparse.ArgumentParser()
     # Data files
     argparser.add_argument("input_file", type=str, help="file listing dialogs")
     argparser.add_argument(
