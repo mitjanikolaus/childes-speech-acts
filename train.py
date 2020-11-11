@@ -134,6 +134,7 @@ def train(args):
         # Turn on evaluation mode which disables dropout.
         model.eval()
         total_loss = 0.0
+        num_samples = 0
         num_correct = 0
         if args.model == MODEL_LSTM:
             hidden = model.init_hidden(args.batch_size)
@@ -165,9 +166,9 @@ def train(args):
                 # Compare predicted labels to ground truth
                 predicted_labels = torch.argmax(output, dim=1)
                 num_correct += int(torch.sum(predicted_labels == targets))
+                num_samples += len(input_samples)
 
-
-        return total_loss / len(data_loader), num_correct / len(data_loader)
+        return total_loss / len(data_loader), num_correct / num_samples
 
     # Loop over epochs.
     best_val_loss = None
