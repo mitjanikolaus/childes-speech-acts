@@ -117,7 +117,7 @@ def train(args):
                 cur_loss = total_loss / (args.log_interval * args.batch_size)
                 current_learning_rate = optimizer.param_groups[0]["lr"]
                 print(
-                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | loss {:5.5f}".format(
+                    "| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.6f} | loss {:5.5f}".format(
                         epoch,
                         batch_id,
                         len(data_loader),
