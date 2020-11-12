@@ -113,7 +113,7 @@ def train(args):
             if args.model == MODEL_LSTM:
                 hidden = detach_hidden(hidden)
 
-            if batch_id % args.log_interval == 0:
+            if batch_id % args.log_interval == 0 and batch_id != 0:
                 cur_loss = total_loss / (args.log_interval * args.batch_size)
                 current_learning_rate = optimizer.param_groups[0]["lr"]
                 print(
