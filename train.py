@@ -160,9 +160,6 @@ def train(args):
                 loss = criterion(output, targets)
                 total_loss += loss.item()
 
-                if args.model == MODEL_LSTM:
-                    hidden = detach_hidden(hidden)
-
                 # Compare predicted labels to ground truth
                 predicted_labels = torch.argmax(output, dim=1)
                 num_correct += int(torch.sum(predicted_labels == targets))

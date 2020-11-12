@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 
 from dataset import SpeechActsDataset, pad_batch
 from generate_dataset import PADDING
+from models import SpeechActDistilBERT, SpeechActLSTM
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -39,21 +40,20 @@ def test(args):
         model.eval()
         num_total = 0
         num_correct = 0
-        hidden = model.init_hidden(args.batch_size)
+        if isinstance(model, SpeechActLSTM):
+            hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
             for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
                     data_loader
             ):
-                current_batch_size = len(input_samples)
                 input_samples = input_samples.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
 
-                output, hidden = model(input_samples, hidden, sequence_lengths)
-
-                # Take last output for each sample (which depends on the sequence length)
-                indices = [s - 1 for s in sequence_lengths]
-                output = output[indices, range(current_batch_size)]
+                if isinstance(model, SpeechActLSTM):
+                    output, hidden = model(input_samples, hidden, sequence_lengths)
+                else:
+                    output = model(input_samples, sequence_lengths)
 
                 predicted_labels = torch.argmax(output, dim=1)
 
@@ -70,7 +70,8 @@ def test(args):
     # Load the saved model checkpoint.
     with open(args.checkpoint, "rb") as f:
         model = torch.load(f, map_location=device)
-        model.lstm.flatten_parameters()
+        if isinstance(model, SpeechActLSTM):
+            model.lstm.flatten_parameters()
 
     # Run on test data.
     test_accuracy = evaluate(test_loader)
