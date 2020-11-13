@@ -6,7 +6,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 
 from dataset import SpeechActsDataset, pad_batch
-from generate_dataset import PADDING
+from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD
 from models import SpeechActDistilBERT, SpeechActLSTM
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,15 +25,32 @@ def test(args):
 
     print("Loading data..")
     test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
-    dataset_test = SpeechActsDataset(test_dataframe)
-    test_loader = DataLoader(
-        dataset_test,
+
+    # Separate data by speaker
+    data_adults = test_dataframe[test_dataframe.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_ADULT])]
+    data_children = test_dataframe[test_dataframe.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_CHILD])]
+
+    data_adults.reset_index(drop=True, inplace=True)
+    data_children.reset_index(drop=True, inplace=True)
+
+    dataset_adults = SpeechActsDataset(data_adults)
+    dataset_children = SpeechActsDataset(data_children)
+    loader_adults = DataLoader(
+        dataset_adults,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
         collate_fn=pad_batch,
     )
-    print("Test samples: ", len(dataset_test))
+    loader_children = DataLoader(
+        dataset_children,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        collate_fn=pad_batch,
+    )
+    print("Test samples (adult): ", len(data_adults))
+    print("Test samples (adult): ", len(data_children))
 
     def evaluate(data_loader):
         # Turn on evaluation mode which disables dropout.
@@ -74,9 +91,11 @@ def test(args):
             model.lstm.flatten_parameters()
 
     # Run on test data.
-    test_accuracy = evaluate(test_loader)
+    test_accuracy_adults = evaluate(loader_adults)
+    test_accuracy_children = evaluate(loader_children)
     print("=" * 89)
-    print("Test acc {:5.2f}".format(test_accuracy))
+    print("Test acc (adults' utterances): {:5.2f}".format(test_accuracy_adults))
+    print("Test acc (children's utterances): {:5.2f}".format(test_accuracy_children))
     print("=" * 89)
 
 
