@@ -24,26 +24,43 @@ class SpeechActLSTM(nn.Module):
         self.drop = nn.Dropout(dropout)
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
         self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
+        self.lstm_context = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
-        self.decoder = nn.Linear(n_hidden_units, label_size)
+        self.decoder = nn.Linear(n_hidden_units*2, label_size)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
 
-    def forward(self, input: Tensor, hidden, sequence_lengths):
+    def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
         emb = self.embeddings(input)
+        context_emb = self.embeddings(context)
+
+        # TODO: same hidden for both lstms?
+        hidden = self.init_hidden(input.size(0))
+        hidden_context = self.init_hidden(input.size(0))
 
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
         output, hidden = self.lstm(packed_emb, hidden)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
         output = self.drop(output)
-        output = self.decoder(output)
 
         # Take last output for each sample (which depends on the sequence length)
         indices = [s - 1 for s in sequence_lengths]
-        output = output[indices, range(len(input))]
-        return output, hidden
+        output = output[indices, range(input.size(0))]
+
+        packed_emb = pack_padded_sequence(context_emb, sequence_lengths_context, enforce_sorted=False, batch_first=True)
+        output_context, _ = self.lstm_context(packed_emb, hidden_context)
+        output_context, _ = nn.utils.rnn.pad_packed_sequence(output_context)
+        output_context = self.drop(output_context)
+
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths_context]
+        output_context = output_context[indices, range(input.size(0))]
+
+        output = self.decoder(torch.cat([output, output_context], dim=1))
+
+        return output
 
     def init_hidden(self, batch_size):
         parameters_input = next(self.parameters())

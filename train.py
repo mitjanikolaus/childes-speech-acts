@@ -81,23 +81,20 @@ def train(args):
     def train_epoch(data_loader, epoch):
         model.train()
         total_loss = 0.0
-        if args.model == MODEL_LSTM:
-            hidden = model.init_hidden(args.batch_size)
 
-        for batch_id, (input_samples, targets, sequence_lengths) in enumerate(data_loader):
+        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context) in enumerate(data_loader):
             # Move data to GPU
             input_samples = input_samples.to(device)
+            input_contexts = input_contexts.to(device)
             targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
+            sequence_lengths_context = sequence_lengths_context.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
 
             # Perform forward pass of the model
-            if args.model == MODEL_LSTM:
-                output, hidden = model(input_samples, hidden, sequence_lengths)
-            else:
-                output = model(input_samples, sequence_lengths)
+            output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
 
             # Calculate loss
             loss = criterion(output, targets)
@@ -110,8 +107,8 @@ def train(args):
             # Update parameter weights
             optimizer.step()
 
-            if args.model == MODEL_LSTM:
-                hidden = detach_hidden(hidden)
+            # if args.model == MODEL_LSTM:
+            #     hidden = detach_hidden(hidden)
 
             if batch_id % args.log_interval == 0 and batch_id != 0:
                 cur_loss = total_loss / (args.log_interval * args.batch_size)
@@ -139,22 +136,18 @@ def train(args):
         if args.model == MODEL_LSTM:
             hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            for batch_id, (input_samples, targets, sequence_lengths) in enumerate(
-                data_loader
-            ):
+            for batch_id, (
+            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context) in enumerate(
+                    data_loader):
                 # Move data to GPU
                 input_samples = input_samples.to(device)
+                input_contexts = input_contexts.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
-
-                # Clear gradients
-                optimizer.zero_grad()
+                sequence_lengths_context = sequence_lengths_context.to(device)
 
                 # Perform forward pass of the model
-                if args.model == MODEL_LSTM:
-                    output, hidden = model(input_samples, hidden, sequence_lengths)
-                else:
-                    output = model(input_samples, sequence_lengths)
+                output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
 
                 # Calculate loss
                 loss = criterion(output, targets)

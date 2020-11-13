@@ -5,11 +5,13 @@ from torch.utils.data import Dataset
 
 def pad_batch(batch):
     # Pad sequences within a batch so they all have equal length
-    padded = pad_sequence([torch.LongTensor(s) for s, _, _ in batch], batch_first=True)
-    targets = torch.tensor([t for _, t, _ in batch])
-    lengths = torch.tensor([l for _, _, l in batch])
+    padded = pad_sequence([torch.LongTensor(s) for s, _, _, _, _ in batch], batch_first=True)
+    padded_contexts = pad_sequence([torch.LongTensor(c) for _, c, _, _, _ in batch], batch_first=True)
+    targets = torch.tensor([t for _, _, t, _, _ in batch])
+    lengths = torch.tensor([l for _, _, _, l, _ in batch])
+    lengths_context = torch.tensor([lc for _, _, _, _, lc in batch])
 
-    return padded, targets, lengths
+    return padded, padded_contexts, targets, lengths, lengths_context
 
 class SpeechActsDataset(Dataset):
 
@@ -30,22 +32,28 @@ class SpeechActsDataset(Dataset):
         if not len(self.data) == len(self.context):
             global_index = self.data.global_index[index]
 
-        # Add context to features
-        features = []
+        # context
+        context = []
+        sequence_length_context = 0
         for i in reversed(range(self.context_length)):
             try:
-                features += self.context.features[global_index - i - 1]
+                context += self.context.features[global_index - i - 1]
+                sequence_length_context += self.sequence_lengths[global_index - i - 1]
             except KeyError:
-                continue
+                # continue
+                #TODO fix: this is not the correct context
+                context += self.context.features[0]
+                sequence_length_context += self.sequence_lengths[0]
 
-        # Add words of target utterance
-        features += self.data.features[index]
+
+
+        features = self.data.features[index]
 
         label = self.data.labels[index]
 
         sequence_length = self.sequence_lengths[index]
 
-        return torch.tensor(features), torch.tensor(label), torch.tensor(sequence_length)
+        return torch.tensor(features), torch.tensor(context), torch.tensor(label), torch.tensor(sequence_length), torch.tensor(sequence_length_context)
 
     def __len__(self):
         return self.len
