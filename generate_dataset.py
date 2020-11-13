@@ -33,79 +33,16 @@ def argparser():
     argparser.add_argument(
         "--vocab", "-v", required=False, help="path to existing vocab file"
     )
-    argparser.add_argument(
-        "--txt_columns",
-        nargs="+",
-        type=str,
-        default=[],
-        help=""".txt columns name (in order); most basic txt is ['spa_all', 'ut', 'time', 'speaker', 'sentence']""",
-    )
     # Operations on data
-    argparser.add_argument(
-        "--match_age",
-        type=int,
-        nargs="+",
-        default=None,
-        help="ages to match data to - for split analysis",
-    )
-    argparser.add_argument(
-        "--keep_tag",
-        choices=["all", "1", "2", "2a"],
-        default="all",
-        help="keep first part / second part / all tag",
-    )
-    argparser.add_argument(
-        "--cut",
-        type=int,
-        default=1000000,
-        help="if specified, use the first n train dialogs instead of all.",
-    )
     argparser.add_argument(
         "--out", type=str, default="data/", help="path for output files"
     )
     # parameters for training:
     argparser.add_argument(
-        "--nb_occurrences",
-        "-noc",
+        "--vocab-size",
         type=int,
-        default=5,
-        help="number of minimum occurrences for word to appear in features",
-    )
-    argparser.add_argument(
-        "--use_past",
-        "-past",
-        action="store_true",
-        help="whether to add previous sentence as features",
-    )
-    argparser.add_argument(
-        "--use_repetitions",
-        "-rep",
-        action="store_true",
-        help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use_past_actions",
-        "-pa",
-        action="store_true",
-        help="whether to add actions from the previous sentence to features",
-    )
-    argparser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Whether to display training iterations output.",
-    )
-    # Baseline model
-    argparser.add_argument(
-        "--baseline",
-        type=str,
-        choices=["SVC", "LSVC", "NB", "RF"],
-        default=None,
-        help="which algorithm to use for baseline: SVM (classifier ou linear classifier), NaiveBayes, RandomForest(100 trees)",
-    )
-    argparser.add_argument(
-        "--balance_ex",
-        action="store_true",
-        help="whether to take proportion of each class into account when training (imbalanced dataset).",
+        default=10000,
+        help="Maximum size of vocabulary",
     )
 
     args = argparser.parse_args()
@@ -134,17 +71,10 @@ if __name__ == "__main__":
     args = argparser()
     print(args)
 
-    # Definitions
-    number_words_for_feature = args.nb_occurrences  # default 5
-    number_segments_length_feature = 10
-    # number_segments_turn_position = 10 # not used for now
-    target_label = "spa_" + args.keep_tag
-
     print("### Loading data:".upper())
 
-    data_train = pd.read_csv(
-        args.input_file, sep="\t", keep_default_na=False
-    ).reset_index(drop=False)
+    data_train = pd.read_csv(args.input_file, sep="\t", keep_default_na=False)
+    data_train.reset_index(drop=False)
     data_train.rename(
         columns={col: col.lower() for col in data_train.columns}, inplace=True
     )
