@@ -37,9 +37,9 @@ def train(args):
     val_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "val")
     test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
 
-    dataset_train = SpeechActsDataset(train_dataframe)
-    dataset_val = SpeechActsDataset(val_dataframe)
-    dataset_test = SpeechActsDataset(test_dataframe)
+    dataset_train = SpeechActsDataset(train_dataframe, context_length=args.context)
+    dataset_val = SpeechActsDataset(val_dataframe, context_length=args.context)
+    dataset_test = SpeechActsDataset(test_dataframe, context_length=args.context)
 
     train_loader = DataLoader(
         dataset_train,
@@ -222,6 +222,9 @@ if __name__ == "__main__":
         default=MODEL_TRANSFORMER,
         choices=[MODEL_TRANSFORMER, MODEL_LSTM],
         help="model architecture",
+    )
+    parser.add_argument(
+        "--context", type=int, default=0, help="Number of previous utterances that are provided as features"
     )
     parser.add_argument(
         "--emsize", type=int, default=300, help="size of word embeddings"
