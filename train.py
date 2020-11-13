@@ -165,7 +165,7 @@ def train(args):
                 num_correct += int(torch.sum(predicted_labels == targets))
                 num_samples += len(input_samples)
 
-        return total_loss / len(data_loader), num_correct / num_samples
+        return total_loss / num_samples, num_correct / num_samples
 
     # Loop over epochs.
     best_val_loss = None
