@@ -24,17 +24,20 @@ def test(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
+    data = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
 
     # Separate data by speaker
-    data_adults = test_dataframe[test_dataframe.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_ADULT])]
-    data_children = test_dataframe[test_dataframe.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_CHILD])]
+    data.reset_index(inplace=True)
+    data_adults = data[data.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_ADULT])]
+    data_children = data[data.features.apply(lambda x: x[0] == vocab.stoi[SPEAKER_CHILD])]
 
-    data_adults.reset_index(drop=True, inplace=True)
-    data_children.reset_index(drop=True, inplace=True)
+    data_children["global_index"] = data_children["index"].copy()
+    data_adults["global_index"] = data_adults["index"].copy()
+    data_adults.reset_index(inplace=True)
+    data_children.reset_index(inplace=True)
 
-    dataset_adults = SpeechActsDataset(data_adults)
-    dataset_children = SpeechActsDataset(data_children)
+    dataset_adults = SpeechActsDataset(data_adults, context=data, context_length=args.context)
+    dataset_children = SpeechActsDataset(data_children, context=data, context_length=args.context)
     loader_adults = DataLoader(
         dataset_adults,
         batch_size=args.batch_size,
@@ -106,6 +109,9 @@ if __name__ == "__main__":
         type=str,
         default="data/",
         help="location of the data corpus and vocabs",
+    )
+    parser.add_argument(
+        "--context", type=int, default=0, help="Number of previous utterances that are provided as features"
     )
     parser.add_argument(
         "--batch-size", type=int, default=50, metavar="N", help="batch size"

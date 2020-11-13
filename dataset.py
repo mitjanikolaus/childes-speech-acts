@@ -13,21 +13,33 @@ def pad_batch(batch):
 
 class SpeechActsDataset(Dataset):
 
-    def __init__(self, dataframe, context_length=0):
+    def __init__(self, dataframe, context=None, context_length=0):
         self.sequence_lengths = [len(sample) for sample in dataframe["features"]]
         self.len = len(dataframe)
         self.data = dataframe
+
+        # Data to to take context from
+        self.context = context if context is not None else dataframe
 
         # Number of previous utterances that are provided as features
         self.context_length = context_length
 
     def __getitem__(self, index):
+        # global index to address context
+        global_index = index
+        if not len(self.data) == len(self.context):
+            global_index = self.data.global_index[index]
+
+        # Add context to features
         features = []
-        for i in reversed(range(self.context_length+1)):
+        for i in reversed(range(self.context_length)):
             try:
-                features += self.data.features[index - i]
+                features += self.context.features[global_index - i - 1]
             except KeyError:
                 continue
+
+        # Add words of target utterance
+        features += self.data.features[index]
 
         label = self.data.labels[index]
 
