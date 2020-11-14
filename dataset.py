@@ -38,12 +38,12 @@ class SpeechActsDataset(Dataset):
         for i in reversed(range(self.context_length)):
             try:
                 context += self.context.features[global_index - i - 1]
-                sequence_length_context += self.sequence_lengths[global_index - i - 1]
+                sequence_length_context += len(context)
             except KeyError:
                 # continue
                 #TODO fix: this is not the correct context
                 context += self.context.features[0]
-                sequence_length_context += self.sequence_lengths[0]
+                sequence_length_context += len(context)
 
 
 
@@ -51,6 +51,7 @@ class SpeechActsDataset(Dataset):
 
         label = self.data.labels[index]
 
+        # TODO sequence lengths can be accessed directly!
         sequence_length = self.sequence_lengths[index]
 
         return torch.tensor(features), torch.tensor(context), torch.tensor(label), torch.tensor(sequence_length), torch.tensor(sequence_length_context)
