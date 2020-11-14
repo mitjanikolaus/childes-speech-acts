@@ -6,12 +6,17 @@ from torch.utils.data import Dataset
 def pad_batch(batch):
     # Pad sequences within a batch so they all have equal length
     padded = pad_sequence([torch.LongTensor(s) for s, _, _, _, _ in batch], batch_first=True)
-    padded_contexts = pad_sequence([torch.LongTensor(c) for _, c, _, _, _ in batch], batch_first=True)
+    context_length = len(batch[0][1])
+    padded_contexts = []
+    lengths_contexts = []
+    for i in range(context_length):
+        padded_contexts.append(pad_sequence([torch.tensor(c[i]) for _, c, _, _, _ in batch], batch_first=True))
+        lengths_contexts.append(torch.tensor([lc[i] for _, _, _, _, lc in batch]))
+
     targets = torch.tensor([t for _, _, t, _, _ in batch])
     lengths = torch.tensor([l for _, _, _, l, _ in batch])
-    lengths_context = torch.tensor([lc for _, _, _, _, lc in batch])
 
-    return padded, padded_contexts, targets, lengths, lengths_context
+    return padded, padded_contexts, targets, lengths, lengths_contexts
 
 class SpeechActsDataset(Dataset):
 
@@ -34,16 +39,18 @@ class SpeechActsDataset(Dataset):
 
         # context
         context = []
-        sequence_length_context = 0
+        sequence_lengths_context = []
         for i in reversed(range(self.context_length)):
             try:
-                context += self.context.features[global_index - i - 1]
-                sequence_length_context += len(context)
+                utt = self.context.features[global_index - i - 1]
+                context.append(utt)
+                sequence_lengths_context.append(len(utt))
             except KeyError:
                 # continue
                 #TODO fix: this is not the correct context
-                context += self.context.features[0]
-                sequence_length_context += len(context)
+                utt = self.context.features[0]
+                context.append(utt)
+                sequence_lengths_context.append(len(utt))
 
 
 
@@ -54,7 +61,7 @@ class SpeechActsDataset(Dataset):
         # TODO sequence lengths can be accessed directly!
         sequence_length = self.sequence_lengths[index]
 
-        return torch.tensor(features), torch.tensor(context), torch.tensor(label), torch.tensor(sequence_length), torch.tensor(sequence_length_context)
+        return torch.tensor(features), context, torch.tensor(label), torch.tensor(sequence_length), torch.tensor(sequence_lengths_context)
 
     def __len__(self):
         return self.len

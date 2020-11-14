@@ -66,7 +66,7 @@ def train(args):
 
     if args.model == MODEL_LSTM:
         model = SpeechActLSTM(
-            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
+            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab), args.context
         )
     elif args.model == MODEL_TRANSFORMER:
         model = SpeechActDistilBERT(num_classes=len(label_vocab), dropout=args.dropout)
@@ -85,10 +85,10 @@ def train(args):
         for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context) in enumerate(data_loader):
             # Move data to GPU
             input_samples = input_samples.to(device)
-            input_contexts = input_contexts.to(device)
+            # input_contexts = input_contexts.to(device)
             targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
-            sequence_lengths_context = sequence_lengths_context.to(device)
+            # sequence_lengths_context = sequence_lengths_context.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
@@ -141,10 +141,10 @@ def train(args):
                     data_loader):
                 # Move data to GPU
                 input_samples = input_samples.to(device)
-                input_contexts = input_contexts.to(device)
+                # input_contexts = input_contexts.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
-                sequence_lengths_context = sequence_lengths_context.to(device)
+                # sequence_lengths_context = sequence_lengths_context.to(device)
 
                 # Perform forward pass of the model
                 output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
