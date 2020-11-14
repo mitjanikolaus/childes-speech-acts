@@ -66,10 +66,10 @@ def test(args):
                 data_loader):
                 # Move data to GPU
                 input_samples = input_samples.to(device)
-                input_contexts = input_contexts.to(device)
+                # input_contexts = input_contexts.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
-                sequence_lengths_context = sequence_lengths_context.to(device)
+                # sequence_lengths_context = sequence_lengths_context.to(device)
 
                 # Perform forward pass of the model
                 output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
@@ -81,10 +81,12 @@ def test(args):
 
                 predicted_labels = torch.argmax(output, dim=1)
 
-                for sample, context, label, predicted in zip(input_samples, input_contexts, targets, predicted_labels):
+                for i, (sample, label, predicted) in enumerate(zip(input_samples, targets, predicted_labels)):
                     if label_vocab.inverse[int(predicted)] != label_vocab.inverse[int(label)]:
+                        for j in range(args.context):
+                            print(get_words(input_contexts[j][i], vocab), end="")
                         print(
-                            f"{get_words(context, vocab)} {get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}"
+                            f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]} True: {label_vocab.inverse[int(label)]}"
                         )
 
                 num_correct += int(torch.sum(predicted_labels == targets))

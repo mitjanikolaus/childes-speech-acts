@@ -35,7 +35,6 @@ class SpeechActLSTM(nn.Module):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
         emb = self.embeddings(input)
 
-        # TODO experiment with order, first feed context?
         hidden = self.init_hidden(input.size(0))
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
         output, hidden = self.lstm(packed_emb, hidden)
