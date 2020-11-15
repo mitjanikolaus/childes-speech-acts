@@ -107,6 +107,9 @@ class SpeechActDistilBERT(torch.nn.Module):
         outputs = self.dropout(pooler)
 
         for context_utt, length in zip(context, sequence_lengths_context):
+            context_utt = context_utt.to(device)
+            length = length.to(device)
+            
             max_len = context_utt[0].size(0)
             attention_masks = self.gen_attention_masks(length, max_len)
             output_1 = self.bert(input_ids=context_utt, attention_mask=attention_masks)
