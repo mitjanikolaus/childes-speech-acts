@@ -26,15 +26,16 @@ class SpeechActLSTM(nn.Module):
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
         self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
-        self.decoder = nn.Linear(n_hidden_units*(1+context_length), label_size)
+        self.lstm_action = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
+
+        self.decoder = nn.Linear(n_hidden_units*(2+context_length), label_size)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
 
-    def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
+    def forward(self, input: Tensor, context: Tensor, action, sequence_lengths, sequence_lengths_context, sequence_lengths_action):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
         emb = self.embeddings(input)
-
         hidden = self.init_hidden(input.size(0))
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
         output, hidden = self.lstm(packed_emb, hidden)
@@ -44,6 +45,18 @@ class SpeechActLSTM(nn.Module):
         # Take last output for each sample (which depends on the sequence length)
         indices = [s - 1 for s in sequence_lengths]
         outputs = output[indices, range(input.size(0))]
+
+        emb_action = self.embeddings(action)
+        hidden_action = self.init_hidden(input.size(0))
+        packed_emb = pack_padded_sequence(emb_action, sequence_lengths_action, enforce_sorted=False, batch_first=True)
+        output, hidden_action = self.lstm(packed_emb, hidden_action)
+        output, _ = nn.utils.rnn.pad_packed_sequence(output)
+        output = self.drop(output)
+
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths_action]
+        output_action = output[indices, range(action.size(0))]
+        outputs = torch.cat([outputs, output_action], dim=1)
 
         for context_utt, length in zip(context, sequence_lengths_context):
             context_utt = context_utt.to(device)

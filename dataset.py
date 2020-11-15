@@ -5,20 +5,23 @@ from torch.utils.data import Dataset
 
 def pad_batch(batch):
     # Pad sequences within a batch so they all have equal length
-    padded = pad_sequence([torch.LongTensor(s) for s, _, _, _, _ , _ in batch], batch_first=True)
+    padded = pad_sequence([torch.LongTensor(s) for s, _, _, _, _ , _, _, _ in batch], batch_first=True)
     context_length = len(batch[0][1])
     padded_contexts = []
     lengths_contexts = []
     for i in range(context_length):
-        padded_contexts.append(pad_sequence([torch.tensor(c[i]) for _, c, _, _, _, _ in batch], batch_first=True))
-        lengths_contexts.append(torch.tensor([lc[i] for _, _, _, _, lc, _ in batch]))
+        padded_contexts.append(pad_sequence([torch.tensor(c[i]) for _, c, _, _, _, _, _, _ in batch], batch_first=True))
+        lengths_contexts.append(torch.tensor([lc[i] for _, _, _, _, lc, _, _, _ in batch]))
 
-    targets = torch.tensor([t for _, _, t, _, _, _ in batch])
-    lengths = torch.tensor([l for _, _, _, l, _, _ in batch])
-    ages = torch.tensor([a for _, _, _, _, _, a in batch])
+    targets = torch.tensor([t for _, _, t, _, _, _, _, _ in batch])
+    lengths = torch.tensor([l for _, _, _, l, _, _, _, _ in batch])
 
+    padded_action = pad_sequence([torch.LongTensor(a) for _, _, _, _, _, a, _, _ in batch], batch_first=True)
+    action_lengths = torch.tensor([l for _, _, _, _, _, _, l, _ in batch])
 
-    return padded, padded_contexts, targets, lengths, lengths_contexts, ages
+    ages = torch.tensor([a for _, _, _, _, _, _, _, a in batch])
+
+    return padded, padded_contexts, targets, lengths, lengths_contexts, padded_action, action_lengths, ages
 
 class SpeechActsDataset(Dataset):
 
@@ -56,9 +59,11 @@ class SpeechActsDataset(Dataset):
         utterance = self.data.utterance[index]
         label = self.data.label[index]
         sequence_length = len(utterance)
+        action = self.data.action[index]
+        action_length = len(action)
         age = self.data.age[index]
 
-        return utterance, context, label, sequence_length, sequence_lengths_context, age
+        return utterance, context, label, sequence_length, sequence_lengths_context, action, action_length, age
 
     def __len__(self):
         return self.len

@@ -82,19 +82,19 @@ def train(args):
         model.train()
         total_loss = 0.0
 
-        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(data_loader):
+        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, actions, sequence_lengths_action, ages) in enumerate(data_loader):
             # Move data to GPU
             input_samples = input_samples.to(device)
-            # input_contexts = input_contexts.to(device)
+            actions = actions.to(device)
             targets = targets.to(device)
             sequence_lengths = sequence_lengths.to(device)
-            # sequence_lengths_context = sequence_lengths_context.to(device)
+            sequence_lengths_action = sequence_lengths_action.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
 
             # Perform forward pass of the model
-            output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
+            output = model(input_samples, input_contexts, actions, sequence_lengths, sequence_lengths_context, sequence_lengths_action)
 
             # Calculate loss
             loss = criterion(output, targets)
@@ -133,21 +133,19 @@ def train(args):
         total_loss = 0.0
         num_samples = 0
         num_correct = 0
-        if args.model == MODEL_LSTM:
-            hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
             for batch_id, (
-            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(
+            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, actions, sequence_lengths_action, ages) in enumerate(
                     data_loader):
                 # Move data to GPU
                 input_samples = input_samples.to(device)
-                # input_contexts = input_contexts.to(device)
+                actions = actions.to(device)
                 targets = targets.to(device)
                 sequence_lengths = sequence_lengths.to(device)
-                # sequence_lengths_context = sequence_lengths_context.to(device)
+                sequence_lengths_action = sequence_lengths_action.to(device)
 
                 # Perform forward pass of the model
-                output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
+                output = model(input_samples, input_contexts, actions, sequence_lengths, sequence_lengths_context, sequence_lengths_action)
 
                 # Calculate loss
                 loss = criterion(output, targets)

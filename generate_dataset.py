@@ -26,6 +26,8 @@ UNTRANSCRIBED = "www"
 SPEAKER_CHILD = "<chi>"
 SPEAKER_ADULT = "<adu>"
 
+NO_ACTION = "<no_action>"
+
 
 #### Read Data functions
 def argparser():
@@ -53,9 +55,9 @@ def argparser():
     return args
 
 
-def build_vocabulary(data):
+def build_vocabulary(utterances, actions):
     word_counter = Counter()
-    for tokens in data:
+    for tokens in utterances + actions:
         word_counter.update(tokens)
     print(f"Vocab: {word_counter.most_common(100)}")
     print(f"Total number of words length: {len(word_counter)}")
@@ -89,6 +91,7 @@ if __name__ == "__main__":
 
     tokenized_sentences = []
     ages = []
+    tokenized_actions = []
     for i, row in tqdm(data_train.iterrows(), total=data_train.shape[0]):
         # Tokenize sentence
         tokenized_sentence = word_tokenize(row["sentence"])
@@ -103,19 +106,29 @@ if __name__ == "__main__":
         tokenized_sentences.append(tokenized_sentence)
         ages.append(row["age_months"])
 
+        # Tokenize action
+        action = row["action"]
+        if action:
+            tokenized_action = word_tokenize(action)
+        else:
+            tokenized_action = [NO_ACTION]
+        tokenized_actions.append(tokenized_action)
+
     if args.vocab:
         vocab = pickle.load(open(args.vocab, "rb"))
     else:
         print("Building vocabulary..")
-        vocab = build_vocabulary(tokenized_sentences)
+        vocab = build_vocabulary(tokenized_sentences, tokenized_actions)
 
     label_vocab = dataset_labels(target_label.upper())
     pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
 
     utterances = []
+    actions = []
     labels = []
-    for tokens, label in zip(tokenized_sentences, data_train[target_label].to_list()):
+    for tokens, action_tokens, label in zip(tokenized_sentences, tokenized_actions, data_train[target_label].to_list()):
         utterances.append([vocab.stoi[t] for t in tokens])
+        actions.append([vocab.stoi[a] for a in action_tokens])
         labels.append(label_vocab[label])
 
     dataset_type = ""
@@ -126,6 +139,6 @@ if __name__ == "__main__":
     elif "test" in args.input_file:
         dataset_type = "test"
 
-    data = pd.DataFrame(data={"utterance": utterances, "label": labels, "age": ages})
+    data = pd.DataFrame(data={"utterance": utterances, "action": actions, "label": labels, "age": ages})
     print(data.head())
     data.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)
