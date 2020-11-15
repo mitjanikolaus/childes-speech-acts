@@ -76,7 +76,7 @@ class SpeechActLSTM(nn.Module):
 
 class SpeechActDistilBERT(torch.nn.Module):
 
-    def __init__(self, num_classes, dropout, context_length, finetune_bert=False):
+    def __init__(self, num_classes, dropout, context_length, finetune_bert=True):
         N_UNITS_BERT_OUT = 768
 
         super(SpeechActDistilBERT, self).__init__()
