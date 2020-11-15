@@ -76,7 +76,7 @@ class SpeechActLSTM(nn.Module):
 
 class SpeechActDistilBERT(torch.nn.Module):
 
-    def __init__(self, num_classes, dropout, context_length):
+    def __init__(self, num_classes, dropout, context_length, finetune_bert=False):
         N_UNITS_BERT_OUT = 768
 
         super(SpeechActDistilBERT, self).__init__()
@@ -84,6 +84,10 @@ class SpeechActDistilBERT(torch.nn.Module):
         self.pre_classifier = torch.nn.Linear(N_UNITS_BERT_OUT, N_UNITS_BERT_OUT)
         self.dropout = torch.nn.Dropout(dropout)
         self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT*(1+context_length), num_classes)
+
+        if not finetune_bert:
+            for param in self.bert.parameters():
+                param.requires_grad = False
 
     def gen_attention_masks(self, sequence_lengths, max_len):
         return torch.tensor(
