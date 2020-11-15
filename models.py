@@ -28,7 +28,9 @@ class SpeechActLSTM(nn.Module):
 
         self.lstm_action = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
-        self.decoder = nn.Linear(n_hidden_units*(2+context_length), label_size)
+        self.integration = nn.Linear(n_hidden_units*(2+context_length), n_hidden_units)
+
+        self.decoder = nn.Linear(n_hidden_units, label_size)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
@@ -75,7 +77,11 @@ class SpeechActLSTM(nn.Module):
             # Append output
             outputs = torch.cat([outputs, output_context], dim=1)
 
-        output = self.decoder(outputs)
+        integrated = self.integration(outputs)
+        integrated = torch.nn.ReLU()(integrated)
+        integrated = self.drop(integrated)
+
+        output = self.decoder(integrated)
 
         return output
 
