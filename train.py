@@ -69,7 +69,7 @@ def train(args):
             len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab), args.context
         )
     elif args.model == MODEL_TRANSFORMER:
-        model = SpeechActDistilBERT(num_classes=len(label_vocab), dropout=args.dropout)
+        model = SpeechActDistilBERT(len(label_vocab), args.dropout, args.context)
     else:
         raise RuntimeError("Unknown model type: ",args.model)
 

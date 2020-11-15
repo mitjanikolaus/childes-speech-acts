@@ -75,13 +75,15 @@ class SpeechActLSTM(nn.Module):
 
 
 class SpeechActDistilBERT(torch.nn.Module):
-    def __init__(self, num_classes, dropout):
+
+    def __init__(self, num_classes, dropout, context_length):
+        N_UNITS_BERT_OUT = 768
+
         super(SpeechActDistilBERT, self).__init__()
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
-        # TODO optimize size
-        self.pre_classifier = torch.nn.Linear(768, 768)
+        self.pre_classifier = torch.nn.Linear(N_UNITS_BERT_OUT, N_UNITS_BERT_OUT)
         self.dropout = torch.nn.Dropout(dropout)
-        self.classifier = torch.nn.Linear(768, num_classes)
+        self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT*(1+context_length), num_classes)
 
     def gen_attention_masks(self, sequence_lengths, max_len):
         return torch.tensor(
@@ -91,15 +93,31 @@ class SpeechActDistilBERT(torch.nn.Module):
             ]
         ).to(device)
 
-    def forward(self, input, sequence_lengths):
+    def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
         # The input should be padded, so all samples should have the same length
-        max_len = len(input[0])
+
+        max_len = input[0].size(0)
         attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
         output_1 = self.bert(input_ids=input, attention_mask=attention_masks)
         hidden_state = output_1[0]
         pooler = hidden_state[:, 0]
         pooler = self.pre_classifier(pooler)
         pooler = torch.nn.ReLU()(pooler)
-        pooler = self.dropout(pooler)
-        output = self.classifier(pooler)
+
+        outputs = self.dropout(pooler)
+
+        for context_utt, length in zip(context, sequence_lengths_context):
+            max_len = context_utt[0].size(0)
+            attention_masks = self.gen_attention_masks(length, max_len)
+            output_1 = self.bert(input_ids=context_utt, attention_mask=attention_masks)
+            hidden_state = output_1[0]
+            pooler = hidden_state[:, 0]
+            pooler = self.pre_classifier(pooler)
+            pooler = torch.nn.ReLU()(pooler)
+            outputs_context = self.dropout(pooler)
+
+            # Append output
+            outputs = torch.cat([outputs, outputs_context], dim=1)
+
+        output = self.classifier(outputs)
         return output
