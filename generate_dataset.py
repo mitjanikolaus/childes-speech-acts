@@ -20,6 +20,9 @@ nltk.download("punkt")
 
 PADDING = "<pad>"
 UNKNOWN = "<unk>"
+UNINTELLIGIBLE = "xxx"
+PHONOLOGICAL = "yyy"
+UNTRANSCRIBED = "www"
 SPEAKER_CHILD = "<chi>"
 SPEAKER_ADULT = "<adu>"
 
@@ -85,6 +88,7 @@ if __name__ == "__main__":
     # data_train = data_train.head()
 
     tokenized_sentences = []
+    ages = []
     for i, row in tqdm(data_train.iterrows(), total=data_train.shape[0]):
         # Tokenize sentence
         tokenized_sentence = word_tokenize(row["sentence"])
@@ -97,6 +101,7 @@ if __name__ == "__main__":
             raise RuntimeError("Unknown speaker code: ", row["speaker"])
 
         tokenized_sentences.append(tokenized_sentence)
+        ages.append(row["age_months"])
 
     if args.vocab:
         vocab = pickle.load(open(args.vocab, "rb"))
@@ -107,10 +112,10 @@ if __name__ == "__main__":
     label_vocab = dataset_labels(target_label.upper())
     pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
 
-    features = []
+    utterances = []
     labels = []
     for tokens, label in zip(tokenized_sentences, data_train[target_label].to_list()):
-        features.append([vocab.stoi[t] for t in tokens])
+        utterances.append([vocab.stoi[t] for t in tokens])
         labels.append(label_vocab[label])
 
     dataset_type = ""
@@ -121,6 +126,6 @@ if __name__ == "__main__":
     elif "test" in args.input_file:
         dataset_type = "test"
 
-    data = pd.DataFrame(data={"features": features, "labels": labels})
+    data = pd.DataFrame(data={"utterance": utterances, "label": labels, "age": ages})
     print(data.head())
     data.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)

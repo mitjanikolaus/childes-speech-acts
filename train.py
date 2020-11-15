@@ -82,7 +82,7 @@ def train(args):
         model.train()
         total_loss = 0.0
 
-        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context) in enumerate(data_loader):
+        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(data_loader):
             # Move data to GPU
             input_samples = input_samples.to(device)
             # input_contexts = input_contexts.to(device)
@@ -137,7 +137,7 @@ def train(args):
             hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
             for batch_id, (
-            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context) in enumerate(
+            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(
                     data_loader):
                 # Move data to GPU
                 input_samples = input_samples.to(device)
