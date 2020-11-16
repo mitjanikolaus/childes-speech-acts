@@ -59,6 +59,7 @@ def argparser():
         action="store_true",
         help="whether to use bi-gram features to train the algorithm",
     )
+    argparser.add_argument('--use-pos', '-pos', action='store_true', help="whether to add POS tags to features")
     argparser.add_argument(
         "--use-action",
         "-act",
@@ -78,7 +79,7 @@ def argparser():
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
     argparser.add_argument(
-        "--use-past_actions",
+        "--use-past-actions",
         "-pa",
         action="store_true",
         help="whether to add actions from the previous sentence to features",
@@ -172,6 +173,7 @@ if __name__ == "__main__":
             args.use_bi_grams,
             args.use_action,
             args.use_repetitions,
+            args.use_pos,
             bin_cut=number_segments_length_feature,
         )
 
@@ -190,6 +192,7 @@ if __name__ == "__main__":
                 else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
                 past_tokens=None if not args.use_past else x.past,
                 pastact_tokens=None if not args.use_past_actions else x.past_act,
+                pos_tags=None if not args.use_pos else x.pos,
             ),
             axis=1,
         )
@@ -248,6 +251,7 @@ if __name__ == "__main__":
                 else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
                 past_tokens=None if not args.use_past else x.past,
                 pastact_tokens=None if not args.use_past_actions else x.past_act,
+                pos_tags=None if not args.use_pos else x.pos,
             ),
             axis=1,
         )

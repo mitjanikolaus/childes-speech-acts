@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 import pycrfsuite
 
 from preprocess import SPEECH_ACT
-from crf_train import add_feature_columns, get_features_from_row, crf_predict
+from crf_train import add_feature_columns, get_features_from_row, crf_predict, bio_classification_report
 
 
 def argparser():
@@ -100,30 +100,6 @@ def features_report(tagg):
 	# return
 	return states, transitions
 
-def bio_classification_report(y_true, y_pred):
-	"""
-	Classification report for a list of BIO-encoded sequences.
-	It computes token-level metrics and discards "O" labels.
-	Requires scikit-learn 0.20+ 
-
-	Output:
-	--------
-	cr: pd.DataFrame
-
-	cm: np.array
-
-	acc: float
-	"""	
-	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
-	cm = confusion_matrix(y_true, y_pred, normalize='true')
-	acc = accuracy_score(y_true, y_pred, normalize = True)
-	cks = cohen_kappa_score(y_true, y_pred)
-
-	print("==> Accuracy: {0:.3f}".format(acc))
-	print("==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(cks, 1./len(set(y_true))))
-	# using both as index in case not the same labels in it
-	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc, cks
-
 def plot_testing(test_df:pd.DataFrame, file_location:str, col_ages):
 	"""Separating CHI/MOT and ages to plot accuracy, annotator agreement and number of categories over age.
 	"""
@@ -161,11 +137,9 @@ def report_to_file(dfs:dict, file_location:str):
 if __name__ == '__main__':
 	args = argparser()
 
-
 	# Loading model
 	name = args.model
 	if os.path.isdir(name):
-		linker = '/'
 		if name[-1] == '/':
 			name = name[:-1]
 	elif os.path.isfile(name + '_model.pycrfsuite'):
@@ -180,10 +154,10 @@ if __name__ == '__main__':
 	else:
 		raise FileNotFoundError(f"Cannot find model {name}.")
 	# update paths for input/output
-	features_path = name + linker + 'feature_vocabs.p'
-	model_path = name + linker + 'model.pycrfsuite'
-	report_path = name + linker + args.data.replace('/', '_')+'_report.xlsx'
-	plot_path = name + linker + args.data.split('/')[-1]+'_agesevol.png'
+	features_path = name + os.path.sep + 'feature_vocabs.p'
+	model_path = name + os.path.sep + 'model.pycrfsuite'
+	report_path = name + os.path.sep + args.data.replace('/', '_')+'_report.xlsx'
+	plot_path = name + os.path.sep + args.data.split('/')[-1]+'_agesevol.png'
 
 	# Loading data
 	data = pd.read_pickle(args.data)
@@ -195,6 +169,7 @@ if __name__ == '__main__':
 		check_repetition=args.use_repetitions,
 		use_past=args.use_past,
 		use_pastact=args.use_past_actions,
+		use_pos=args.use_pos,
 	)
 
 	_, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
@@ -202,12 +177,14 @@ if __name__ == '__main__':
 	# Loading features
 	with open(features_path, 'rb') as pickle_file:
 		features_idx = pickle.load(pickle_file)
+
 	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x['prev_speaker'], x.turn_length,
 																			use_bi_grams=args.use_bi_grams,
 																			action_tokens=None if not args.use_action else x.action_tokens,
 																			repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
 																			past_tokens=None if not args.use_past else x.past,
-																			pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
+																			pastact_tokens=None if not args.use_past_actions else x.past_act,
+																			pos_tags=None if not args.use_pos else x.pos), axis=1)
 
 	# Predictions
 	tagger = pycrfsuite.Tagger()

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import sklearn
 from nltk import ngrams
 from sklearn.metrics import (
-    accuracy_score,
+    accuracy_score, classification_report, confusion_matrix, cohen_kappa_score,
 )
 from sklearn.model_selection import train_test_split
 import pycrfsuite
@@ -58,6 +58,7 @@ def argparser():
         action="store_true",
         help="whether to use action features to train the algorithm, if they are in the data",
     )
+    argparser.add_argument('--use-pos', '-pos', action='store_true', help="whether to add POS tags to features")
     argparser.add_argument(
         "--use-past",
         "-past",
@@ -94,6 +95,7 @@ def add_feature_columns(
     use_action: bool = False,
     use_past: bool = False,
     use_pastact: bool = False,
+    use_pos:bool = False,
     check_repetition: bool = False,
 ):
     """Function adding features to the data:
@@ -153,6 +155,10 @@ def add_feature_columns(
         p["past_act"] = p.apply(
             lambda x: x.prev_act if (x.file_id == x.prev_file) else [], axis=1
         )
+
+    if use_pos:
+        p['pos'] = p.pos.apply(lambda x: x.lower().split())
+
     # remove helper columns
     p = p.drop(columns=["prev_spk", "prev_st", "prev_file", "prev_act"], errors="ignore")
 
@@ -251,6 +257,8 @@ def get_features_from_row(
             [w for w in kwargs["pastact_tokens"] if (w in features["action"].keys())]
         )
 
+    if ('pos_tags' in kwargs) and (kwargs['pos_tags'] is not None):
+        feat_glob['pos'] = Counter([w for w in kwargs['pos_tags'] if (w in features['pos'].keys())])
     return feat_glob
 
 def get_n_grams(utterance, n):
@@ -272,6 +280,7 @@ def generate_features_vocabs(
     use_bi_grams: bool,
     use_action: bool,
     use_repetitions: bool,
+    use_pos: bool,
     bin_cut: int = 10,
 ) -> dict:
     """Analyse data according to arguments passed and generate features_idx dictionary. Printing log data to console."""
@@ -355,6 +364,20 @@ def generate_features_vocabs(
         for i, k in enumerate(bins[:-1]):
             print("\tlabel {}: turns of length {}-{}".format(i, k, bins[i + 1]))
 
+    if use_pos:
+        nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
+
+        pos_vocab = Counter()
+        for tags in data.pos.tolist():
+            pos_vocab.update(tags)
+
+        pos_vocab = dict(pos_vocab)
+        # filtering features
+        pos_vocab = {k: v for k, v in pos_vocab.items() if v > nb_occ}
+        # turning vocabulary into numbered features - ordered vocabulary
+        feature_vocabs['pos'] = {k: i + nb_feat for i, k in enumerate(sorted(pos_vocab.keys()))}
+        print("\nThere are {} pos tags in the features".format(len(feature_vocabs['pos'])))
+
     return feature_vocabs
 
 
@@ -417,6 +440,31 @@ def crf_predict(
     return y_pred  # else
 
 
+def bio_classification_report(y_true, y_pred):
+	"""
+	Classification report for a list of BIO-encoded sequences.
+	It computes token-level metrics and discards "O" labels.
+	Requires scikit-learn 0.20+
+
+	Output:
+	--------
+	cr: pd.DataFrame
+
+	cm: np.array
+
+	acc: float
+	"""
+	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
+	cm = confusion_matrix(y_true, y_pred, normalize='true')
+	acc = accuracy_score(y_true, y_pred, normalize = True)
+	cks = cohen_kappa_score(y_true, y_pred)
+
+	print("==> Accuracy: {0:.3f}".format(acc))
+	print("==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(cks, 1./len(set(y_true))))
+	# using both as index in case not the same labels in it
+	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc, cks
+
+
 #### MAIN
 if __name__ == "__main__":
     args = argparser()
@@ -447,6 +495,7 @@ if __name__ == "__main__":
         args.use_bi_grams,
         args.use_action,
         args.use_repetitions,
+        args.use_pos,
         bin_cut=number_segments_length_feature,
     )
 
@@ -465,6 +514,7 @@ if __name__ == "__main__":
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
             past_tokens=None if not args.use_past else x.past,
             pastact_tokens=None if not args.use_past_actions else x.past_act,
+            pos_tags=None if not args.use_pos else x.pos
         ),
         axis=1,
     )
@@ -540,6 +590,7 @@ if __name__ == "__main__":
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
             past_tokens=None if not args.use_past else x.past,
             pastact_tokens=None if not args.use_past_actions else x.past_act,
+            pos_tags=None if not args.use_pos else x.pos,
         ),
         axis=1,
     )
@@ -566,10 +617,12 @@ if __name__ == "__main__":
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
     data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
-    print(data_crf[SPEECH_ACT].tolist()[:30])
-    print(data_crf["y_pred"].tolist()[:30])
 
     acc = accuracy_score(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), normalize=True
     )
-    print(f"Accuracy on test set: {acc:.3f}")
+
+    report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())
+    pickle.dump(report.T, open("data/classification_scores_crf.p", "wb"))
+
+
