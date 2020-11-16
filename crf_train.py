@@ -70,6 +70,7 @@ def argparser():
 	argparser.add_argument('--use_past', '-past', action='store_true', help="whether to add previous sentence as features")
 	argparser.add_argument('--use_repetitions', '-rep', action='store_true', help="whether to check in data if words were repeated from previous sentence, to train the algorithm")
 	argparser.add_argument('--use_past_actions', '-pa', action='store_true', help="whether to add actions from the previous sentence to features")
+	argparser.add_argument('--use_pos', '-pos', action='store_true', help="whether to add POS tags to features")
 	argparser.add_argument('--train_percentage', type=float, default=1., help="percentage (as fraction) of data to use for training. If --conv_split_length is not set, whole conversations will be used.")
 	argparser.add_argument('--verbose', action="store_true", help="Whether to display training iterations output.")
 	# Baseline model
@@ -142,7 +143,7 @@ def openData(list_file:str, cut:int=100000, column_names:list=['all', 'ut', 'tim
 
 #### Features functions
 def data_add_features(p:pd.DataFrame, match_age:Union[str,list] = None, 
-						use_action:bool = False, use_past:bool = False, use_pastact:bool = False, 
+						use_action:bool = False, use_past:bool = False, use_pastact:bool = False, use_pos:bool = False,
 						check_repetition:bool = False):
 	"""Function adding features to the data:
 		* tokens: splitting spoken sentence into individual words
@@ -150,7 +151,7 @@ def data_add_features(p:pd.DataFrame, match_age:Union[str,list] = None,
 		* tags (if necessary): extract interchange/illocutionary from general tag
 		* action_tokens (if necessary): splitting action sentence into individual words
 		* age_months: matching age to experimental labels
-		* repeted_words:
+		* repeated_words:
 		* number of repeated words
 		* ratio of words that were repeated from previous sentence over sentence length
 	"""
@@ -182,6 +183,9 @@ def data_add_features(p:pd.DataFrame, match_age:Union[str,list] = None,
 		p['prev_act'] = p['action_tokens'].shift(1)
 		p['prev_act'].iloc[0] = p['action_tokens'].iloc[0]
 		p['past_act'] = p.apply(lambda x: x.prev_act if (x.file_id == x.prev_file) else [], axis=1)
+	if use_pos:
+		p['pos'] = p.pos.apply(lambda x: x.lower().split())
+
 	# remove useless columns
 	p = p[[col for col in p.columns if col not in ['prev_spk', 'prev_st', 'prev_file', 'prev_act']]]
 	# return Dataframe
@@ -243,7 +247,10 @@ def word_to_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kw
 	if ('pastact_tokens' in kwargs) and (kwargs['pastact_tokens'] is not None):
 		feat_glob['past_actions'] = Counter([w for w in kwargs['pastact_tokens'] if (w in features['action'].keys())])
 
+	if ('pos_tags' in kwargs) and (kwargs['pos_tags'] is not None):
+		feat_glob['pos'] = Counter([w for w in kwargs['pos_tags'] if (w in features['pos'].keys())])
 	return feat_glob
+
 
 
 def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kwargs):
@@ -301,7 +308,7 @@ def word_bs_feature(features:dict, spoken_tokens:list, speaker:str, ln:int, **kw
 	return features_full
 
 def generate_features(data:pd.DataFrame, tag:str, 
-						nb_occ:int, use_action:bool, use_repetitions:bool,
+						nb_occ:int, use_action:bool, use_repetitions:bool, use_pos:bool,
 						bin_cut:int = 10) -> dict:
 	"""Analyse data according to arguments passed and generate features_idx dictionary. Printing log data to console.
 	"""
@@ -363,7 +370,21 @@ def generate_features(data:pd.DataFrame, tag:str,
 		print("\nRepetition ratio splits: ")
 		for i,k in enumerate(bins[:-1]):
 			print("\tlabel {}: turns of length {}-{}".format(i,k, bins[i+1]))
-	
+
+	if use_pos:
+		nb_feat = max([max(v.values()) for v in features_idx.values()])
+
+		pos_vocab = Counter()
+		for tags in data.pos.tolist():
+			pos_vocab.update(tags)
+
+		pos_vocab = dict(pos_vocab)
+		# filtering features
+		pos_vocab = {k: v for k, v in pos_vocab.items() if v > nb_occ}
+		# turning vocabulary into numbered features - ordered vocabulary
+		features_idx['pos'] = {k: i+nb_feat for i, k in enumerate(sorted(pos_vocab.keys()))}
+		print("\nThere are {} pos tags in the features".format(len(features_idx['pos'])))
+
 	return features_idx
 
 ### BASELINE
@@ -425,19 +446,20 @@ if __name__ == '__main__':
 		args.use_action = args.use_action & ('action' in data_train.columns.str.lower())
 		args.use_past_actions = args.use_past_actions & args.use_action
 		data_train.rename(columns={col:col.lower() for col in data_train.columns}, inplace=True)
-		data_train = data_add_features(data_train, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
+		data_train = data_add_features(data_train, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions, use_pos=args.use_pos)
 		training_tag = [x for x in data_train.columns if 'spa_' in x][0]
 		args.training_tag = training_tag
 	
 	print("### Creating features:".upper())
-	features_idx = generate_features(data_train, training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature)
+	features_idx = generate_features(data_train, training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature, use_pos=args.use_pos)
 
 	# creating crf features set for train
-	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, 
+	data_train['features'] = data_train.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length,
 												action_tokens=None if not args.use_action else x.action_tokens, 
 												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
 												past_tokens=None if not args.use_past else x.past,
-												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
+												pastact_tokens=None if not args.use_past_actions else x.past_act,
+												pos_tags=None if not args.use_pos else x.pos), axis=1)
 
 	if args.train_percentage < 1:
 		# only take x % of the files
@@ -491,7 +513,8 @@ if __name__ == '__main__':
 		X = data_train.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
 															x.turn_length, 
 															action_tokens=None if not args.use_action else x.action_tokens, 
-															repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)
+															repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+															pos_tags=None if not args.use_pos else x.pos,
 															), axis=1)
 		y = data_train.dropna(subset=[training_tag])[training_tag].tolist()
 		weights = dict(Counter(y))
