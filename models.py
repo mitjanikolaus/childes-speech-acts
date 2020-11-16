@@ -26,7 +26,9 @@ class SpeechActLSTM(nn.Module):
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
         self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
-        self.decoder = nn.Linear(n_hidden_units*(1+context_length), label_size)
+        self.lstm_integration = LSTM(n_hidden_units, n_hidden_units, 1)
+
+        self.decoder = nn.Linear(n_hidden_units, label_size)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
@@ -43,7 +45,7 @@ class SpeechActLSTM(nn.Module):
 
         # Take last output for each sample (which depends on the sequence length)
         indices = [s - 1 for s in sequence_lengths]
-        outputs = output[indices, range(input.size(0))]
+        outputs = [output[indices, range(input.size(0))]]
 
         for context_utt, length in zip(context, sequence_lengths_context):
             context_utt = context_utt.to(device)
@@ -60,9 +62,17 @@ class SpeechActLSTM(nn.Module):
             output_context = output_context[indices, range(input.size(0))]
 
             # Append output
-            outputs = torch.cat([outputs, output_context], dim=1)
+            outputs.append(output_context)
 
-        output = self.decoder(outputs)
+        outputs = torch.stack(outputs)
+
+        #TODO experiment with either utt or context first
+        hidden_integration = self.init_hidden_integration(input.size(0))
+        output_integrated, _ = self.lstm_integration(outputs, hidden_integration)
+        output_integrated = output_integrated[-1]
+
+
+        output = self.decoder(output_integrated)
 
         return output
 
@@ -71,6 +81,13 @@ class SpeechActLSTM(nn.Module):
         return (
             parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
             parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
+        )
+
+    def init_hidden_integration(self, batch_size):
+        parameters_input = next(self.parameters())
+        return (
+            parameters_input.new_zeros(1, batch_size, self.nhid),
+            parameters_input.new_zeros(1, batch_size, self.nhid),
         )
 
 
