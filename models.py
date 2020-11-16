@@ -35,18 +35,10 @@ class SpeechActLSTM(nn.Module):
 
     def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
-        emb = self.embeddings(input)
 
-        hidden = self.init_hidden(input.size(0))
-        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
-        output, hidden = self.lstm(packed_emb, hidden)
-        output, _ = nn.utils.rnn.pad_packed_sequence(output)
-        output = self.drop(output)
+        outputs = []
 
-        # Take last output for each sample (which depends on the sequence length)
-        indices = [s - 1 for s in sequence_lengths]
-        outputs = [output[indices, range(input.size(0))]]
-
+        # Process context
         for context_utt, length in zip(context, sequence_lengths_context):
             context_utt = context_utt.to(device)
             length = length.to(device)
@@ -64,13 +56,23 @@ class SpeechActLSTM(nn.Module):
             # Append output
             outputs.append(output_context)
 
-        outputs = torch.stack(outputs)
+        # Process utterance
+        emb = self.embeddings(input)
+        hidden = self.init_hidden(input.size(0))
+        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
+        output, hidden = self.lstm(packed_emb, hidden)
+        output, _ = nn.utils.rnn.pad_packed_sequence(output)
+        output = self.drop(output)
 
-        #TODO experiment with either utt or context first
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths]
+        outputs.append(output[indices, range(input.size(0))])
+
+        # Conversation-level integration
+        outputs = torch.stack(outputs)
         hidden_integration = self.init_hidden_integration(input.size(0))
         output_integrated, _ = self.lstm_integration(outputs, hidden_integration)
         output_integrated = output_integrated[-1]
-
 
         output = self.decoder(output_integrated)
 
