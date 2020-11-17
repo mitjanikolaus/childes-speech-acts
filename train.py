@@ -46,21 +46,18 @@ def train(args):
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        # collate_fn=pad_batch,
     )
     valid_loader = DataLoader(
         dataset_val,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        # collate_fn=pad_batch,
     )
     test_loader = DataLoader(
         dataset_test,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        # collate_fn=pad_batch,
     )
     print("Loaded data.")
 
@@ -84,11 +81,7 @@ def train(args):
 
         for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
             # Move data to GPU
-            # input_samples = input_samples.to(device)
-            # input_contexts = input_contexts.to(device)
             targets = torch.tensor(targets).to(device)
-            # sequence_lengths = sequence_lengths.to(device)
-            # sequence_lengths_context = sequence_lengths_context.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
@@ -106,9 +99,6 @@ def train(args):
 
             # Update parameter weights
             optimizer.step()
-
-            # if args.model == MODEL_LSTM:
-            #     hidden = detach_hidden(hidden)
 
             if batch_id % args.log_interval == 0 and batch_id != 0:
                 cur_loss = total_loss / (args.log_interval * args.batch_size)
@@ -136,11 +126,7 @@ def train(args):
         with torch.no_grad():
             for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
                 # Move data to GPU
-                # input_samples = input_samples.to(device)
-                # input_contexts = input_contexts.to(device)
                 targets = torch.tensor(targets).to(device)
-                # sequence_lengths = sequence_lengths.to(device)
-                # sequence_lengths_context = sequence_lengths_context.to(device)
 
                 # Perform forward pass of the model
                 output = model(input_samples, targets)
@@ -222,6 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=0.001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")
+    # TODO fix: works only with batch size one at the moment
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
