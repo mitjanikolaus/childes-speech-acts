@@ -37,7 +37,7 @@ class SpeechActLSTM(nn.Module):
         # TODO use targets to train using teacher forcing
 
         sequence_lengths = [len(i) for i in input]
-        padded_inputs = pad_sequence([torch.LongTensor(i) for i in input])
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 
         emb = self.embeddings(padded_inputs)
         batch_size = emb.size(1)
