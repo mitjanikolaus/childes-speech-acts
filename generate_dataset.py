@@ -26,7 +26,6 @@ UNTRANSCRIBED = "www"
 SPEAKER_CHILD = "<chi>"
 SPEAKER_ADULT = "<adu>"
 
-
 #### Read Data functions
 def argparser():
     """Creating arparse.ArgumentParser and returning arguments"""
@@ -68,55 +67,56 @@ def build_vocabulary(data):
 
     return vocabulary
 
+def tokenize_sentence(sentence, speaker):
+    # Tokenize sentence
+    tokenized_sentence = word_tokenize(sentence)
 
-#### MAIN
+    # Prepend speaker special token
+    if speaker in ["MOT", "FAT", "INV"]:
+        tokenized_sentence = [SPEAKER_ADULT] + tokenized_sentence
+    elif speaker in ["CHI"]:
+        tokenized_sentence = [SPEAKER_CHILD] + tokenized_sentence
+    else:
+        raise RuntimeError("Unknown speaker code: ", speaker)
+
+    return tokenized_sentence
+
 if __name__ == "__main__":
     args = argparser()
     print(args)
 
     print("### Loading data:".upper())
 
-    data_train = pd.read_csv(args.input_file, sep="\t", keep_default_na=False)
-    data_train.reset_index(drop=False)
-    data_train.rename(
-        columns={col: col.lower() for col in data_train.columns}, inplace=True
+    data = pd.read_csv(args.input_file, sep="\t", keep_default_na=False)
+    data.reset_index(drop=False)
+    data.rename(
+        columns={col: col.lower() for col in data.columns}, inplace=True
     )
-    target_label = [x for x in data_train.columns if "spa_" in x][0]
-    args.training_tag = target_label
-
-    # limit number of samples for development purposes
-    # data_train = data_train.head()
+    target_label = "spa_2"
 
     tokenized_sentences = []
     ages = []
-    for i, row in tqdm(data_train.iterrows(), total=data_train.shape[0]):
-        # Tokenize sentence
-        tokenized_sentence = word_tokenize(row["sentence"])
-        # Prepend speaker special token
-        if row["speaker"] in ["MOT", "FAT", "INV"]:
-            tokenized_sentence = [SPEAKER_ADULT] + tokenized_sentence
-        elif row["speaker"] in ["CHI"]:
-            tokenized_sentence = [SPEAKER_CHILD] + tokenized_sentence
-        else:
-            raise RuntimeError("Unknown speaker code: ", row["speaker"])
-
-        tokenized_sentences.append(tokenized_sentence)
-        ages.append(row["age_months"])
+    data["tokens"] = data.apply(lambda x: tokenize_sentence(x.sentence, x.speaker), axis='columns')
 
     if args.vocab:
         vocab = pickle.load(open(args.vocab, "rb"))
     else:
         print("Building vocabulary..")
-        vocab = build_vocabulary(tokenized_sentences)
+        vocab = build_vocabulary(data["tokens"])
 
     label_vocab = dataset_labels(target_label.upper())
     pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
 
-    utterances = []
-    labels = []
-    for tokens, label in zip(tokenized_sentences, data_train[target_label].to_list()):
-        utterances.append([vocab.stoi[t] for t in tokens])
-        labels.append(label_vocab[label])
+    # Convert words and labels to indices using the respective vocabs
+    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
+    data["labels"] = data[target_label].apply(lambda l: label_vocab[l])
+
+    # Group by transcript (file name), each transcript is treated as one long input sequence
+    grouped_train = data.groupby(by=['file_id']).agg({
+        'utterances': lambda x: [y for y in x],
+        'labels': lambda x: [y for y in x],
+        'age_months': min,
+    })
 
     dataset_type = ""
     if "train" in args.input_file:
@@ -126,6 +126,6 @@ if __name__ == "__main__":
     elif "test" in args.input_file:
         dataset_type = "test"
 
-    data = pd.DataFrame(data={"utterance": utterances, "label": labels, "age": ages})
-    print(data.head())
-    data.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)
+    # data = pd.DataFrame(data={"utterance": utterances, "label": labels, "age": ages})
+    print(grouped_train.head())
+    grouped_train.to_hdf(args.out + "speech_acts_data.h5", key=dataset_type)

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor, cuda
 from torch.nn.modules.rnn import LSTM
-from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 from transformers import DistilBertModel
 
 device = "cuda" if cuda.is_available() else "cpu"
@@ -18,91 +18,110 @@ class SpeechActLSTM(nn.Module):
         n_layers,
         dropout,
         label_size,
-        context_length,
     ):
         super(SpeechActLSTM, self).__init__()
         self.ntoken = vocab_size
         self.drop = nn.Dropout(dropout)
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
-        self.lstm = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
+        self.lstm_words = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
 
-        self.lstm_integration = LSTM(n_hidden_units, n_hidden_units, 1)
+        self.lstm_utterance = LSTM(n_hidden_units, n_hidden_units, 1)
 
         self.decoder = nn.Linear(n_hidden_units, label_size)
 
         self.nhid = n_hidden_units
         self.nlayers = n_layers
 
-    def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
+    def forward(self, input: Tensor, targets: Tensor):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
+        # TODO use targets to train using teacher forcing
 
-        outputs = []
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i) for i in input])
 
-        # Process context
-        for context_utt, length in zip(context, sequence_lengths_context):
-            context_utt = context_utt.to(device)
-            length = length.to(device)
-            context_emb = self.embeddings(context_utt)
-            hidden_context = self.init_hidden(input.size(0))
-            packed_emb = pack_padded_sequence(context_emb, length, enforce_sorted=False, batch_first=True)
-            output_context, _ = self.lstm(packed_emb, hidden_context)
-            output_context, _ = nn.utils.rnn.pad_packed_sequence(output_context)
-            output_context = self.drop(output_context)
+        emb = self.embeddings(padded_inputs)
+        batch_size = emb.size(1)
+        hidden = self.init_hidden(self.nlayers, batch_size)
 
-            # Take last output for each sample (which depends on the sequence length)
-            indices = [s - 1 for s in length]
-            output_context = output_context[indices, range(input.size(0))]
-
-            # Append output
-            outputs.append(output_context)
-
-        # Process utterance
-        emb = self.embeddings(input)
-        hidden = self.init_hidden(input.size(0))
-        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
-        output, hidden = self.lstm(packed_emb, hidden)
+        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
+        output, hidden = self.lstm_words(packed_emb, hidden)
         output, _ = nn.utils.rnn.pad_packed_sequence(output)
-        output = self.drop(output)
 
         # Take last output for each sample (which depends on the sequence length)
         indices = [s - 1 for s in sequence_lengths]
-        outputs.append(output[indices, range(input.size(0))])
+        utterance_representations = output[indices, range(batch_size)]
 
-        # Conversation-level integration
-        outputs = torch.stack(outputs)
-        hidden_integration = self.init_hidden_integration(input.size(0))
-        output_integrated, _ = self.lstm_integration(outputs, hidden_integration)
-        output_integrated = output_integrated[-1]
+        hidden_utterance_lstm = self.init_hidden(1, 1)
+        outputs = []
+        for utt in utterance_representations:
+            utt = utt.unsqueeze(0).unsqueeze(0) # add batch size and sequence length dimension
+            output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
 
-        output = self.decoder(output_integrated)
+            outputs.append(self.decoder(output_utterance_level[0][0]))
 
-        return output
 
-    def init_hidden(self, batch_size):
+        return torch.stack(outputs)
+
+        # utterance_representation = []
+        #
+        # # Process context
+        # for context_utt, length in zip(context, sequence_lengths_context):
+        #     context_utt = context_utt.to(device)
+        #     length = length.to(device)
+        #     context_emb = self.embeddings(context_utt)
+        #     hidden_context = self.init_hidden(input.size(0))
+        #     packed_emb = pack_padded_sequence(context_emb, length, enforce_sorted=False, batch_first=True)
+        #     output_context, _ = self.lstm(packed_emb, hidden_context)
+        #     output_context, _ = nn.utils.rnn.pad_packed_sequence(output_context)
+        #     output_context = self.drop(output_context)
+        #
+        #     # Take last output for each sample (which depends on the sequence length)
+        #     indices = [s - 1 for s in length]
+        #     output_context = output_context[indices, range(input.size(0))]
+        #
+        #     # Append output
+        #     utterance_representation.append(output_context)
+        #
+        # # Process utterance
+        # emb = self.embeddings(input)
+        # hidden = self.init_hidden(input.size(0))
+        # packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
+        # output, hidden = self.lstm(packed_emb, hidden)
+        # output, _ = nn.utils.rnn.pad_packed_sequence(output)
+        # output = self.drop(output)
+        #
+        # # Take last output for each sample (which depends on the sequence length)
+        # indices = [s - 1 for s in sequence_lengths]
+        # utterance_representation.append(output[indices, range(input.size(0))])
+        #
+        # # Conversation-level integration
+        # utterance_representation = torch.stack(utterance_representation)
+        # hidden_integration = self.init_hidden_integration(input.size(0))
+        # output_integrated, _ = self.lstm_integration(utterance_representation, hidden_integration)
+        # output_integrated = output_integrated[-1]
+        #
+        # output = self.decoder(output_integrated)
+        #
+        # return output
+
+    def init_hidden(self, n_layers, batch_size):
         parameters_input = next(self.parameters())
         return (
-            parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
-            parameters_input.new_zeros(self.nlayers, batch_size, self.nhid),
-        )
-
-    def init_hidden_integration(self, batch_size):
-        parameters_input = next(self.parameters())
-        return (
-            parameters_input.new_zeros(1, batch_size, self.nhid),
-            parameters_input.new_zeros(1, batch_size, self.nhid),
+            parameters_input.new_zeros(n_layers, batch_size, self.nhid),
+            parameters_input.new_zeros(n_layers, batch_size, self.nhid),
         )
 
 
 class SpeechActDistilBERT(torch.nn.Module):
 
-    def __init__(self, num_classes, dropout, context_length, finetune_bert=True):
+    def __init__(self, num_classes, dropout, finetune_bert=True):
         N_UNITS_BERT_OUT = 768
 
         super(SpeechActDistilBERT, self).__init__()
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.pre_classifier = torch.nn.Linear(N_UNITS_BERT_OUT, N_UNITS_BERT_OUT)
         self.dropout = torch.nn.Dropout(dropout)
-        self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT*(1+context_length), num_classes)
+        # self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT*(1+context_length), num_classes)
 
         if not finetune_bert:
             for param in self.bert.parameters():

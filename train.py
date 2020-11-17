@@ -37,39 +37,39 @@ def train(args):
     val_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "val")
     test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
 
-    dataset_train = SpeechActsDataset(train_dataframe, context_length=args.context)
-    dataset_val = SpeechActsDataset(val_dataframe, context_length=args.context)
-    dataset_test = SpeechActsDataset(test_dataframe, context_length=args.context)
+    dataset_train = SpeechActsDataset(train_dataframe)
+    dataset_val = SpeechActsDataset(val_dataframe)
+    dataset_test = SpeechActsDataset(test_dataframe)
 
     train_loader = DataLoader(
         dataset_train,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        collate_fn=pad_batch,
+        # collate_fn=pad_batch,
     )
     valid_loader = DataLoader(
         dataset_val,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        collate_fn=pad_batch,
+        # collate_fn=pad_batch,
     )
     test_loader = DataLoader(
         dataset_test,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        collate_fn=pad_batch,
+        # collate_fn=pad_batch,
     )
     print("Loaded data.")
 
     if args.model == MODEL_LSTM:
         model = SpeechActLSTM(
-            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab), args.context
+            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
         )
     elif args.model == MODEL_TRANSFORMER:
-        model = SpeechActDistilBERT(len(label_vocab), args.dropout, args.context)
+        model = SpeechActDistilBERT(len(label_vocab), args.dropout)
     else:
         raise RuntimeError("Unknown model type: ",args.model)
 
@@ -82,19 +82,19 @@ def train(args):
         model.train()
         total_loss = 0.0
 
-        for batch_id, (input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(data_loader):
+        for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
             # Move data to GPU
-            input_samples = input_samples.to(device)
+            # input_samples = input_samples.to(device)
             # input_contexts = input_contexts.to(device)
-            targets = targets.to(device)
-            sequence_lengths = sequence_lengths.to(device)
+            targets = torch.tensor(targets).to(device)
+            # sequence_lengths = sequence_lengths.to(device)
             # sequence_lengths_context = sequence_lengths_context.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
 
             # Perform forward pass of the model
-            output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
+            output = model(input_samples, targets)
 
             # Calculate loss
             loss = criterion(output, targets)
@@ -133,21 +133,17 @@ def train(args):
         total_loss = 0.0
         num_samples = 0
         num_correct = 0
-        if args.model == MODEL_LSTM:
-            hidden = model.init_hidden(args.batch_size)
         with torch.no_grad():
-            for batch_id, (
-            input_samples, input_contexts, targets, sequence_lengths, sequence_lengths_context, ages) in enumerate(
-                    data_loader):
+            for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
                 # Move data to GPU
-                input_samples = input_samples.to(device)
+                # input_samples = input_samples.to(device)
                 # input_contexts = input_contexts.to(device)
-                targets = targets.to(device)
-                sequence_lengths = sequence_lengths.to(device)
+                targets = torch.tensor(targets).to(device)
+                # sequence_lengths = sequence_lengths.to(device)
                 # sequence_lengths_context = sequence_lengths_context.to(device)
 
                 # Perform forward pass of the model
-                output = model(input_samples, input_contexts, sequence_lengths, sequence_lengths_context)
+                output = model(input_samples, targets)
 
                 # Calculate loss
                 loss = criterion(output, targets)
@@ -217,9 +213,6 @@ if __name__ == "__main__":
         help="model architecture",
     )
     parser.add_argument(
-        "--context", type=int, default=0, help="Number of previous utterances that are provided as features"
-    )
-    parser.add_argument(
         "--emsize", type=int, default=300, help="size of word embeddings"
     )
     parser.add_argument(
@@ -230,7 +223,7 @@ if __name__ == "__main__":
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")
     parser.add_argument(
-        "--batch-size", type=int, default=50, metavar="N", help="batch size"
+        "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
     parser.add_argument(
         "--dropout",
