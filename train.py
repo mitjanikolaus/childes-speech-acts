@@ -9,7 +9,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from dataset import SpeechActsDataset, pad_batch
+from dataset import SpeechActsDataset
 from models import SpeechActLSTM, SpeechActDistilBERT
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -63,7 +63,7 @@ def train(args):
 
     if args.model == MODEL_LSTM:
         model = SpeechActLSTM(
-            len(vocab), args.emsize, args.nhid, args.nlayers, args.dropout, len(label_vocab)
+            len(vocab), args.emsize, args.nhid_words_lstm, args.nhid_utterance_lstm, args.nlayers, args.dropout, len(label_vocab)
         )
     elif args.model == MODEL_TRANSFORMER:
         model = SpeechActDistilBERT(len(label_vocab), args.dropout)
@@ -200,9 +200,13 @@ if __name__ == "__main__":
         "--emsize", type=int, default=300, help="size of word embeddings"
     )
     parser.add_argument(
-        "--nhid", type=int, default=200, help="number of hidden units per layer"
+        "--nhid-words-lstm", type=int, default=200, help="number of hidden units of the lower-level LSTM"
     )
-    parser.add_argument("--nlayers", type=int, default=2, help="number of layers")
+    parser.add_argument(
+        "--nhid-utterance-lstm", type=int, default=200, help="number of hidden units of the higher-level LSTM"
+    )
+
+    parser.add_argument("--nlayers", type=int, default=2, help="number of layers of the lower-level LSTM")
     parser.add_argument("--lr", type=float, default=0.001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")

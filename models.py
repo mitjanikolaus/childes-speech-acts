@@ -14,8 +14,9 @@ class SpeechActLSTM(nn.Module):
         self,
         vocab_size,
         n_input_layer_units,
-        n_hidden_units,
-        n_layers,
+        n_hidden_units_words_lstm,
+        n_hidden_units_utterance_lstm,
+        n_layers_words_lstm,
         dropout,
         label_size,
     ):
@@ -23,14 +24,15 @@ class SpeechActLSTM(nn.Module):
         self.ntoken = vocab_size
         self.drop = nn.Dropout(dropout)
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
-        self.lstm_words = LSTM(n_input_layer_units, n_hidden_units, n_layers, dropout=dropout)
+        self.lstm_words = LSTM(n_input_layer_units, n_hidden_units_words_lstm, n_layers_words_lstm, dropout=dropout)
 
-        self.lstm_utterance = LSTM(n_hidden_units, n_hidden_units, 1)
+        self.lstm_utterance = LSTM(n_hidden_units_words_lstm, n_hidden_units_utterance_lstm, 1)
 
-        self.decoder = nn.Linear(n_hidden_units, label_size)
+        self.decoder = nn.Linear(n_hidden_units_utterance_lstm, label_size)
 
-        self.nhid = n_hidden_units
-        self.nlayers = n_layers
+        self.n_hidden_units_utterance_lstm = n_hidden_units_utterance_lstm
+        self.n_hidden_units_words_lstm = n_hidden_units_words_lstm
+        self.n_layers_words_lstm = n_layers_words_lstm
 
     def forward(self, input: Tensor, targets: Tensor):
         # Expected input dimensions: (batch_size, sequence_length, number_of_features)
@@ -41,7 +43,7 @@ class SpeechActLSTM(nn.Module):
 
         emb = self.embeddings(padded_inputs)
         batch_size = emb.size(1)
-        hidden = self.init_hidden(self.nlayers, batch_size)
+        hidden = self.init_hidden(self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm)
 
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
         output, hidden = self.lstm_words(packed_emb, hidden)
@@ -51,7 +53,7 @@ class SpeechActLSTM(nn.Module):
         indices = [s - 1 for s in sequence_lengths]
         utterance_representations = output[indices, range(batch_size)]
 
-        hidden_utterance_lstm = self.init_hidden(1, 1)
+        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
         outputs = []
         for utt in utterance_representations:
             utt = utt.unsqueeze(0).unsqueeze(0) # add batch size and sequence length dimension
@@ -62,53 +64,11 @@ class SpeechActLSTM(nn.Module):
 
         return torch.stack(outputs)
 
-        # utterance_representation = []
-        #
-        # # Process context
-        # for context_utt, length in zip(context, sequence_lengths_context):
-        #     context_utt = context_utt.to(device)
-        #     length = length.to(device)
-        #     context_emb = self.embeddings(context_utt)
-        #     hidden_context = self.init_hidden(input.size(0))
-        #     packed_emb = pack_padded_sequence(context_emb, length, enforce_sorted=False, batch_first=True)
-        #     output_context, _ = self.lstm(packed_emb, hidden_context)
-        #     output_context, _ = nn.utils.rnn.pad_packed_sequence(output_context)
-        #     output_context = self.drop(output_context)
-        #
-        #     # Take last output for each sample (which depends on the sequence length)
-        #     indices = [s - 1 for s in length]
-        #     output_context = output_context[indices, range(input.size(0))]
-        #
-        #     # Append output
-        #     utterance_representation.append(output_context)
-        #
-        # # Process utterance
-        # emb = self.embeddings(input)
-        # hidden = self.init_hidden(input.size(0))
-        # packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False, batch_first=True)
-        # output, hidden = self.lstm(packed_emb, hidden)
-        # output, _ = nn.utils.rnn.pad_packed_sequence(output)
-        # output = self.drop(output)
-        #
-        # # Take last output for each sample (which depends on the sequence length)
-        # indices = [s - 1 for s in sequence_lengths]
-        # utterance_representation.append(output[indices, range(input.size(0))])
-        #
-        # # Conversation-level integration
-        # utterance_representation = torch.stack(utterance_representation)
-        # hidden_integration = self.init_hidden_integration(input.size(0))
-        # output_integrated, _ = self.lstm_integration(utterance_representation, hidden_integration)
-        # output_integrated = output_integrated[-1]
-        #
-        # output = self.decoder(output_integrated)
-        #
-        # return output
-
-    def init_hidden(self, n_layers, batch_size):
+    def init_hidden(self, n_layers, batch_size, n_hidden_units):
         parameters_input = next(self.parameters())
         return (
-            parameters_input.new_zeros(n_layers, batch_size, self.nhid),
-            parameters_input.new_zeros(n_layers, batch_size, self.nhid),
+            parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
+            parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
         )
 
 
