@@ -87,10 +87,10 @@ def train(args):
             optimizer.zero_grad()
 
             # Perform forward pass of the model
-            output = model(input_samples, targets)
+            loss = model(input_samples, targets)
 
             # Calculate loss
-            loss = criterion(output, targets)
+            # loss = criterion(output, targets)
             total_loss += loss.item()
             loss.backward()
 
@@ -129,14 +129,14 @@ def train(args):
                 targets = torch.tensor(targets).to(device)
 
                 # Perform forward pass of the model
-                output = model(input_samples, targets)
-
+                predicted_labels = model.forward_decode(input_samples)
+                predicted_labels = torch.tensor(predicted_labels)
                 # Calculate loss
-                loss = criterion(output, targets)
-                total_loss += loss.item()
+                # loss = criterion(output, targets)
+                # total_loss += loss.item()
 
                 # Compare predicted labels to ground truth
-                predicted_labels = torch.argmax(output, dim=1)
+                # predicted_labels = torch.argmax(output, dim=1)
                 num_correct += int(torch.sum(predicted_labels == targets))
                 num_samples += len(input_samples)
 
