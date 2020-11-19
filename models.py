@@ -27,9 +27,9 @@ class SpeechActLSTM(nn.Module):
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
         self.lstm_words = LSTM(n_input_layer_units, n_hidden_units_words_lstm, n_layers_words_lstm, dropout=dropout)
 
-        # self.lstm_utterance = LSTM(n_hidden_units_words_lstm, n_hidden_units_utterance_lstm, 1)
+        self.lstm_utterance = LSTM(n_hidden_units_words_lstm, n_hidden_units_utterance_lstm, 1)
 
-        self.decoder = nn.Linear(n_hidden_units_words_lstm, label_size)
+        self.decoder = nn.Linear(n_hidden_units_utterance_lstm, label_size)
 
         self.crf = CRF(label_size)
 
@@ -37,7 +37,7 @@ class SpeechActLSTM(nn.Module):
         self.n_hidden_units_words_lstm = n_hidden_units_words_lstm
         self.n_layers_words_lstm = n_layers_words_lstm
 
-    def forward(self, input: Tensor, targets: Tensor):
+    def forward(self, input, targets):
         # TODO use targets to train using teacher forcing
 
         sequence_lengths = [len(i) for i in input]
@@ -55,9 +55,17 @@ class SpeechActLSTM(nn.Module):
         indices = [s - 1 for s in sequence_lengths]
         utterance_representations = output[indices, range(batch_size)]
 
-        decoded = self.decoder(utterance_representations)
+        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+        outputs = []
+        for utt in utterance_representations:
+            utt = utt.unsqueeze(0).unsqueeze(0) # add batch size and sequence length dimension
+            output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
 
-        decoded = decoded.unsqueeze(1)
+            outputs.append(self.decoder(output_utterance_level[0][0]))
+
+        outputs = torch.stack(outputs)
+
+        decoded = outputs.unsqueeze(1)
         targets = targets.unsqueeze(1)
 
         log_likelihood = self.crf(decoded, targets)
@@ -66,18 +74,9 @@ class SpeechActLSTM(nn.Module):
 
         return loss
 
-        # hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
-        # outputs = []
-        # for utt in utterance_representations:
-        #     utt = utt.unsqueeze(0).unsqueeze(0) # add batch size and sequence length dimension
-        #     output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
-        #
-        #     outputs.append(self.decoder(output_utterance_level[0][0]))
-
-
         # return torch.stack(outputs)
 
-    def forward_decode(self,  input: Tensor):
+    def forward_decode(self,  input):
         # TODO use targets to train using teacher forcing
 
         sequence_lengths = [len(i) for i in input]
@@ -95,9 +94,17 @@ class SpeechActLSTM(nn.Module):
         indices = [s - 1 for s in sequence_lengths]
         utterance_representations = output[indices, range(batch_size)]
 
-        decoded = self.decoder(utterance_representations)
+        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+        outputs = []
+        for utt in utterance_representations:
+            utt = utt.unsqueeze(0).unsqueeze(0)  # add batch size and sequence length dimension
+            output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
 
-        decoded = decoded.unsqueeze(1)
+            outputs.append(self.decoder(output_utterance_level[0][0]))
+
+        outputs = torch.stack(outputs)
+
+        decoded = outputs.unsqueeze(1)
 
         labels = self.crf.decode(decoded)
 
