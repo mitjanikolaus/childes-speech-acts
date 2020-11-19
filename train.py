@@ -142,7 +142,7 @@ def train(args):
         return total_loss / num_samples, num_correct / num_samples
 
     # Loop over epochs.
-    best_val_loss = None
+    best_val_acc = None
 
     try:
         for epoch in range(1, args.epochs + 1):
@@ -156,10 +156,10 @@ def train(args):
             )
             print("-" * 89)
             # Save the model if the validation loss is the best we've seen so far.
-            if not best_val_loss or val_loss < best_val_loss:
+            if not best_val_acc or val_accuracy < best_val_acc:
                 with open(args.save, "wb") as f:
                     torch.save(model, f)
-                best_val_loss = val_loss
+                best_val_acc = val_accuracy
 
     except KeyboardInterrupt:
         print("-" * 89)
