@@ -129,7 +129,7 @@ def train(args):
 
                 # Perform forward pass of the model
                 predicted_labels = model.forward_decode(input_samples)
-                predicted_labels = torch.tensor(predicted_labels)
+                predicted_labels = torch.tensor(predicted_labels).to(device)
                 # Calculate loss
                 # loss = criterion(output, targets)
                 # total_loss += loss.item()
