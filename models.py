@@ -62,7 +62,9 @@ class SpeechActLSTM(nn.Module):
 
         log_likelihood = self.crf(decoded, targets)
 
-        return log_likelihood
+        loss = -log_likelihood / len(input)
+
+        return loss
 
         # hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
         # outputs = []

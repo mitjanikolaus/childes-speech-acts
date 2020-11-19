@@ -72,7 +72,6 @@ def train(args):
 
     model.to(device)
 
-    criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     def train_epoch(data_loader, epoch):
