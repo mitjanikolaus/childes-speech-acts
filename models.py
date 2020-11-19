@@ -68,9 +68,9 @@ class SpeechActLSTM(nn.Module):
         decoded = outputs.unsqueeze(1)
         targets = targets.unsqueeze(1)
 
-        log_likelihood = self.crf(decoded, targets)
+        log_likelihood = self.crf.forward(decoded, targets, reduction="token_mean")
 
-        loss = -log_likelihood / len(input)
+        loss = -log_likelihood
 
         return loss
 
