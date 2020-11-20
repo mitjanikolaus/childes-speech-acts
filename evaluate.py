@@ -61,11 +61,10 @@ def test(args):
                 targets = torch.tensor(targets).to(device)
 
                 # Perform forward pass of the model
-                output = model(input_samples, targets)
+                predicted_labels = model.forward_decode(input_samples)
+                predicted_labels = torch.tensor(predicted_labels).to(device)
 
                 # Compare predicted labels to ground truth
-                predicted_labels = torch.argmax(output, dim=1)
-
                 speaker_is_child += [True if x[0] == vocab.stoi[SPEAKER_CHILD] else False for x in input_samples]
                 all_true_labels += targets.tolist()
                 all_predicted_labels += predicted_labels.tolist()
