@@ -1,4 +1,5 @@
 import argparse
+import os
 import pickle
 
 import numpy as np
@@ -35,7 +36,7 @@ def test(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    data = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
+    data = pd.read_hdf(args.data + os.sep + args.corpus, "test")
 
     dataset_test = SpeechActsDataset(data)
 
@@ -134,6 +135,12 @@ if __name__ == "__main__":
         type=str,
         default="data/",
         help="location of the data corpus and vocabs",
+    )
+    parser.add_argument(
+        "--corpus",
+        type=str,
+        default="speech_acts_data_newengland.h5",
+        help="name of the corpus file",
     )
     # TODO fix: works only with batch size one at the moment
     parser.add_argument(

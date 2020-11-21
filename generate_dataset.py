@@ -74,7 +74,7 @@ def tokenize_sentence(sentence, speaker):
     # Prepend speaker special token
     if speaker in ["MOT", "FAT", "INV"]:
         tokenized_sentence = [SPEAKER_ADULT] + tokenized_sentence
-    elif speaker in ["CHI"]:
+    elif speaker in ["CHI", "AMY"]:
         tokenized_sentence = [SPEAKER_CHILD] + tokenized_sentence
     else:
         raise RuntimeError("Unknown speaker code: ", speaker)
