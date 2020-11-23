@@ -36,7 +36,7 @@ def test(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    data = pd.read_hdf(args.data + os.sep + args.corpus, "test")
+    data = pd.read_hdf(args.data + args.corpus, "test")
 
     dataset_test = SpeechActsDataset(data)
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="data",
+        default="data/",
         help="location of the data corpus and vocabs",
     )
     parser.add_argument(

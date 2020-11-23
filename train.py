@@ -34,9 +34,9 @@ def train(args):
     vocab = pickle.load(open(args.data + "vocab.p", "rb"))
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
-    train_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "train")
-    val_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "val")
-    test_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "test")
+    train_dataframe = pd.read_hdf(args.data + args.corpus, "train")
+    val_dataframe = pd.read_hdf(args.data + args.corpus, "val")
+    test_dataframe = pd.read_hdf(args.data + args.corpus, "test")
 
     dataset_train = SpeechActsDataset(train_dataframe)
     dataset_val = SpeechActsDataset(val_dataframe)
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="./data",
+        default="./data/",
         help="location of the data corpus and vocabs",
     )
     parser.add_argument(
