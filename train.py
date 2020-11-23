@@ -1,6 +1,7 @@
 """Training routine for LSTM and Transformer"""
 
 import argparse
+import os
 import pickle
 
 import pandas as pd
@@ -33,9 +34,9 @@ def train(args):
     vocab = pickle.load(open(args.data + "vocab.p", "rb"))
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
-    train_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "train")
-    val_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "val")
-    test_dataframe = pd.read_hdf(args.data + "speech_acts_data.h5", "test")
+    train_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "train")
+    val_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "val")
+    test_dataframe = pd.read_hdf(args.data + os.sep + args.corpus, "test")
 
     dataset_train = SpeechActsDataset(train_dataframe)
     dataset_val = SpeechActsDataset(val_dataframe)
@@ -187,6 +188,12 @@ if __name__ == "__main__":
         type=str,
         default="./data/",
         help="location of the data corpus and vocabs",
+    )
+    parser.add_argument(
+        "--corpus",
+        type=str,
+        default="speech_acts_data_newengland.h5",
+        help="name of the corpus file",
     )
     parser.add_argument(
         "--model",
