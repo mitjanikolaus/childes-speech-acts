@@ -39,6 +39,9 @@ def argparser():
         "--vocab", "-v", required=False, help="path to existing vocab file"
     )
     argparser.add_argument(
+        "--label-vocab", required=False, help="path to existing label vocab file"
+    )
+    argparser.add_argument(
         "--min-label-frequency", type=int, default=100, help="Minimum frequency to include label in vocab"
     )
     # Operations on data
@@ -117,13 +120,20 @@ if __name__ == "__main__":
         print("Building vocabulary..")
         vocab = build_vocabulary(data["tokens"])
 
-    # Filter labels and replace all low frequent label names with UNK
-    filtered_labels = filter_labels(data[target_label], args.min_label_frequency)
-    filtered_labels.append("UNK")
-    data["labels"] = data[target_label].apply(lambda l: l if l in filtered_labels else "UNK")
+    if args.label_vocab:
+        label_vocab = pickle.load(open(args.label_vocab, "rb"))
 
-    label_vocab = bidict({label: i for i, label in enumerate(filtered_labels)})
-    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+    else:
+        print("Building label vocabulary..")
+
+        # Filter labels and replace all low frequent label names with UNK
+        filtered_labels = filter_labels(data[target_label], args.min_label_frequency)
+        filtered_labels.append("UNK")
+
+        label_vocab = bidict({label: i for i, label in enumerate(filtered_labels)})
+        pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+
+    data["labels"] = data[target_label].apply(lambda l: l if l in label_vocab.keys() else "UNK")
 
     # Convert words and labels to indices using the respective vocabs
     data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
