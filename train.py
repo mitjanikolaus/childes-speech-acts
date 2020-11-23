@@ -186,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="./data/",
+        default="./data",
         help="location of the data corpus and vocabs",
     )
     parser.add_argument(
