@@ -24,10 +24,12 @@ import sklearn
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 import pycrfsuite
 
+import seaborn as sns
+
 ### Tag functions
 from sklearn.model_selection import KFold
 
-from utils import dataset_labels
+from utils import dataset_labels, ILLOC
 from crf_train import openData, data_add_features, word_to_feature, word_bs_feature, generate_features
 from crf_test import bio_classification_report, report_to_file, crf_predict
 
@@ -86,9 +88,18 @@ if __name__ == '__main__':
 	
 	logger = {} # Dictionary containing results
 	freport = {} # Dictionary containing reports
+	counters = {}
 	name = os.path.join(os.getcwd(),('' if args.out is None else args.out), 
 				'_'.join([ x for x in [os.path.basename(__file__).replace('.py',''), training_tag, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')] if x ])) # Location for weight save
 	os.mkdir(name)
+
+	# Gather ground-truth label distributions:
+	counts = Counter(data[training_tag])
+	observed_labels = [k for k in ILLOC.Name.keys() if counts[k] > 1000]
+	counters["gold"] = dict.fromkeys(observed_labels)
+	counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
+	for k in counters["gold"].keys():
+		counters["gold"][k] /= len(data)
 
 	# Split data
 	kf = KFold(n_splits=args.num_splits, random_state=0)
@@ -168,6 +179,23 @@ if __name__ == '__main__':
 		logger[i] = acc
 		freport[i] = {'report':report, 'cm':mat}
 
+		counts = Counter(data_crf["y_pred"].tolist())
+		counters[i] = dict.fromkeys(observed_labels)
+		counters[i].update((k, counts[k]) for k in counts.keys() & observed_labels)
+		for k in counters[i].keys():
+			if counters[i][k]:
+				counters[i][k] /= len(data_crf)
+			else:
+				counters[i][k] = 0
+
+	labels = observed_labels * (args.num_splits + 1)
+	splits = np.concatenate([[str(i)] * len(counters[0])  for i in counters.keys()]) # [str(i) for i in counters.keys()] * len(counters[0])
+	counts = np.concatenate([list(counter.values()) for counter in counters.values()])
+	df = pd.DataFrame(zip(labels, splits, counts), columns=["speech_act", "split", "frequency"])
+	plt.figure(figsize=(10, 6))
+	sns.barplot(x="speech_act", hue="split", y="frequency", data=df)
+	plt.show()
+
 	train_per = pd.Series(logger, name='acc_over_train_percentage')
 
 	report_to_file({ 
@@ -183,4 +211,4 @@ if __name__ == '__main__':
 	# plotting training curves
 	plot_training(train_per, os.path.join(name, 'percentage_evolution'))
 
-	print("Average accuracy over all splits: ", np.average(logger))
+	print("Average accuracy over all splits: ", np.average(list(logger.values())))
