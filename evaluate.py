@@ -5,15 +5,19 @@ import pickle
 import numpy as np
 import torch
 import pandas as pd
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
+from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, plot_confusion_matrix
 from torch.utils.data import DataLoader
 
+import matplotlib.pyplot as plt
+
 from dataset import SpeechActsDataset
-from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD
+from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD, UNKNOWN
 from models import SpeechActLSTM
+from utils import ILLOC
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+PUNCTUATION = [".","!","?"]
 
 def get_words(indices, vocab):
     return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
@@ -65,7 +69,6 @@ def test(args):
                 predicted_labels = model.forward_decode(input_samples)
                 predicted_labels = torch.tensor(predicted_labels).to(device)
 
-                # Compare predicted labels to ground truth
                 speaker_is_child += [True if x[0] == vocab.stoi[SPEAKER_CHILD] else False for x in input_samples]
                 all_true_labels += targets.tolist()
                 all_predicted_labels += predicted_labels.tolist()
@@ -79,7 +82,7 @@ def test(args):
                             )
 
 
-        acc = sum([p == l for p, l in zip(all_predicted_labels, all_true_labels)]) / len(all_true_labels)
+        acc = int(sum([p == l for p, l in zip(all_predicted_labels, all_true_labels)])) / len(all_true_labels)
         print("=" * 89)
         print("Test acc: {:5.2f}".format(acc))
 
@@ -96,27 +99,50 @@ def test(args):
         print("=" * 89)
 
         if args.verbose:
-            all_ages = [age_bin(age) for age in all_ages]
-            for age in [14, 20, 32]:
-                print(f"Stats for age: {age} months")
-                true_labels = [l for l, a in zip(all_true_labels, all_ages) if a == age]
-                predicted_labels = [l for l, a in zip(all_predicted_labels, all_ages) if a == age]
+            # all_ages = [age_bin(age) for age in all_ages]
+            # for age in [14, 20, 32]:
+            #     print(f"Stats for age: {age} months")
+            #     true_labels = [l for l, a in zip(all_true_labels, all_ages) if a == age]
+            #     predicted_labels = [l for l, a in zip(all_predicted_labels, all_ages) if a == age]
+            predicted_labels = all_predicted_labels
+            true_labels = all_true_labels
 
-                correct = np.equal(true_labels, predicted_labels).sum()
-                total = len(true_labels)
-                print("Acc: {:5.2f}".format(correct/total))
-                print("#Samples: ",total)
+            correct = np.equal(true_labels, predicted_labels).sum()
+            total = len(true_labels)
+            print("Acc: {:5.2f}".format(correct/total))
+            print("#Samples: ",total)
 
-                labels = label_vocab.keys()
-                label_indices = [label_vocab[l] for l in labels]
+            labels = label_vocab.keys()
+            label_indices = [label_vocab[l] for l in labels]
 
-                cm = confusion_matrix(true_labels, predicted_labels, normalize='true')
-                print(cm)
+            cm = confusion_matrix(true_labels, predicted_labels, normalize='true', labels=list(label_vocab.values()))
 
-                kappa = cohen_kappa_score(true_labels, predicted_labels)
-                print("cohen's kappa: ", kappa)
-                report = classification_report(true_labels, predicted_labels,  labels=label_indices, target_names=labels)
-                print(report)
+            for label_idx in label_vocab.inverse.keys():
+                confusions = [label_vocab.inverse[i] for i in np.where(cm[label_idx] > .3)[0] if i != label_idx]
+                label = label_vocab.inverse[label_idx]
+                if confusions:
+                    print(f"{label} ({ILLOC.Description[label]}) is confused with:")
+                    for confusion in confusions:
+                        print(confusion, ILLOC.Description[confusion])
+                    print("")
+
+
+
+            fig, ax = plt.subplots(1, 1)
+            ax.imshow(cm, cmap='binary', interpolation='None')
+            ax.set_xticks(np.arange(len(label_vocab)))
+            ax.set_xticklabels(label_vocab.keys())
+            ax.set_yticks(np.arange(len(label_vocab)))
+            ax.set_yticklabels(label_vocab.keys())
+            plt.xticks(rotation=90)
+            plt.grid()
+            plt.show()
+
+
+            kappa = cohen_kappa_score(true_labels, predicted_labels)
+            print("cohen's kappa: ", kappa)
+            report = classification_report(true_labels, predicted_labels,  labels=label_indices, target_names=labels)
+            print(report)
 
 
     # Load the saved model checkpoint.
