@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
+from scipy.stats import entropy
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 import pycrfsuite
 
@@ -95,7 +96,7 @@ if __name__ == '__main__':
 
 	# Gather ground-truth label distributions:
 	counts = Counter(data[training_tag])
-	observed_labels = [k for k in ILLOC.Name.keys() if counts[k] > 1000]
+	observed_labels = [k for k in ILLOC.Name.keys() if counts[k] > 100]
 	counters["gold"] = dict.fromkeys(observed_labels)
 	counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
 	for k in counters["gold"].keys():
@@ -189,12 +190,16 @@ if __name__ == '__main__':
 				counters[i][k] = 0
 
 	labels = observed_labels * (args.num_splits + 1)
-	splits = np.concatenate([[str(i)] * len(counters[0])  for i in counters.keys()]) # [str(i) for i in counters.keys()] * len(counters[0])
+	splits = np.concatenate([[str(i)] * len(observed_labels) for i in counters.keys()])
 	counts = np.concatenate([list(counter.values()) for counter in counters.values()])
 	df = pd.DataFrame(zip(labels, splits, counts), columns=["speech_act", "split", "frequency"])
 	plt.figure(figsize=(10, 6))
 	sns.barplot(x="speech_act", hue="split", y="frequency", data=df)
 	plt.show()
+
+	for i in range(args.num_splits):
+		kl_divergence = entropy(list(counters[i].values()), qk=list(counters["gold"].values()))
+		print(f"KL Divergence for results of split {i}: {kl_divergence:.3f}")
 
 	train_per = pd.Series(logger, name='acc_over_train_percentage')
 
