@@ -36,6 +36,8 @@ import json
 from typing import Union, Tuple
 
 import re
+
+import nltk
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -155,7 +157,7 @@ def data_add_features(p:pd.DataFrame, match_age:Union[str,list] = None,
 		* ratio of words that were repeated from previous sentence over sentence length
 	"""
 	# sentence: using tokens to count & all
-	p['tokens'] = p.sentence.apply(lambda x: x.lower().split())
+	p['tokens'] = p.sentence.apply(lambda x: nltk.word_tokenize(x))
 	p['turn_length'] = p.tokens.apply(len)
 	# action: creating action tokens
 	if use_action:
