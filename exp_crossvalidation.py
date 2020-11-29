@@ -95,12 +95,15 @@ if __name__ == '__main__':
 	os.mkdir(name)
 
 	# Gather ground-truth label distributions:
-	counts = Counter(data[training_tag])
+	data_children = data[data.speaker == "CHI"]
+	counts = Counter(data_children[training_tag])
 	observed_labels = [k for k in ILLOC.Name.keys() if counts[k] > 100]
 	counters["gold"] = dict.fromkeys(observed_labels)
 	counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
 	for k in counters["gold"].keys():
-		counters["gold"][k] /= len(data)
+		counters["gold"][k] /= len(data_children)
+
+	counts_predicted = Counter()
 
 	# Split data
 	kf = KFold(n_splits=args.num_splits, random_state=0)
@@ -114,7 +117,7 @@ if __name__ == '__main__':
 		data_test = data[data['file_id'].isin(test_files)]
 
 		print(f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: ")
-		nm = os.path.join(name, f"permutation_{i}%")
+		nm = os.path.join(name, f"permutation_{i}")
 
 		# generating features
 		features_idx = generate_features(data_train, training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature)
@@ -180,16 +183,22 @@ if __name__ == '__main__':
 		logger[i] = acc
 		freport[i] = {'report':report, 'cm':mat}
 
-		counts = Counter(data_crf["y_pred"].tolist())
-		counters[i] = dict.fromkeys(observed_labels)
-		counters[i].update((k, counts[k]) for k in counts.keys() & observed_labels)
-		for k in counters[i].keys():
-			if counters[i][k]:
-				counters[i][k] /= len(data_crf)
-			else:
-				counters[i][k] = 0
+		# Filter for children's utterances
+		data_crf_children = data_crf[data_crf.speaker == "CHI"]
 
-	labels = observed_labels * (args.num_splits + 1)
+		counts = Counter(data_crf_children["y_pred"].tolist())
+		counts_predicted.update(counts)
+
+	counters["pred"] = dict.fromkeys(observed_labels)
+	counters["pred"].update((k, counts_predicted[k]) for k in counts_predicted.keys() & observed_labels)
+
+	for k in counters["pred"].keys():
+		if counters["pred"][k]:
+			counters["pred"][k] /= len(data_children)
+		else:
+			counters["pred"][k] = 0
+
+	labels = observed_labels * 2
 	splits = np.concatenate([[str(i)] * len(observed_labels) for i in counters.keys()])
 	counts = np.concatenate([list(counter.values()) for counter in counters.values()])
 	df = pd.DataFrame(zip(labels, splits, counts), columns=["speech_act", "split", "frequency"])
@@ -197,9 +206,8 @@ if __name__ == '__main__':
 	sns.barplot(x="speech_act", hue="split", y="frequency", data=df)
 	plt.show()
 
-	for i in range(args.num_splits):
-		kl_divergence = entropy(list(counters[i].values()), qk=list(counters["gold"].values()))
-		print(f"KL Divergence for results of split {i}: {kl_divergence:.3f}")
+	kl_divergence = entropy(list(counters["pred"].values()), qk=list(counters["gold"].values()))
+	print(f"KL Divergence: {kl_divergence:.3f}")
 
 	train_per = pd.Series(logger, name='acc_over_train_percentage')
 
