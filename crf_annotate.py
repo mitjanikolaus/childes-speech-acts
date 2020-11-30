@@ -132,6 +132,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(zip(labels, source, counts), columns=["speech_act", "source", "frequency"])
     plt.figure(figsize=(10, 6))
     sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
+    plt.title(f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}")
     plt.show()
 
     #
