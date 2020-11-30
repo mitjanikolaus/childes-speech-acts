@@ -33,7 +33,7 @@ def age_bin(age):
 
 
 def test(args):
-    print("Start training with args: ", args)
+    print("Start evaluation with args: ", args)
     print("Device: ", device)
     # Load data
     vocab = pickle.load(open(args.data + "vocab.p", "rb"))

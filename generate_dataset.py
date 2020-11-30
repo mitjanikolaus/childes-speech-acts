@@ -67,17 +67,25 @@ def build_vocabulary(data):
 
     return vocabulary
 
+def preprend_speaker_token(tokens, speaker):
+    """Prepend speaker special token"""
+    if speaker in ["MOT", "FAT", "INV"]:
+        tokens = [SPEAKER_ADULT] + tokens
+    elif speaker in ["CHI", "AMY"]:
+        tokens = [SPEAKER_CHILD] + tokens
+    else:
+        raise RuntimeError("Unknown speaker code: ", speaker)
+
+    return tokens
+
+
+
+
 def tokenize_sentence(sentence, speaker):
     # Tokenize sentence
     tokenized_sentence = word_tokenize(sentence)
 
-    # Prepend speaker special token
-    if speaker in ["MOT", "FAT", "INV"]:
-        tokenized_sentence = [SPEAKER_ADULT] + tokenized_sentence
-    elif speaker in ["CHI", "AMY"]:
-        tokenized_sentence = [SPEAKER_CHILD] + tokenized_sentence
-    else:
-        raise RuntimeError("Unknown speaker code: ", speaker)
+    tokenized_sentence = preprend_speaker_token(tokenized_sentence)
 
     return tokenized_sentence
 

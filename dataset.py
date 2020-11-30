@@ -22,4 +22,10 @@ class SpeechActsDataset(Dataset):
         return self.len
 
 
+class SpeechActsTestDataset(SpeechActsDataset):
 
+    def __getitem__(self, index):
+        utterances = self.data.utterances.iloc[index]
+        sequence_length = len(utterances)
+
+        return utterances, sequence_length
