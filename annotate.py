@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 import seaborn as sns
 
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from dataset import SpeechActsDataset, SpeechActsTestDataset
 from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD, UNKNOWN, preprend_speaker_token
@@ -36,7 +37,6 @@ def annotate(args):
         lambda x: "CHI" if x == "Target_Child" else "MOT"
     )
 
-    # TODO check why punctuation is missing
     data["tokens"] = data.apply(lambda row: preprend_speaker_token(row["tokens"], row["speaker"]), axis=1)
     data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
 
@@ -59,7 +59,7 @@ def annotate(args):
         all_predicted_labels = []
         speaker_is_child = []
         with torch.no_grad():
-            for batch_id, (input_samples, sequence_lengths) in enumerate(data_loader):
+            for batch_id, (input_samples, sequence_lengths) in tqdm(enumerate(data_loader), total=len(data_loader)):
 
                 # Perform forward pass of the model
                 predicted_labels = model.forward_decode(input_samples)
