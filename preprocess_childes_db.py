@@ -16,6 +16,23 @@ DB_ARGS = {
     "db_name": "childes-db-version-0.1.2",
 }
 
+TYPES_QUESTION = {
+    "question",
+    "interruption question",
+    "trail off question",
+    "question exclamation",
+    "self interruption question",
+    "trail off",
+}
+TYPES_EXCLAMATION = {"imperative_emphatic"}
+TYPES_STATEMENT = {
+    "declarative",
+    "quotation next line",
+    "quotation precedes",
+    "self interruption",
+    "interruption",
+}
+
 
 #### Read Data functions
 def parse_args():
@@ -32,6 +49,19 @@ def parse_args():
     args = argparser.parse_args()
 
     return args
+
+
+def add_punctuation(tokens, utterance_type):
+    if utterance_type in TYPES_QUESTION:
+        tokens += "?"
+    elif utterance_type in TYPES_EXCLAMATION:
+        tokens += "!"
+    elif utterance_type in TYPES_STATEMENT:
+        tokens += "."
+    else:
+        raise ValueError("Unknown utterance type: ", utterance_type)
+
+    return tokens
 
 
 def load_utts(age):
@@ -64,6 +94,9 @@ def load_utts(age):
                 for _, utt in utts_transcript.iterrows():
                     if utt["gloss"]:
                         tokenized_utterance = nltk.word_tokenize(utt["gloss"])
+                        tokenized_utterance = add_punctuation(
+                            tokenized_utterance, utt["type"]
+                        )
                         data.append(
                             {
                                 "file_id": transcript["transcript_id"],
