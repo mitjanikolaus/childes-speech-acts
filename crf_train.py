@@ -396,6 +396,7 @@ def plot_training(trainer, file_name):
 	logs = pd.DataFrame(trainer.logparser.iterations) # initially list of dicts
 	# columns: {'loss', 'error_norm', 'linesearch_trials', 'active_features', 'num', 'time', 'scores', 'linesearch_step', 'feature_norm'}
 	# FYI scores is empty
+
 	logs.set_index('num', inplace=True)
 	for col in ['loss', 'active_features']:
 		plt.figure()
@@ -478,7 +479,7 @@ if __name__ == '__main__':
 	os.mkdir(name)
 	trainer.train(os.path.join(name, 'model.pycrfsuite'))
 	# plotting training curves
-	plot_training(trainer, name)
+	# plot_training(trainer, name)
 	# dumping features
 	with open(os.path.join(name, 'features.json'), 'w') as json_file:
 		json.dump(features_idx, json_file)

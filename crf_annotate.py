@@ -50,7 +50,7 @@ def parse_args():
         "--data", type=str, required=True, help="Path to preprocessed data to annotate"
     )
     argparser.add_argument(
-        "--compare", type=str, required=True, help="Path to frequencies to compare to"
+        "--compare", type=str, help="Path to frequencies to compare to"
     )
 
     args = argparser.parse_args()
@@ -58,6 +58,31 @@ def parse_args():
     return args
 
 
+def compare_frequencies(frequencies, args):
+    gold_frequencies = pickle.load(open(args.compare, "rb"))
+    frequencies = {k: frequencies[k] for k in gold_frequencies.keys()}
+    kl_divergence = entropy(
+        list(frequencies.values()), qk=list(gold_frequencies.values())
+    )
+    print(f"KL Divergence: {kl_divergence:.3f}")
+    labels = list(gold_frequencies.keys()) * 2
+    source = ["Gold"] * len(gold_frequencies) + ["Predicted"] * len(gold_frequencies)
+    frequencies = list(gold_frequencies.values()) + list(frequencies.values())
+    df = pd.DataFrame(zip(labels, source, frequencies), columns=["speech_act", "source", "frequency"])
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
+    plt.title(f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}")
+    plt.show()
+
+def calculate_frequencies(data: list):
+    frequencies = Counter(data)
+    for k in frequencies.keys():
+        if frequencies[k]:
+            frequencies[k] /= len(data)
+        else:
+            frequencies[k] = 0
+
+    return frequencies
 
 if __name__ == "__main__":
     args = parse_args()
@@ -108,32 +133,19 @@ if __name__ == "__main__":
     )
     data["y_pred"] = [y for x in y_pred for y in x]
 
-    # Filter for children's utterances
+    # Filter for children's and adults' utterances
     data_children = data[data.speaker == "CHI"]
+    data_adults = data[data.speaker != "CHI"]
 
-    counts = Counter(data_children["y_pred"].tolist())
-    for k in counts.keys():
-        if counts[k]:
-            counts[k] /= len(data_children)
-        else:
-            counts[k] = 0
+    speech_acts_adults = data_adults["y_pred"].tolist()
 
-    gold_frequencies = pickle.load(open(args.compare, "rb"))
-    counts = {k: counts[k] for k in gold_frequencies.keys()}
+    pickle.dump(data_children[["file_id", "y_pred"]], open(args.data.replace("utterances", "speech_acts_chi"), "wb"))
+    pickle.dump(data_adults[["file_id", "y_pred"]], open(args.data.replace("utterances", "speech_acts_adu"), "wb"))
 
-    kl_divergence = entropy(
-        list(counts.values()), qk=list(gold_frequencies.values())
-    )
-    print(f"KL Divergence: {kl_divergence:.3f}")
+    frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())
 
-    labels = list(gold_frequencies.keys()) * 2
-    source = ["Gold"] * len(gold_frequencies) + ["Predicted"] * len(gold_frequencies)
-    counts = list(gold_frequencies.values()) + list(counts.values())
-    df = pd.DataFrame(zip(labels, source, counts), columns=["speech_act", "source", "frequency"])
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
-    plt.title(f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}")
-    plt.show()
+    if args.compare:
+        compare_frequencies(frequencies_children, args)
 
     #
     # for _, row in data.iterrows():

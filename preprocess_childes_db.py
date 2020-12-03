@@ -40,10 +40,11 @@ def parse_args():
         description="Preprocess and store utterances from childes-db."
     )
     argparser.add_argument(
-        "--age",
+        "--ages",
+        nargs="+",
         type=int,
-        default=32,
-        help="Filter data for children's age (retrieves data for +-6 months of given age)",
+        required=True,
+        help="Filter data for children's age (retrieves also data for up to -6 months of given age)",
     )
 
     args = argparser.parse_args()
@@ -59,7 +60,8 @@ def add_punctuation(tokens, utterance_type):
     elif utterance_type in TYPES_STATEMENT:
         tokens += "."
     else:
-        raise ValueError("Unknown utterance type: ", utterance_type)
+        print("Unknown utterance type: ", utterance_type)
+        tokens += "."
 
     return tokens
 
@@ -78,7 +80,7 @@ def load_utts(age):
 
         # Filter transcripts by child age
         transcripts = transcripts.loc[
-            (transcripts["target_child_age"] < age + 6)
+            (transcripts["target_child_age"] <= age)
             & (transcripts["target_child_age"] > age - 6)
         ]
 
@@ -110,9 +112,10 @@ def load_utts(age):
 if __name__ == "__main__":
     args = parse_args()
 
-    # Loading data
-    data = load_utts(age=args.age)
+    for age in args.ages:
+        # Loading data
+        data = load_utts(age=age)
 
-    # Store utterances for future re-use
-    data_path = f"data/utterances_age_{args.age}.p"
-    pickle.dump(data, open(data_path, "wb"))
+        # Store utterances for future re-use
+        data_path = f"data/utterances_age_{age}.p"
+        pickle.dump(data, open(data_path, "wb"))

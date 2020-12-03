@@ -27,6 +27,7 @@ Execute training:
 	$ python crf_test.py ttv/childes_ne_test_spa_2.tsv -f tsv -m results/spa_2_2020-08-17-133211
 """
 import os
+import pickle
 import sys
 import random
 import codecs
@@ -317,6 +318,8 @@ if __name__ == '__main__':
 		'weights': states, 
 		'learned_transitions': transitions.pivot(index='label_from', columns='label', values='likelihood') 
 	}
+
+	pickle.dump(report.T, open("data/classification_scores_crf.p","wb"))
 
 	if args.col_ages is not None:
 		plot_testing(data_test, plot_path, args.col_ages)
