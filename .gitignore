@@ -4,3 +4,8 @@ ttv/*
 .DS_Store
 __pycache__/*
 results/*
+.idea/*
+chatter.jar
+java_out/*
+checkpoints/*
+outputs/*
