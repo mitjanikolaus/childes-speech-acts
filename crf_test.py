@@ -95,39 +95,6 @@ def argparser():
 					
 	return args
 
-#### Check predictions
-def crf_predict(tagger:pycrfsuite.Tagger, gp_data:list, mode:str='raw', 
-			exclude_labels:list = ['NOL', 'NAT', 'NEE']) -> Union[list, Tuple[list, pd.DataFrame]]:
-	"""Return predictions for the test data, grouped by file. 3 modes for return:
-		* Return raw predictions (raw)
-		* Return predictions with only valid tags (exclude_ool)
-		* Return predictions (valid tags) and probabilities for each class (rt_proba)
-
-	Predictions are returned unflattened
-	
-	https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html
-	"""
-	if mode not in ['raw', 'exclude_ool', 'rt_proba']:
-		raise ValueError(f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}")
-	if mode == 'raw':
-		return [tagger.tag(xseq) for xseq in gp_data]
-	labels = tagger.labels()
-
-	res = []
-	y_pred = []
-	for fi, xseq in enumerate(gp_data):
-		tagger.set(xseq)
-		file_proba = pd.DataFrame({label:[tagger.marginal(label, i) for i in range(len(xseq))] for label in labels})
-		y_pred.append(
-			file_proba[[col for col in file_proba.columns if col not in exclude_labels]].idxmax(axis=1).tolist()
-		)
-		file_proba['file_id'] = fi
-		res.append(file_proba)
-	
-	if mode == 'rt_proba':
-		return y_pred, pd.concat(res, axis=0)
-	return y_pred # else
-
 def baseline_predict(model, data, labels:bidict, mode:str='raw',
 				exclude_labels:list = ['NOL', 'NAT', 'NEE']) -> Union[list, Tuple[list, pd.DataFrame]]:
 	"""Return predictions for the test data. 3 modes for return:

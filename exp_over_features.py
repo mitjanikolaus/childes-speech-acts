@@ -26,7 +26,7 @@ from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa
 import pycrfsuite
 
 ### Tag functions
-from utils import dataset_labels, ILLOC
+from utils import dataset_labels, SPEECH_ACT_DESCRIPTIONS
 from crf_train import openData, data_add_features, word_to_feature, word_bs_feature, generate_features, baseline_model
 from crf_test import bio_classification_report, report_to_file, crf_predict, baseline_predict
 
@@ -271,7 +271,7 @@ if __name__ == '__main__':
 
     res_comp = pd.DataFrame(logger)
     rep_comp = pd.concat(freport, axis=1)
-    rep_comp = pd.concat([rep_comp, ILLOC], axis=1)
+    rep_comp = pd.concat([rep_comp, SPEECH_ACT_DESCRIPTIONS], axis=1)
     report_to_file({ 
         'comparison': res_comp.set_index('mode'),
         'precision_evolution': rep_comp[[col for col in rep_comp.columns if 'precision' in col]],

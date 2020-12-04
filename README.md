@@ -1,48 +1,30 @@
-Repository for parsing childes transcriptions, preparing data for speech act prediction.
-Also included: speech act prediction using CRF.
+# Speech Act Annotations
+Repository for classification of speech acts in child-caregiver conversations using CRFs, LSTMs and Transformers.
+
+As recommended by the [CHAT transcription format](https://talkbank.org/manuals/CHAT.pdf), we use INCA-A as speech acts
+annotation scheme.
 
 # Requirements
-* xmltodict
-* python-crfsuite
+Listed in `environment.yml`
 
-# Generating data for classification
-Data is downloaded from [Childes](https://childes.talkbank.org/access/) then converted to XML:
+# Preprocessing data for supervised training of classifiers
+
+Data for supervised training is taken from the [New England corpus](https://childes.talkbank.org/access/Eng-NA/NewEngland.html) of [CHILDES](https://childes.talkbank.org/access/) and then converted to XML:
+
+1. Download the [New England Corpus data](https://childes.talkbank.org/data/Eng-NA/NewEngland.zip).
+2. Convert the data using the [chatter java app](https://talkbank.org/software/chatter.html):
+    ```
+    $ java -cp chatter.jar org.talkbank.chatter.App [location_of_downloaded_corpus] -inputFormat cha -outputFormat xml -tree -outputDir java_out 
+    ```
+3. Preprocess data
+    ```
+    python preprocess.py --input java_out/
+   ```
+   
+# Train CRF classifier
+
 ```
-$ java -cp chatter.jar org.talkbank.chatter.App -inputFormat cha -outputFormat xml -tree -outputDir [outdirname] [inputdir]
-```
-Data from annotation platform MACANNOT can also be used as input for the last steps.
-
-**Extraction pipelines:**
-* *raw XML to raw JSON* - either in the same or a separate folder
-* *raw (XML/JSON) to individual files (JSON)* with extracted data
-* *extracted data to individual DSV* with selected features
-* *extracted data to aggregated train/test/valid DSV* with selected features
-
-**Extracted features:**
-* Uttered sentence (main words, no fillers, without correction)
-* Lemmas and POS tags
-* Speech act if exists
-
-**Organisation:**
-```
-/data
-    /NewEngland
-    /Bates
-    ... transcripts in xml format
-/formatted
-    /NewEngland
-    /Bates
-    ... json/xml individual files with extracted features
-/ttv
-    newEngland_train.tsv
-    ... train/test/valid files
-xml_to_json.py: raw XML to raw JSON (1)
-format_data.py: raw to formatted JSON (2)
-extract_data.py: formatted JSON to desired columnar format (3)
-utils.py: useful functions for extraction from raw data
-crf_train.py: training/testing crf annotation.
+python
 ```
 
-# Sources
-* Childes - Download and transform to xml: https://talkbank.org/share/data.html 
-* Speech Acts: https://talkbank.org/manuals/CHAT.pdf
+

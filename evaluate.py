@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from dataset import SpeechActsDataset
 from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD, UNKNOWN
 from models import SpeechActLSTM
-from utils import ILLOC
+from utils import SPEECH_ACT_DESCRIPTIONS
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -121,9 +121,9 @@ def test(args):
                 confusions = [label_vocab.inverse[i] for i in np.where(cm[label_idx] > .1)[0] if i != label_idx]
                 label = label_vocab.inverse[label_idx]
                 if confusions:
-                    print(f"{label} ({ILLOC.Description[label]}) is confused with:")
+                    print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")
                     for confusion in confusions:
-                        print(confusion, ILLOC.Description[confusion])
+                        print(confusion, SPEECH_ACT_DESCRIPTIONS.Description[confusion])
                     print("")
 
 

@@ -31,7 +31,7 @@ import seaborn as sns
 ### Tag functions
 from sklearn.model_selection import KFold
 
-from utils import dataset_labels, ILLOC
+from utils import dataset_labels, SPEECH_ACT_DESCRIPTIONS
 from crf_train import (
     openData,
     data_add_features,
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     # Gather ground-truth label distributions:
     data_children = data[data.speaker == "CHI"]
     counts = Counter(data_children[training_tag])
-    observed_labels = [k for k in ILLOC.Name.keys() if counts[k] > 0]
+    observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.Name.keys() if counts[k] > 0]
     counters["gold"] = dict.fromkeys(observed_labels)
     counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
     for k in counters["gold"].keys():
