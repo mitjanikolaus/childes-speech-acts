@@ -1,43 +1,23 @@
 import os
 import pickle
-import sys
-import random
-import codecs
 import argparse
-import time, datetime
 from collections import Counter
 import json
-import ast
-from typing import Union, Tuple
-from bidict import bidict
 
 import seaborn as sns
 
-from childespy.childespy import get_transcripts, get_corpora, get_utterances
-
-import re
-import nltk
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import sklearn
 from scipy.stats import entropy
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
-from sklearn.preprocessing import LabelBinarizer
 import pycrfsuite
-from joblib import load
-
-### Tag functions
-from tqdm import tqdm
 
 from crf_test import crf_predict
-from utils import dataset_labels, check_tag_pattern
-from crf_train import openData, add_feature_columns, get_features_from_row, word_bs_feature
+from crf_train import get_features_from_row
+from preprocess import CHILD, ADULT
 
-#### Read Data functions
+
 def parse_args():
     argparser = argparse.ArgumentParser(description="Annotate.")
-    # Data files
     argparser.add_argument(
         "--model",
         "-m",
@@ -101,7 +81,7 @@ if __name__ == "__main__":
 
     # Replace speaker column values
     data["speaker"] = data["speaker"].apply(
-        lambda x: "CHI" if x == "Target_Child" else "MOT"
+        lambda x: CHILD if x == "Target_Child" else ADULT
     )
 
     # Loading features
@@ -134,8 +114,8 @@ if __name__ == "__main__":
     data["y_pred"] = [y for x in y_pred for y in x]
 
     # Filter for children's and adults' utterances
-    data_children = data[data.speaker == "CHI"]
-    data_adults = data[data.speaker != "CHI"]
+    data_children = data[data.speaker == CHILD]
+    data_adults = data[data.speaker != CHILD]
 
     speech_acts_adults = data_adults["y_pred"].tolist()
 

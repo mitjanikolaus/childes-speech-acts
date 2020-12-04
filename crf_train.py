@@ -1,71 +1,26 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Original code: https://github.com/scrapinghub/python-crfsuite/blob/master/examples/CoNLL%202002.ipynb
-
-Features originally include:
-* 'PosTurnSeg<=i', 'PosTurnSeg>=i', 'PosTurnSeg=i' with i in 0, number_segments_turn_position
-	* Removed: need adapted parameter, default parameter splits the text into 4 
-* 'Length<-]', 'Length]->', 'Length[-]' with i in 0 .. inf with binning
-	* Adapted: if need for *more* features, will be added
-* 'Spk=='
-	* Removed: no clue what this does
-* 'Speaker' in ['CHI', 'MOM', etc]
-	* kept but simplified
-
-TODO:
-* Wait _this_ yields a question: shouldn't we split files if no direct link between sentences? like activities changed
-* Split trainings
-* ADAPT TAGS: RENAME TAGS
-
-COLUMN NAMES IN FILES:
-FILE_ID SPA_X SPEAKER SENTENCE for tsv
-SPA_ALL IT TIME SPEAKER SENTENCE for txt - then ACTION
-
-Execute training:
-	$ python crf_train.py ttv/childes_ne_train_spa_2.tsv -act  -f tsv
-"""
 import os
-import sys
-import random
-import codecs
 import argparse
-import time, datetime
 from collections import Counter
 import json
 from typing import Union, Tuple
 
-import re
-
-import nltk
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
-from sklearn import svm, naive_bayes, ensemble
 from sklearn.metrics import (
-    classification_report,
-    confusion_matrix,
-    cohen_kappa_score,
     accuracy_score,
 )
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.model_selection import train_test_split
 import pycrfsuite
-from joblib import dump
 
-### Tag functions
-from preprocess import SPEECH_ACT, SPEAKER_ADULT
-from utils import dataset_labels, select_tag
+from preprocess import SPEECH_ACT, ADULT
 
-
-#### Read Data functions
 def argparser():
-    """Creating arparse.ArgumentParser and returning arguments"""
     argparser = argparse.ArgumentParser(
         description="Train a CRF and test it.",
     )
     # Data files
-    argparser.add_argument("train", type=str, help="file listing train dialogs")
+    argparser.add_argument("data", type=str, help="file listing train dialogs")
     # Operations on data
     argparser.add_argument(
         "--match_age",
@@ -81,6 +36,12 @@ def argparser():
         type=int,
         default=5,
         help="number of minimum occurrences for word to appear in features",
+    )
+    argparser.add_argument(
+        "--test-ratio",
+        type=float,
+        default=.2,
+        help="Ratio of dataset to be used to testing",
     )
     argparser.add_argument(
         "--use_action",
@@ -229,7 +190,7 @@ def get_features_from_row(
         "words": Counter([w for w in spoken_tokens if (w in features["words"].keys())])
     }  # TODO: add 'UNK' token
     feat_glob["speaker"] = {speaker: 1.0}
-    feat_glob["speaker"] = 1.0 if speaker == SPEAKER_ADULT else 0.0
+    feat_glob["speaker"] = 1.0 if speaker == ADULT else 0.0
     feat_glob["length"] = {
         k: (1 if ln <= float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
         for k in features["length_bins"].keys()
@@ -275,76 +236,7 @@ def get_features_from_row(
     return feat_glob
 
 
-def word_bs_feature(
-    features: dict, spoken_tokens: list, speaker: str, ln: int, **kwargs
-):
-    """Replacing input list tokens with feature index
-
-    Input:
-    -------
-    features: `dict`
-            dictionary of all features used, by type: {'words':Counter(), ...}
-
-    spoken_tokens: `list`
-            data sentence
-
-    speaker: `str`
-            MOT/CHI
-
-    ln: `int`
-            sentence length
-
-    Kwargs:
-    -------
-    action_tokens: `list`
-            data action, default None if actions are not taken into account
-
-    repetitions: `Tuple[list, float, float]`
-            contains the list of repeated words, number of words repeated, ratio of repeated words over sequence
-
-    Output:
-    -------
-    features_glob: `list`
-            list of size nb_features, dummy of whether feature is contained or not
-    """
-    nb_features = (
-        max([max([int(x) for x in v.values()]) for v in features.values()]) + 1
-    )
-    # list features
-    features_sparse = [
-        features["words"][w] for w in spoken_tokens if w in features["words"].keys()
-    ]  # words
-    features_sparse.append(features["speaker"][speaker])  # locutor
-    for k in features["length_bins"].keys():  # length
-        if ln <= float(k.split("-")[1]) and ln >= float(k.split("-")[0]):
-            features_sparse.append(features["length_bins"][k])
-
-    if ("action_tokens" in kwargs) and (
-        kwargs["action_tokens"] is not None
-    ):  # actions are descriptions just like 'words'
-        features_sparse += [
-            features["action"][w]
-            for w in kwargs["action_tokens"]
-            if w in features["action"].keys()
-        ]
-    if ("repetitions" in kwargs) and (
-        kwargs["repetitions"] is not None
-    ):  # not using words, only ratio+len
-        (_, len_rep, ratio_rep) = kwargs["repetitions"]
-        for k in features["rep_length_bins"].keys():
-            if len_rep <= float(k.split("-")[1]) and len_rep >= float(k.split("-")[0]):
-                features_sparse.append(features["rep_length_bins"][k])
-        for k in features["rep_ratio_bins"].keys():
-            if len_rep <= float(k.split("-")[1]) and len_rep >= float(k.split("-")[0]):
-                features_sparse.append(features["rep_ratio_bins"][k])
-
-    # transforming features
-    features_full = [1 if i in features_sparse else 0 for i in range(nb_features)]
-
-    return features_full
-
-
-def generate_features(
+def generate_features_vocabs(
     data: pd.DataFrame,
     nb_occ: int,
     use_action: bool,
@@ -368,20 +260,11 @@ def generate_features(
     }
     print("\nThere are {} words in the vocab".format(len(feature_vocabs["words"])))
 
-    # Features: Speakers (+ logging counts)
-    # count_spk = dict(Counter(data["speaker"].tolist()))
-    # print("\nSpeaker counts: ")
-    # for k in sorted(count_spk.keys()):
-    #     print("{}: {}".format(k, count_spk[k]), end=" ; ")
-    # feature_vocabs["speaker"] = {
-    #     k: (len(feature_vocabs["words"]) + i)
-    #     for i, k in enumerate(sorted(count_spk.keys()))
-    # }
-
     # Features: sentence length (+ logging counts)
     data["len_bin"], bins = pd.qcut(
         data.turn_length, q=bin_cut, duplicates="drop", labels=False, retbins=True
     )
+
     print("\nTurn length splits: ")
     for i, k in enumerate(bins[:-1]):
         print("\tlabel {}: turns of length {}-{}".format(i, k, bins[i + 1]))
@@ -391,8 +274,6 @@ def generate_features(
         "{}-{}".format(k, bins[i + 1]): (nb_feat + i) for i, k in enumerate(bins[:-1])
     }
     feature_vocabs["length"] = {i: (nb_feat + i) for i, _ in enumerate(bins[:-1])}
-    # parameters: duplicates: 'raise' raises error if bins are identical, 'drop' just ignores them (leading to the creation of larger bins by fusing those with identical cuts)
-    # retbins = return bins (for debug) ; labels=False: only yield the position in the binning, not the name (simpler to create features)
 
     # Features: actions
     if use_action:
@@ -407,7 +288,7 @@ def generate_features(
         }
         print("\nThere are {} words in the actions".format(len(feature_vocabs["action"])))
 
-    # Features: repetitions (reusing word from speech)
+    # Features: repetitions of previous utterance
     if use_repetitions:
         nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
         # features esp for length & ratio - repeated words can use previously defined features
@@ -451,7 +332,6 @@ def plot_training(trainer, file_name):
         plt.savefig(file_name + "/" + col + ".png")
 
 
-#### Check predictions
 def crf_predict(
     tagger: pycrfsuite.Tagger,
     gp_data: list,
@@ -504,18 +384,14 @@ if __name__ == "__main__":
     print(args)
 
     # Definitions
-    number_words_for_feature = args.nb_occurrences  # default 5
     number_segments_length_feature = 10
-    # number_segments_turn_position = 10 # not used for now
 
     print("### Loading data:".upper())
 
-    data_train = pd.read_pickle(args.train)
+    data = pd.read_pickle(args.data)
 
-    args.use_action = args.use_action & ("action" in data_train.columns.str.lower())
-    args.use_past_actions = args.use_past_actions & args.use_action
-    data_train = add_feature_columns(
-        data_train,
+    data = add_feature_columns(
+        data,
         use_action=args.use_action,
         match_age=args.match_age,
         check_repetition=args.use_repetitions,
@@ -523,8 +399,10 @@ if __name__ == "__main__":
         use_pastact=args.use_past_actions,
     )
 
+    data_train, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
+
     print("### Creating features:")
-    features_idx = generate_features(
+    feature_vocabs = generate_features_vocabs(
         data_train,
         args.nb_occurrences,
         args.use_action,
@@ -535,7 +413,7 @@ if __name__ == "__main__":
     # creating crf features set for train
     data_train["features"] = data_train.apply(
         lambda x: get_features_from_row(
-            features_idx,
+            feature_vocabs,
             x.tokens,
             x["speaker"],
             x.turn_length,
@@ -550,7 +428,7 @@ if __name__ == "__main__":
     )
 
     # Once the features are done, groupby name and extract a list of lists
-    # some "None" appear bc some illocutionary codes missing - however creating separations between data...
+    # The list contains transcripts, which each contain a list of utterances
     grouped_train = (
         data_train.dropna(subset=[SPEECH_ACT])
         .groupby(by=["file_id"])
@@ -561,15 +439,16 @@ if __name__ == "__main__":
                 "index": min,
             }
         )
-    )  # listed by apparition order
+    )
+
     grouped_train = sklearn.utils.shuffle(grouped_train)
 
-    # After that, train ---
     print("\n### Training starts.".upper())
     trainer = pycrfsuite.Trainer(verbose=args.verbose)
-    # Adding data
+    # Add data
     for idx, file_data in grouped_train.iterrows():
         trainer.append(file_data["features"], file_data[SPEECH_ACT])  # X_train, y_train
+
     # Parameters
     trainer.set_params(
         {
@@ -581,44 +460,72 @@ if __name__ == "__main__":
     )
 
     # Location for weight save
-    name = os.path.join(
-        os.getcwd(),
-        "_".join(
-            [
-                x
-                for x in [
-                    SPEECH_ACT,
-                    datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"),
-                ]
-                if x
-            ]
-        ),
-    )  # creating name with arguments, removing Nones in list
-    print("Saving model at: {}".format(name))
-    os.mkdir(name)
-    trainer.train(os.path.join(name, "model.pycrfsuite"))
+    checkpoint_path = "checkpoints/crf/"
+    print("Saving model at: {}".format(checkpoint_path))
+    if not os.path.exists(checkpoint_path):
+        os.makedirs(checkpoint_path)
+
+    trainer.train(os.path.join(checkpoint_path, "model.pycrfsuite"))
+
     # plotting training curves
-    # plot_training(trainer, name)
+    if args.verbose:
+        plot_training(trainer, checkpoint_path)
+
     # dumping features
-    with open(os.path.join(name, "features.json"), "w") as json_file:
-        json.dump(features_idx, json_file)
+    with open(os.path.join(checkpoint_path, "feature_vocabs.json"), "w") as json_file:
+        json.dump(feature_vocabs, json_file)
+
     # dumping metadata
-    with open(os.path.join(name, "metadata.txt"), "w") as meta_file:
+    with open(os.path.join(checkpoint_path, "metadata.txt"), "w") as meta_file:
         for arg in vars(args):
             meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
 
+    # Calculate test accuracy
     tagger = pycrfsuite.Tagger()
-    tagger.open(os.path.join(name, "model.pycrfsuite"))
+    tagger.open(os.path.join(checkpoint_path, "model.pycrfsuite"))
+
+    data_test["features"] = data_test.apply(
+        lambda x: get_features_from_row(
+            feature_vocabs,
+            x.tokens,
+            x["speaker"],
+            x.turn_length,
+            action_tokens=None if not args.use_action else x.action_tokens,
+            repetitions=None
+            if not args.use_repetitions
+            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+            past_tokens=None if not args.use_past else x.past,
+            pastact_tokens=None if not args.use_past_actions else x.past_act,
+        ),
+        axis=1,
+    )
+
+    # Once the features are done, groupby name and extract a list of lists
+    # The list contains transcripts, which each contain a list of utterances
+    grouped_test = (
+        data_test.dropna(subset=[SPEECH_ACT])
+            .groupby(by=["file_id"])
+            .agg(
+            {
+                "features": lambda x: [y for y in x],
+                SPEECH_ACT: lambda x: [y for y in x],
+                "index": min,
+            }
+        )
+    )
+
     y_pred = crf_predict(
         tagger,
-        grouped_train.sort_values("index", ascending=True)["features"],
+        grouped_test.sort_values("index", ascending=True)["features"],
         mode="exclude_ool",
     )
-    data_train["y_pred"] = [y for x in y_pred for y in x]  # flatten
+    data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+    data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
-    # TODO check whether we do similar filter for LSTM eval!
-    data_crf = data_train[~data_train[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
+    print(data_crf[SPEECH_ACT].tolist()[:30])
+    print(data_crf["y_pred"].tolist()[:30])
+
     acc = accuracy_score(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), normalize=True
     )
-    print(acc)
+    print(f"Accuracy on test set: {acc:.3f}")

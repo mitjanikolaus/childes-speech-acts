@@ -12,8 +12,8 @@ from utils import parse_xml, get_xml_as_dict
 
 SPEECH_ACT = "speech_act"
 
-SPEAKER_CHILD = "CHI"
-SPEAKER_ADULT = "ADU"
+CHILD = "CHI"
+ADULT = "ADU"
 
 
 def read_files(input_dir, input_format="xml"):
@@ -69,7 +69,12 @@ def read_files(input_dir, input_format="xml"):
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     # Data files
-    argparser.add_argument("--input_dir", "-i", required=True)
+    argparser.add_argument("--input-dir", "-i", required=True)
+    argparser.add_argument(
+        "--keep-untagged",
+        action="store_true",
+        help="Keep utterances that have not been annotated",
+    )
     args = argparser.parse_args()
 
     data = read_files(args.input_dir)
@@ -86,9 +91,6 @@ if __name__ == "__main__":
         "age_months",
     ]
 
-    # TODO experiment with
-    args.keep_untagged = False
-
     tag_counts = data[SPEECH_ACT].value_counts().to_dict()
     print(f"Speech act proportions:")
     print({k: np.round(v / data.shape[0], 2) for k, v in tag_counts.items()})
@@ -104,10 +106,9 @@ if __name__ == "__main__":
         (pd.concat([data[col] != "" for col in drop_subset], axis=1)).any(axis=1)
     ]
 
-    data['speaker'] = data['speaker'].apply(lambda x: x if x  == SPEAKER_CHILD else SPEAKER_ADULT)
+    data['speaker'] = data['speaker'].apply(lambda x: x if x == CHILD else ADULT)
 
     if not args.keep_untagged:
-        # Note: hierarchical: 1 > 2 = 2a ; if one is empty the next are empty
         data.drop(
             data[data[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])].index, inplace=True
         )

@@ -4,7 +4,7 @@
 Compare training on different heldout datasets
 
 Execute training:
-	$ python exp_crossvalidation.py --data ttv/newengland_all_spa_2.tsv -rep
+	$ python crf_crossvalidation.py --data ttv/newengland_all_spa_2.tsv -rep
 """
 import os
 import pickle
@@ -31,15 +31,15 @@ import seaborn as sns
 ### Tag functions
 from sklearn.model_selection import KFold
 
+from preprocess import SPEECH_ACT
 from utils import dataset_labels, SPEECH_ACT_DESCRIPTIONS
 from crf_train import (
-    openData,
     add_feature_columns,
     get_features_from_row,
     word_bs_feature,
-    generate_features,
+    generate_features_vocabs, crf_predict, plot_training,
 )
-from crf_test import bio_classification_report, report_to_file, crf_predict
+from crf_test import bio_classification_report, report_to_file
 
 AGE_MONTHS_GROUPS = {
     14: [13, 14, 15],
@@ -50,8 +50,7 @@ AGE_MONTHS_GROUPS = {
 def argparser():
     """Creating arparse.ArgumentParser and returning arguments"""
     argparser = argparse.ArgumentParser(
-        description="Train a CRF and test it.",
-        formatter_class=argparse.RawTextHelpFormatter,
+        description="Perform cross-validation for the CRF",
     )
     # Data files
     argparser.add_argument("--data", type=str, help="file listing all dialogs")
@@ -65,15 +64,6 @@ def argparser():
     # Operations on data
     argparser.add_argument(
         "--age", type=int, default=None, help="filter data for children's age"
-    )
-    argparser.add_argument(
-        "--keep_tag",
-        choices=["all", "1", "2", "2a"],
-        default="2",
-        help="keep first part / second part / all tag",
-    )
-    argparser.add_argument(
-        "--out", type=str, default="results", help="where to write .crfsuite model file"
     )
     # parameters for training:
     argparser.add_argument(
@@ -130,59 +120,61 @@ def argparser():
     return args
 
 
-### REPORT
-def plot_training(data, file_name):
-    plt.figure()
-    data.plot()
-    plt.savefig(file_name + ".png")
-
-
-#### MAIN
 if __name__ == "__main__":
     args = argparser()
     print(args)
 
     # Definitions
-    number_words_for_feature = args.nb_occurrences  # default 5
     number_segments_length_feature = 10
-    training_tag = "spa_" + args.keep_tag
 
-    # Loading data
-    data = pd.read_csv(args.data, sep="\t", keep_default_na=False).reset_index(
-        drop=False
-    )
-    if "action" not in data.columns.str.lower():
-        raise ValueError(
-            "in order to test the impact of actions, they must be in the data"
-        )
-    # Loading with actions and repetitions in order to use them later
-    data.rename(columns={col: col.lower() for col in data.columns}, inplace=True)
+    print("### Loading data:".upper())
+
+    data = pd.read_pickle(args.data)
+
     data = add_feature_columns(
-        data, use_action=True, check_repetition=True, use_past=True, use_pastact=True
+        data,
+        use_action=args.use_action,
+        check_repetition=args.use_repetitions,
+        use_past=args.use_past,
+        use_pastact=args.use_past_actions,
     )
-    # Parameters
-    training_tag = [x for x in data.columns if "spa_" in x][0]
-    args.training_tag = training_tag
+
+    print("### Creating features:")
+    feature_vocabs = generate_features_vocabs(
+        data,
+        args.nb_occurrences,
+        args.use_action,
+        args.use_repetitions,
+        bin_cut=number_segments_length_feature,
+    )
+
+    # creating crf features set for train
+    data["features"] = data.apply(
+        lambda x: get_features_from_row(
+            feature_vocabs,
+            x.tokens,
+            x["speaker"],
+            x.turn_length,
+            action_tokens=None if not args.use_action else x.action_tokens,
+            repetitions=None
+            if not args.use_repetitions
+            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+            past_tokens=None if not args.use_past else x.past,
+            pastact_tokens=None if not args.use_past_actions else x.past_act,
+        ),
+        axis=1,
+    )
+
+    # Location for weight save
+    checkpoint_path = "checkpoints/crf_cross_validation/"
+    print("Saving model at: {}".format(checkpoint_path))
+    if not os.path.exists(checkpoint_path):
+        os.makedirs(checkpoint_path)
 
     logger = {}  # Dictionary containing results
     freport = {}  # Dictionary containing reports
     counters = {}
-    name = os.path.join(
-        os.getcwd(),
-        ("" if args.out is None else args.out),
-        "_".join(
-            [
-                x
-                for x in [
-                    os.path.basename(__file__).replace(".py", ""),
-                    training_tag,
-                    datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"),
-                ]
-                if x
-            ]
-        ),
-    )  # Location for weight save
-    os.mkdir(name)
+
 
     # Filter data by childen's age
     if args.age:
@@ -190,7 +182,7 @@ if __name__ == "__main__":
 
     # Gather ground-truth label distributions:
     data_children = data[data.speaker == "CHI"]
-    counts = Counter(data_children[training_tag])
+    counts = Counter(data_children[SPEECH_ACT])
     observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.Name.keys() if counts[k] > 0]
     counters["gold"] = dict.fromkeys(observed_labels)
     counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
@@ -217,12 +209,11 @@ if __name__ == "__main__":
         print(
             f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
         )
-        nm = os.path.join(name, f"permutation_{i}")
+        nm = os.path.join(checkpoint_path, f"permutation_{i}")
 
         # generating features
-        features_idx = generate_features(
+        features_idx = generate_features_vocabs(
             data_train,
-            training_tag,
             args.nb_occurrences,
             args.use_action,
             args.use_repetitions,
@@ -248,12 +239,12 @@ if __name__ == "__main__":
 
         # Once the features are done, groupby name and extract a list of lists
         grouped_train = (
-            data_train.dropna(subset=[training_tag])
+            data_train.dropna(subset=[SPEECH_ACT])
             .groupby(by=["file_id"])
             .agg(
                 {
                     "features": lambda x: [y for y in x],
-                    training_tag: lambda x: [y for y in x],
+                    SPEECH_ACT: lambda x: [y for y in x],
                     "index": min,
                 }
             )
@@ -265,7 +256,7 @@ if __name__ == "__main__":
         # Adding data
         for idx, file_data in grouped_train.iterrows():
             trainer.append(
-                file_data["features"], file_data[training_tag]
+                file_data["features"], file_data[SPEECH_ACT]
             )  # X_train, y_train
         # Parameters
         trainer.set_params(
@@ -302,7 +293,7 @@ if __name__ == "__main__":
             axis=1,
         )
 
-        data_test.dropna(subset=[training_tag], inplace=True)
+        data_test.dropna(subset=[SPEECH_ACT], inplace=True)
         X_dev = data_test.groupby(by=["file_id"]).agg(
             {"features": lambda x: [y for y in x], "index": min}
         )
@@ -312,7 +303,7 @@ if __name__ == "__main__":
             mode=args.prediction_mode,
         )
         data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
-        data_test["y_true"] = data_test[training_tag]
+        data_test["y_true"] = data_test[SPEECH_ACT]
         data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
         # remove ['NOL', 'NAT', 'NEE'] for prediction and reports
         data_crf = data_test[~data_test["y_true"].isin(["NOL", "NAT", "NEE"])]
@@ -362,15 +353,12 @@ if __name__ == "__main__":
             **{"report_" + str(n): d["report"].T for n, d in freport.items()},
             **{"cm_" + str(n): d["cm"].T for n, d in freport.items()},
         },
-        os.path.join(name, "report.xlsx"),
+        os.path.join(checkpoint_path, "report.xlsx"),
     )
 
-    with open(os.path.join(name, "metadata.txt"), "w") as meta_file:  # dumping metadata
+    with open(os.path.join(checkpoint_path, "metadata.txt"), "w") as meta_file:  # dumping metadata
         for arg in vars(args):
             meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
         meta_file.write("{0}:\t{1}\n".format("Experiment", "Datasets"))
-
-    # plotting training curves
-    plot_training(train_per, os.path.join(name, "percentage_evolution"))
 
     print("Average accuracy over all splits: ", np.average(list(logger.values())))

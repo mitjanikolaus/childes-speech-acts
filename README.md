@@ -24,7 +24,12 @@ Data for supervised training is taken from the [New England corpus](https://chil
 # Train CRF classifier
 
 ```
-python
+python crf_train.py data/new_england_preprocessed.p [optional_feature_args]
 ```
 
+# Test CRF classifier
 
+
+```
+python crf_test.py data/new_england_preprocessed.p -m checkpoints/crf/
+```

@@ -1,66 +1,32 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Original code: https://github.com/scrapinghub/python-crfsuite/blob/master/examples/CoNLL%202002.ipynb
-
-Features originally include:
-* 'PosTurnSeg<=i', 'PosTurnSeg>=i', 'PosTurnSeg=i' with i in 0, number_segments_turn_position
-	* Removed: need adapted parameter, default parameter splits the text into 4 
-* 'Length<-]', 'Length]->', 'Length[-]' with i in 0 .. inf with binning
-	* Adapted: if need for *more* features, will be added
-* 'Spk=='
-	* Removed: no clue what this does
-* 'Speaker' in ['CHI', 'MOM', etc]
-	* kept but simplified
-
-TODO:
-* Wait _this_ yields a question: shouldn't we split files if no direct link between sentences? like activities changed
-* Split trainings
-* ADAPT TAGS: RENAME TAGS
-
-COLUMN NAMES IN FILES:
-FILE_ID SPA_X SPEAKER SENTENCE for tsv
-SPA_ALL IT TIME SPEAKER SENTENCE for txt - then ACTION and PREV_SENTENCE ?
-
-
-Execute training:
-	$ python crf_test.py ttv/childes_ne_test_spa_2.tsv -f tsv -m results/spa_2_2020-08-17-133211
-"""
 import os
 import pickle
-import sys
-import random
-import codecs
 import argparse
-import time, datetime
 from collections import Counter
 import json
 import ast
 from typing import Union, Tuple
 from bidict import bidict
 
-import re
-import nltk
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.model_selection import train_test_split
 import pycrfsuite
-from joblib import load
 
-### Tag functions
-from utils import dataset_labels, check_tag_pattern
-from crf_train import openData, add_feature_columns, get_features_from_row, word_bs_feature
+from preprocess import SPEECH_ACT
+from crf_train import add_feature_columns, get_features_from_row, crf_predict
 
 
-#### Read Data functions
 def argparser():
-	argparser = argparse.ArgumentParser(description='Train a CRF and test it.', formatter_class=argparse.RawTextHelpFormatter)
-	# Data files
-	argparser.add_argument('test', type=str, help="file listing test dialogs")
-	argparser.add_argument('--format', '-f', choices=['txt', 'tsv'], required=True, help="data file format - adapt reading")
+	argparser = argparse.ArgumentParser(description='Test a previously trained CRF')
+	argparser.add_argument('data', type=str, help="file listing all dialogs")
+	argparser.add_argument(
+		"--test-ratio",
+		type=float,
+		default=.2,
+		help="Ratio of given dataset to be used to testing",
+	)
 	argparser.add_argument('--txt_columns', nargs='+', type=str, default=[], help=""".txt columns name (in order); most basic txt is ['spa_all', 'ut', 'time', 'speaker', 'sentence']""")
 	argparser.add_argument('--match_age', type=int, nargs='+', default=None, help="ages to match data to - for split analysis")
 	argparser.add_argument('--model', '-m', required=True, type=str, default=None, help="folder containing model, features and metadata")
@@ -72,27 +38,19 @@ def argparser():
 	args = argparser.parse_args()
 
 	# Load training arguments
-	try:
-		text_file = open(os.path.join(args.model, 'metadata.txt'), "r")
-		lines = text_file.readlines() # lines ending with "\n"
-		for line in lines:
-			arg_name, value = line[:-1].split(":\t")
-			if arg_name not in ['format', 'txt_columns', 'match_age']: # don't replace existing arguments!
-				try:
-					setattr(args, arg_name, ast.literal_eval(value))
-				except ValueError as e:
-					if "malformed node or string" in str(e):
-						setattr(args, arg_name, value)
-				except Exception as e:
-					raise e
-	except FileNotFoundError as e:
-		if "No such file or directory" in str(e):
-			print("No metadata file for this model.")
-			# set tag
-			tag_from_file = check_tag_pattern(args.test)
-			if tag_from_file is not None:
-				args.training_tag = tag_from_file
-					
+	text_file = open(os.path.join(args.model, 'metadata.txt'), "r")
+	lines = text_file.readlines() # lines ending with "\n"
+	for line in lines:
+		arg_name, value = line[:-1].split(":\t")
+		if arg_name not in ['format', 'txt_columns', 'match_age']: # don't replace existing arguments!
+			try:
+				setattr(args, arg_name, ast.literal_eval(value))
+			except ValueError as e:
+				if "malformed node or string" in str(e):
+					setattr(args, arg_name, value)
+			except Exception as e:
+				raise e
+
 	return args
 
 def baseline_predict(model, data, labels:bidict, mode:str='raw',
@@ -205,8 +163,6 @@ def report_to_file(dfs:dict, file_location:str):
 if __name__ == '__main__':
 	args = argparser()
 
-	# Definitions
-	training_tag = args.training_tag
 
 	# Loading model
 	name = args.model
@@ -228,24 +184,23 @@ if __name__ == '__main__':
 	# update paths for input/output
 	features_path = name + linker + 'features.json'
 	model_path = name + linker + 'model.pycrfsuite'
-	report_path = name + linker + args.test.replace('/', '_')+'_report.xlsx'
-	plot_path = name + linker + args.test.split('/')[-1]+'_agesevol.png'
+	report_path = name + linker + args.data.replace('/', '_')+'_report.xlsx'
+	plot_path = name + linker + args.data.split('/')[-1]+'_agesevol.png'
 
 	# Loading data
-	if args.format == 'txt':
-		if args.txt_columns == []:
-			raise TypeError('--txt_columns [col0] [col1] ... is required with format txt')
-		data_test = openData(args.test, column_names=args.txt_columns, match_age=args.match_age, use_action = args.use_action, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
-	elif args.format == 'tsv':
-		data_test = pd.read_csv(args.test, sep='\t', keep_default_na=False).reset_index(drop=False)
-		data_test.rename(columns={col:col.lower() for col in data_test.columns}, inplace=True)
-		data_test['speaker'] = data_test['speaker'].apply(lambda x: x if x in ['CHI', 'MOT'] else 'MOT')
-		data_test = add_feature_columns(data_test, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
-	# Check child consistency possible
-	if args.consistency_check and ("child" not in data_test.columns):
-		raise IndexError("Cannot check consistency if children names are not in the data.")
-	
-	
+	data = pd.read_pickle(args.data)
+
+	data = add_feature_columns(
+		data,
+		use_action=args.use_action,
+		match_age=args.match_age,
+		check_repetition=args.use_repetitions,
+		use_past=args.use_past,
+		use_pastact=args.use_past_actions,
+	)
+
+	_, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
+
 	# Loading features
 	with open(features_path, 'r') as json_file:
 		features_idx = json.load(json_file)
@@ -259,8 +214,7 @@ if __name__ == '__main__':
 	tagger = pycrfsuite.Tagger()
 	tagger.open(model_path)
 	
-	# creating data - TODO: dropna???
-	data_test.dropna(subset=[training_tag], inplace=True)
+	data_test.dropna(subset=[SPEECH_ACT], inplace=True)
 	X_dev = data_test.groupby(by=['file_id']).agg({ 
 		'features' : lambda x: [y for y in x],
 		'index': min
@@ -268,7 +222,7 @@ if __name__ == '__main__':
 	# parameter 'raw' vs 'exclude_ool': remove ['NOL', 'NAT', 'NEE'] from predictions, predict closest label
 	y_pred = crf_predict(tagger, X_dev.sort_values('index', ascending=True)['features'], mode=args.prediction_mode) 
 	data_test['y_pred'] = [y for x in y_pred for y in x] # flatten
-	data_test['y_true'] = data_test[training_tag]
+	data_test['y_true'] = data_test[SPEECH_ACT]
 	data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
 	# only report on tags where y_true != NOL, NAT, NEE
 	data_crf = data_test[~data_test['y_true'].isin(['NOL', 'NAT', 'NEE'])]
@@ -290,32 +244,6 @@ if __name__ == '__main__':
 
 	if args.col_ages is not None:
 		plot_testing(data_test, plot_path, args.col_ages)
-
-	# Test baseline
-	if args.baseline is not None:
-		bs_model = load(os.path.join(name, 'baseline.joblib'))
-
-		print("\nBaseline model for comparison:")
-		X = data_test.dropna(subset=[training_tag]).apply(lambda x: word_bs_feature(features_idx, x.tokens, x['speaker'], 
-															x.turn_length, 
-															action_tokens=None if not args.use_action else x.action_tokens, 
-															repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords)
-															), axis=1)
-		# ID from label - bidict
-		labels = dataset_labels(training_tag.upper(), add_empty_labels=True) # empty labels removed either way
-		# transforming
-		X = np.array(X.tolist())
-		# y = data_test.dropna(subset=[training_tag])[training_tag].tolist()
-		# y = np.array([labels[lab] for lab in y]) # to ID 			# No need for ID
-		y_pred = baseline_predict(bs_model, X, labels, mode=args.prediction_mode)
-		data_test['y_pred'] = y_pred
-		data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
-		data_bs = data_test[~data_test['y_true'].isin(['NOL', 'NAT', 'NEE'])]
-
-		report, _, _, _ = bio_classification_report(data_bs['y_true'].tolist(), data_bs['y_pred'].tolist())
-		# Add to report
-		report_d[args.baseline+'_predictions'] = data_bs[int_cols]
-		report_d[args.baseline+'_classification_report'] = report.T
 
 	# Write excel with all reports
 	report_to_file(report_d, report_path)
