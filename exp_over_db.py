@@ -26,7 +26,7 @@ import pycrfsuite
 
 ### Tag functions
 from utils import dataset_labels
-from crf_train import openData, data_add_features, word_to_feature, word_bs_feature, generate_features
+from crf_train import openData, add_feature_columns, get_features_from_row, word_bs_feature, generate_features
 from crf_test import bio_classification_report, report_to_file, crf_predict
 
 #### Read Data functions
@@ -102,9 +102,9 @@ if __name__ == '__main__':
 		# Update data
 		for db in args.data_pattern:
 			data_train[db].rename(columns={col:col.lower() for col in data_train[db].columns}, inplace=True)
-			data_train[db] = data_add_features(data_train[db], use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
+			data_train[db] = add_feature_columns(data_train[db], use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 			data_test[db].rename(columns={col:col.lower() for col in data_test[db].columns}, inplace=True)
-			data_test[db] = data_add_features(data_test[db], use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
+			data_test[db] = add_feature_columns(data_test[db], use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 		training_tag = [x for x in list(data_train.values())[0].columns if 'spa_' in x][0]
 		args.training_tag = training_tag
 	
@@ -120,12 +120,12 @@ if __name__ == '__main__':
 		features_idx = generate_features(data_train[db_train], training_tag, args.nb_occurrences, args.use_action, args.use_repetitions, bin_cut=number_segments_length_feature)
 
 		# creating crf features set for train
-		data_train[db_train]['features'] = data_train[db_train].apply(lambda x: word_to_feature(features_idx, 
-												x.tokens, x['speaker'], x.turn_length, 
-												action_tokens=None if not args.use_action else x.action_tokens, 
-												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-												past_tokens=None if not args.use_past else x.past,
-												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
+		data_train[db_train]['features'] = data_train[db_train].apply(lambda x: get_features_from_row(features_idx,
+                                                                                                      x.tokens, x['speaker'], x.turn_length,
+                                                                                                      action_tokens=None if not args.use_action else x.action_tokens,
+                                                                                                      repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                                                                                                      past_tokens=None if not args.use_past else x.past,
+                                                                                                      pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
 
 		# Once the features are done, groupby name and extract a list of lists
 		grouped_train = data_train[db_train].dropna(subset=[training_tag]).groupby(by=['file_id']).agg({
@@ -159,12 +159,12 @@ if __name__ == '__main__':
 		tagger.open(nm +'_model.pycrfsuite')
 
 		for db_test in args.data_pattern: 
-			data_test[db_test]['features'] = data_test[db_test].apply(lambda x: word_to_feature(features_idx, 
-												x.tokens, x['speaker'], x.turn_length, 
-												action_tokens=None if not args.use_action else x.action_tokens, 
-												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-												past_tokens=None if not args.use_past else x.past,
-												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
+			data_test[db_test]['features'] = data_test[db_test].apply(lambda x: get_features_from_row(features_idx,
+                                                                                                      x.tokens, x['speaker'], x.turn_length,
+                                                                                                      action_tokens=None if not args.use_action else x.action_tokens,
+                                                                                                      repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                                                                                                      past_tokens=None if not args.use_past else x.past,
+                                                                                                      pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
 
 			data_test[db_test].dropna(subset=[training_tag], inplace=True)
 			X_dev = data_test[db_test].groupby(by=['file_id']).agg({ 

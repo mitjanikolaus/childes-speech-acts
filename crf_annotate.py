@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 from crf_test import crf_predict
 from utils import dataset_labels, check_tag_pattern
-from crf_train import openData, data_add_features, word_to_feature, word_bs_feature
+from crf_train import openData, add_feature_columns, get_features_from_row, word_bs_feature
 
 #### Read Data functions
 def parse_args():
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # TODO use more features?
     data["features"] = data.apply(
-        lambda x: word_to_feature(
+        lambda x: get_features_from_row(
             features_idx,
             x.tokens,
             x["speaker"],

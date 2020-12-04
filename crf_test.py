@@ -52,7 +52,7 @@ from joblib import load
 
 ### Tag functions
 from utils import dataset_labels, check_tag_pattern
-from crf_train import openData, data_add_features, word_to_feature, word_bs_feature
+from crf_train import openData, add_feature_columns, get_features_from_row, word_bs_feature
 
 
 #### Read Data functions
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 		data_test = pd.read_csv(args.test, sep='\t', keep_default_na=False).reset_index(drop=False)
 		data_test.rename(columns={col:col.lower() for col in data_test.columns}, inplace=True)
 		data_test['speaker'] = data_test['speaker'].apply(lambda x: x if x in ['CHI', 'MOT'] else 'MOT')
-		data_test = data_add_features(data_test, use_action=args.use_action , match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
+		data_test = add_feature_columns(data_test, use_action=args.use_action, match_age=args.match_age, check_repetition=args.use_repetitions, use_past=args.use_past, use_pastact=args.use_past_actions)
 	# Check child consistency possible
 	if args.consistency_check and ("child" not in data_test.columns):
 		raise IndexError("Cannot check consistency if children names are not in the data.")
@@ -249,11 +249,11 @@ if __name__ == '__main__':
 	# Loading features
 	with open(features_path, 'r') as json_file:
 		features_idx = json.load(json_file)
-	data_test['features'] = data_test.apply(lambda x: word_to_feature(features_idx, x.tokens, x['speaker'], x.turn_length, 
-												action_tokens=None if not args.use_action else x.action_tokens, 
-												repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-												past_tokens=None if not args.use_past else x.past,
-												pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
+	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x.turn_length,
+																			action_tokens=None if not args.use_action else x.action_tokens,
+																			repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+																			past_tokens=None if not args.use_past else x.past,
+																			pastact_tokens=None if not args.use_past_actions else x.past_act), axis=1)
 
 	# Predictions
 	tagger = pycrfsuite.Tagger()

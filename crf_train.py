@@ -54,7 +54,7 @@ import pycrfsuite
 from joblib import dump
 
 ### Tag functions
-from preprocess import SPEECH_ACT
+from preprocess import SPEECH_ACT, SPEAKER_ADULT
 from utils import dataset_labels, select_tag
 
 
@@ -118,7 +118,7 @@ def argparser():
 
 
 #### Features functions
-def data_add_features(
+def add_feature_columns(
     p: pd.DataFrame,
     match_age: Union[str, list] = None,
     use_action: bool = False,
@@ -127,7 +127,6 @@ def data_add_features(
     check_repetition: bool = False,
 ):
     """Function adding features to the data:
-    * tokens: splitting spoken sentence into individual words
     * turn_length
     * tags (if necessary): extract interchange/illocutionary from general tag
     * action_tokens (if necessary): splitting action sentence into individual words
@@ -139,25 +138,28 @@ def data_add_features(
     # sentence: using tokens to count & all
     p["tokens"] = p.tokens
     p["turn_length"] = p.tokens.apply(len)
+
     # action: creating action tokens
     if use_action:
         p["action"].fillna("", inplace=True)
         p["action_tokens"] = p.action.apply(lambda x: x.lower().split())
+
     # matching age with theoretical age from the study
-    # p['age_months'] = p.file.apply(lambda x: int(x.split('/')[-2])) # NewEngland only
     if "age_months" in p.columns and match_age is not None:
         match_age = match_age if isinstance(match_age, list) else [match_age]
         p["age_months"] = p.age_months.apply(
             lambda age: min(match_age, key=lambda x: abs(x - age))
         )
+
     # repetition features
     if check_repetition or use_past or use_pastact:
         p["prev_file"] = p.file_id.shift(1).fillna(p.file_id.iloc[0])
         p["prev_spk"] = p.speaker.shift(1).fillna(p.speaker.iloc[0])
         p["prev_st"] = p.tokens.shift(
             1
-        )  # .fillna(p.tokens.iloc[0]) # doesn't work - fillna doesn't accept a list as value
+        )
         p["prev_st"].iloc[0] = p.tokens.iloc[0]
+
     if check_repetition:
         p["repeated_words"] = p.apply(
             lambda x: [w for w in x.tokens if w in x.prev_st]
@@ -167,36 +169,30 @@ def data_add_features(
         )
         p["nb_repwords"] = p.repeated_words.apply(len)
         p["ratio_repwords"] = p.nb_repwords / p.turn_length
+
     if use_past:
         p["past"] = p.apply(
             lambda x: x.prev_st if (x.file_id == x.prev_file) else [], axis=1
         )
+
     if use_action and use_pastact:
         p["prev_act"] = p["action_tokens"].shift(1)
         p["prev_act"].iloc[0] = p["action_tokens"].iloc[0]
         p["past_act"] = p.apply(
             lambda x: x.prev_act if (x.file_id == x.prev_file) else [], axis=1
         )
-    # remove useless columns
-    p = p[
-        [
-            col
-            for col in p.columns
-            if col not in ["prev_spk", "prev_st", "prev_file", "prev_act"]
-        ]
-    ]
+    # remove helper columns
+    p = p.drop(columns=["prev_spk", "prev_st", "prev_file", "prev_act"], errors="ignore")
+
     # return Dataframe
     return p
 
 
-def word_to_feature(
+def get_features_from_row(
     features: dict, spoken_tokens: list, speaker: str, ln: int, **kwargs
 ):
     """Replacing input list tokens with feature index
 
-    Features should be of type:
-    https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html#pycrfsuite.ItemSequence
-    ==> Using Counters
 
     Input:
     -------
@@ -233,6 +229,7 @@ def word_to_feature(
         "words": Counter([w for w in spoken_tokens if (w in features["words"].keys())])
     }  # TODO: add 'UNK' token
     feat_glob["speaker"] = {speaker: 1.0}
+    feat_glob["speaker"] = 1.0 if speaker == SPEAKER_ADULT else 0.0
     feat_glob["length"] = {
         k: (1 if ln <= float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
         for k in features["length_bins"].keys()
@@ -355,32 +352,31 @@ def generate_features(
     bin_cut: int = 10,
 ) -> dict:
     """Analyse data according to arguments passed and generate features_idx dictionary. Printing log data to console."""
-    # Also counting tags for knowledge's sake
     print("\nTag counts: ")
     count_tags = data[SPEECH_ACT].value_counts().to_dict()
     for k in sorted(count_tags.keys()):
         print("{}: {}".format(k, count_tags[k]), end=" ; ")
 
     # Features: vocabulary (spoken)
-    count_vocabulary = [y for x in data.tokens.tolist() for y in x]  # flatten
+    count_vocabulary = [y for x in data.tokens.tolist() for y in x]
     count_vocabulary = dict(Counter(count_vocabulary))
-    # filtering features
     count_vocabulary = {k: v for k, v in count_vocabulary.items() if v > nb_occ}
+
     # turning vocabulary into numbered features - ordered vocabulary
-    features_idx = {
+    feature_vocabs = {
         "words": {k: i for i, k in enumerate(sorted(count_vocabulary.keys()))}
     }
-    print("\nThere are {} words in the features".format(len(features_idx["words"])))
+    print("\nThere are {} words in the vocab".format(len(feature_vocabs["words"])))
 
     # Features: Speakers (+ logging counts)
-    count_spk = dict(Counter(data["speaker"].tolist()))
-    print("\nSpeaker counts: ")
-    for k in sorted(count_spk.keys()):
-        print("{}: {}".format(k, count_spk[k]), end=" ; ")
-    features_idx["speaker"] = {
-        k: (len(features_idx["words"]) + i)
-        for i, k in enumerate(sorted(count_spk.keys()))
-    }
+    # count_spk = dict(Counter(data["speaker"].tolist()))
+    # print("\nSpeaker counts: ")
+    # for k in sorted(count_spk.keys()):
+    #     print("{}: {}".format(k, count_spk[k]), end=" ; ")
+    # feature_vocabs["speaker"] = {
+    #     k: (len(feature_vocabs["words"]) + i)
+    #     for i, k in enumerate(sorted(count_spk.keys()))
+    # }
 
     # Features: sentence length (+ logging counts)
     data["len_bin"], bins = pd.qcut(
@@ -390,11 +386,11 @@ def generate_features(
     for i, k in enumerate(bins[:-1]):
         print("\tlabel {}: turns of length {}-{}".format(i, k, bins[i + 1]))
 
-    nb_feat = max([max(v.values()) for v in features_idx.values()])
-    features_idx["length_bins"] = {
+    nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
+    feature_vocabs["length_bins"] = {
         "{}-{}".format(k, bins[i + 1]): (nb_feat + i) for i, k in enumerate(bins[:-1])
     }
-    features_idx["length"] = {i: (nb_feat + i) for i, _ in enumerate(bins[:-1])}
+    feature_vocabs["length"] = {i: (nb_feat + i) for i, _ in enumerate(bins[:-1])}
     # parameters: duplicates: 'raise' raises error if bins are identical, 'drop' just ignores them (leading to the creation of larger bins by fusing those with identical cuts)
     # retbins = return bins (for debug) ; labels=False: only yield the position in the binning, not the name (simpler to create features)
 
@@ -405,21 +401,21 @@ def generate_features(
         # filtering features
         count_actions = {k: v for k, v in count_actions.items() if v > nb_occ}
         # turning vocabulary into numbered features - ordered vocabulary
-        nb_feat = max([max(v.values()) for v in features_idx.values()])
-        features_idx["action"] = {
+        nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
+        feature_vocabs["action"] = {
             k: i + nb_feat for i, k in enumerate(sorted(count_actions.keys()))
         }
-        print("\nThere are {} words in the actions".format(len(features_idx["action"])))
+        print("\nThere are {} words in the actions".format(len(feature_vocabs["action"])))
 
     # Features: repetitions (reusing word from speech)
     if use_repetitions:
-        nb_feat = max([max(v.values()) for v in features_idx.values()])
+        nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
         # features esp for length & ratio - repeated words can use previously defined features
         # lengths
         _, bins = pd.qcut(
             data.nb_repwords, q=bin_cut, duplicates="drop", labels=False, retbins=True
         )
-        features_idx["rep_length_bins"] = {
+        feature_vocabs["rep_length_bins"] = {
             "{}-{}".format(k, bins[i + 1]): (nb_feat + i)
             for i, k in enumerate(bins[:-1])
         }
@@ -431,7 +427,7 @@ def generate_features(
             labels=False,
             retbins=True,
         )
-        features_idx["rep_ratio_bins"] = {
+        feature_vocabs["rep_ratio_bins"] = {
             "{}-{}".format(k, bins[i + 1]): (nb_feat + i)
             for i, k in enumerate(bins[:-1])
         }
@@ -439,7 +435,7 @@ def generate_features(
         for i, k in enumerate(bins[:-1]):
             print("\tlabel {}: turns of length {}-{}".format(i, k, bins[i + 1]))
 
-    return features_idx
+    return feature_vocabs
 
 
 ### REPORT
@@ -518,10 +514,7 @@ if __name__ == "__main__":
 
     args.use_action = args.use_action & ("action" in data_train.columns.str.lower())
     args.use_past_actions = args.use_past_actions & args.use_action
-    data_train.rename(
-        columns={col: col.lower() for col in data_train.columns}, inplace=True
-    )
-    data_train = data_add_features(
+    data_train = add_feature_columns(
         data_train,
         use_action=args.use_action,
         match_age=args.match_age,
@@ -530,7 +523,7 @@ if __name__ == "__main__":
         use_pastact=args.use_past_actions,
     )
 
-    print("### Creating features:".upper())
+    print("### Creating features:")
     features_idx = generate_features(
         data_train,
         args.nb_occurrences,
@@ -541,7 +534,7 @@ if __name__ == "__main__":
 
     # creating crf features set for train
     data_train["features"] = data_train.apply(
-        lambda x: word_to_feature(
+        lambda x: get_features_from_row(
             features_idx,
             x.tokens,
             x["speaker"],

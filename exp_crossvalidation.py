@@ -34,8 +34,8 @@ from sklearn.model_selection import KFold
 from utils import dataset_labels, SPEECH_ACT_DESCRIPTIONS
 from crf_train import (
     openData,
-    data_add_features,
-    word_to_feature,
+    add_feature_columns,
+    get_features_from_row,
     word_bs_feature,
     generate_features,
 )
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         )
     # Loading with actions and repetitions in order to use them later
     data.rename(columns={col: col.lower() for col in data.columns}, inplace=True)
-    data = data_add_features(
+    data = add_feature_columns(
         data, use_action=True, check_repetition=True, use_past=True, use_pastact=True
     )
     # Parameters
@@ -231,7 +231,7 @@ if __name__ == "__main__":
 
         # creating crf features set for train
         data_train["features"] = data_train.apply(
-            lambda x: word_to_feature(
+            lambda x: get_features_from_row(
                 features_idx,
                 x.tokens,
                 x["speaker"],
@@ -287,7 +287,7 @@ if __name__ == "__main__":
         tagger.open(nm + "_model.pycrfsuite")
 
         data_test["features"] = data_test.apply(
-            lambda x: word_to_feature(
+            lambda x: get_features_from_row(
                 features_idx,
                 x.tokens,
                 x["speaker"],

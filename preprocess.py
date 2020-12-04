@@ -12,6 +12,9 @@ from utils import parse_xml, get_xml_as_dict
 
 SPEECH_ACT = "speech_act"
 
+SPEAKER_CHILD = "CHI"
+SPEAKER_ADULT = "ADU"
+
 
 def read_files(input_dir, input_format="xml"):
     """
@@ -100,6 +103,8 @@ if __name__ == "__main__":
     data = data[
         (pd.concat([data[col] != "" for col in drop_subset], axis=1)).any(axis=1)
     ]
+
+    data['speaker'] = data['speaker'].apply(lambda x: x if x  == SPEAKER_CHILD else SPEAKER_ADULT)
 
     if not args.keep_untagged:
         # Note: hierarchical: 1 > 2 = 2a ; if one is empty the next are empty
