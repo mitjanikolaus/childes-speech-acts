@@ -192,7 +192,7 @@ def get_features_from_row(
     feat_glob["speaker"] = {speaker: 1.0}
     feat_glob["speaker"] = 1.0 if speaker == ADULT else 0.0
     feat_glob["length"] = {
-        k: (1 if ln <= float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
+        k: (1 if ln < float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
         for k in features["length_bins"].keys()
     }
 
