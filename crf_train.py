@@ -1,12 +1,15 @@
 import os
 import argparse
+import pickle
 from collections import Counter
 import json
+from itertools import tee, islice
 from typing import Union, Tuple
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
+from nltk import ngrams
 from sklearn.metrics import (
     accuracy_score,
 )
@@ -23,7 +26,7 @@ def argparser():
     argparser.add_argument("data", type=str, help="file listing train dialogs")
     # Operations on data
     argparser.add_argument(
-        "--match_age",
+        "--match-age",
         type=int,
         nargs="+",
         default=None,
@@ -31,7 +34,7 @@ def argparser():
     )
     # parameters for training:
     argparser.add_argument(
-        "--nb_occurrences",
+        "--nb-occurrences",
         "-noc",
         type=int,
         default=5,
@@ -44,25 +47,31 @@ def argparser():
         help="Ratio of dataset to be used to testing",
     )
     argparser.add_argument(
-        "--use_action",
+        "--use-bi-grams",
+        "-bi",
+        action="store_true",
+        help="whether to use bi-gram features to train the algorithm",
+    )
+    argparser.add_argument(
+        "--use-action",
         "-act",
         action="store_true",
         help="whether to use action features to train the algorithm, if they are in the data",
     )
     argparser.add_argument(
-        "--use_past",
+        "--use-past",
         "-past",
         action="store_true",
         help="whether to add previous sentence as features",
     )
     argparser.add_argument(
-        "--use_repetitions",
+        "--use-repetitions",
         "-rep",
         action="store_true",
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
     argparser.add_argument(
-        "--use_past_actions",
+        "--use-past_actions",
         "-pa",
         action="store_true",
         help="whether to add actions from the previous sentence to features",
@@ -150,7 +159,7 @@ def add_feature_columns(
 
 
 def get_features_from_row(
-    features: dict, spoken_tokens: list, speaker: str, ln: int, **kwargs
+    features: dict, tokens: list, speaker: str, ln: int, use_bi_grams, **kwargs
 ):
     """Replacing input list tokens with feature index
 
@@ -186,15 +195,20 @@ def get_features_from_row(
     feat_glob: `dict`
             dictionary of same shape as feature, but only containing features relevant to data line
     """
-    feat_glob = {
-        "words": Counter([w for w in spoken_tokens if (w in features["words"].keys())])
-    }  # TODO: add 'UNK' token
-    feat_glob["speaker"] = {speaker: 1.0}
+    feat_glob = {}
+
+    # TODO: add 'UNK' token
+    feat_glob["words"] = Counter([w for w in tokens if (w in features["words"].keys())])
+
     feat_glob["speaker"] = 1.0 if speaker == ADULT else 0.0
     feat_glob["length"] = {
         k: (1 if ln < float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
         for k in features["length_bins"].keys()
     }
+
+    if use_bi_grams:
+        bi_grams = ["-".join(n_gram) for n_gram in get_n_grams(tokens, 2) if n_gram in features["bigrams"].keys()]
+        feat_glob["bigrams"] = Counter(bi_grams)
 
     if ("action_tokens" in kwargs) and (kwargs["action_tokens"] is not None):
         # actions are descriptions just like 'words'
@@ -235,15 +249,29 @@ def get_features_from_row(
 
     return feat_glob
 
+def get_n_grams(utterance, n):
+    # Cut off punctuation
+    utterance = utterance[:-1]
+    n_grams = ngrams(utterance, n)
+    return n_grams
+
+def get_n_grams_counter(utterances, n):
+    counter = Counter()
+    for utterance in utterances:
+        n_grams = get_n_grams(utterance, n)
+        counter.update(n_grams)
+    return counter
 
 def generate_features_vocabs(
     data: pd.DataFrame,
     nb_occ: int,
+    use_bi_grams: bool,
     use_action: bool,
     use_repetitions: bool,
     bin_cut: int = 10,
 ) -> dict:
     """Analyse data according to arguments passed and generate features_idx dictionary. Printing log data to console."""
+    feature_vocabs = {}
     print("\nTag counts: ")
     count_tags = data[SPEECH_ACT].value_counts().to_dict()
     for k in sorted(count_tags.keys()):
@@ -255,9 +283,7 @@ def generate_features_vocabs(
     count_vocabulary = {k: v for k, v in count_vocabulary.items() if v > nb_occ}
 
     # turning vocabulary into numbered features - ordered vocabulary
-    feature_vocabs = {
-        "words": {k: i for i, k in enumerate(sorted(count_vocabulary.keys()))}
-    }
+    feature_vocabs["words"] = {k: i for i, k in enumerate(sorted(count_vocabulary.keys()))}
     print("\nThere are {} words in the vocab".format(len(feature_vocabs["words"])))
 
     # Features: sentence length (+ logging counts)
@@ -274,6 +300,15 @@ def generate_features_vocabs(
         "{}-{}".format(k, bins[i + 1]): (nb_feat + i) for i, k in enumerate(bins[:-1])
     }
     feature_vocabs["length"] = {i: (nb_feat + i) for i, _ in enumerate(bins[:-1])}
+
+    if use_bi_grams:
+        bi_grams_counter = get_n_grams_counter(data.tokens.tolist(), 2)
+        bi_grams_vocab = {k: v for k, v in dict(bi_grams_counter).items() if v > nb_occ}
+        nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
+        feature_vocabs["bigrams"] = {k: nb_feat+i for i, k in enumerate(sorted(bi_grams_vocab.keys()))}
+
+        print("\nMost common bigrams: ", bi_grams_counter.most_common(20))
+        print("There are {} bigrams in the vocab".format(len(feature_vocabs["bigrams"])))
 
     # Features: actions
     if use_action:
@@ -405,6 +440,7 @@ if __name__ == "__main__":
     feature_vocabs = generate_features_vocabs(
         data_train,
         args.nb_occurrences,
+        args.use_bi_grams,
         args.use_action,
         args.use_repetitions,
         bin_cut=number_segments_length_feature,
@@ -417,6 +453,7 @@ if __name__ == "__main__":
             x.tokens,
             x["speaker"],
             x.turn_length,
+            use_bi_grams = args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,
             repetitions=None
             if not args.use_repetitions
@@ -472,8 +509,8 @@ if __name__ == "__main__":
         plot_training(trainer, checkpoint_path)
 
     # dumping features
-    with open(os.path.join(checkpoint_path, "feature_vocabs.json"), "w") as json_file:
-        json.dump(feature_vocabs, json_file)
+    with open(os.path.join(checkpoint_path, "feature_vocabs.p"), "wb") as pickle_file:
+        pickle.dump(feature_vocabs, pickle_file)
 
     # dumping metadata
     with open(os.path.join(checkpoint_path, "metadata.txt"), "w") as meta_file:
@@ -490,6 +527,7 @@ if __name__ == "__main__":
             x.tokens,
             x["speaker"],
             x.turn_length,
+            use_bi_grams=args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,
             repetitions=None
             if not args.use_repetitions

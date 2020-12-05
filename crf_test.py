@@ -182,7 +182,7 @@ if __name__ == '__main__':
 	else:
 		raise FileNotFoundError(f"Cannot find model {name}.")
 	# update paths for input/output
-	features_path = name + linker + 'features.json'
+	features_path = name + linker + 'feature_vocabs.p'
 	model_path = name + linker + 'model.pycrfsuite'
 	report_path = name + linker + args.data.replace('/', '_')+'_report.xlsx'
 	plot_path = name + linker + args.data.split('/')[-1]+'_agesevol.png'
@@ -202,8 +202,8 @@ if __name__ == '__main__':
 	_, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
 
 	# Loading features
-	with open(features_path, 'r') as json_file:
-		features_idx = json.load(json_file)
+	with open(features_path, 'rb') as pickle_file:
+		features_idx = pickle.load(pickle_file)
 	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x.turn_length,
 																			action_tokens=None if not args.use_action else x.action_tokens,
 																			repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),

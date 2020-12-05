@@ -1,42 +1,24 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Compare training on different heldout datasets
-
-Execute training:
-	$ python crf_crossvalidation.py --data ttv/newengland_all_spa_2.tsv -rep
-"""
 import os
 import pickle
-import sys
-import random
-import codecs
 import argparse
-import time, datetime
 from collections import Counter
-import json
-import difflib
 
-import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
 from scipy.stats import entropy
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 import pycrfsuite
 
 import seaborn as sns
 
-### Tag functions
 from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
-from utils import dataset_labels, SPEECH_ACT_DESCRIPTIONS
+from utils import SPEECH_ACT_DESCRIPTIONS
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
-    word_bs_feature,
     generate_features_vocabs, crf_predict, plot_training,
 )
 from crf_test import bio_classification_report, report_to_file
@@ -78,6 +60,12 @@ def argparser():
         type=int,
         default=5,
         help="number of splits to perform crossvalidation over",
+    )
+    argparser.add_argument(
+        "--use-bi-grams",
+        "-bi",
+        action="store_true",
+        help="whether to use bi-gram features to train the algorithm",
     )
     argparser.add_argument(
         "--use_action",
@@ -143,6 +131,7 @@ if __name__ == "__main__":
     feature_vocabs = generate_features_vocabs(
         data,
         args.nb_occurrences,
+        args.use_bi_grams,
         args.use_action,
         args.use_repetitions,
         bin_cut=number_segments_length_feature,
@@ -155,6 +144,7 @@ if __name__ == "__main__":
             x.tokens,
             x["speaker"],
             x.turn_length,
+            use_bi_grams=args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,
             repetitions=None
             if not args.use_repetitions
@@ -215,6 +205,7 @@ if __name__ == "__main__":
         features_idx = generate_features_vocabs(
             data_train,
             args.nb_occurrences,
+            args.use_bi_grams,
             args.use_action,
             args.use_repetitions,
             bin_cut=number_segments_length_feature,
@@ -227,6 +218,7 @@ if __name__ == "__main__":
                 x.tokens,
                 x["speaker"],
                 x.turn_length,
+                use_bi_grams=args.use_bi_grams,
                 action_tokens=None if not args.use_action else x.action_tokens,
                 repetitions=None
                 if not args.use_repetitions
@@ -270,8 +262,8 @@ if __name__ == "__main__":
         print("Saving model at: {}".format(nm))
 
         trainer.train(nm + "_model.pycrfsuite")
-        with open(nm + "_features.json", "w") as json_file:  # dumping features
-            json.dump(features_idx, json_file)
+        with open(nm + "_features.p", "wb") as pickle_file:  # dumping features
+            pickle.dump(features_idx, pickle_file)
 
         ### Testing
         tagger = pycrfsuite.Tagger()
@@ -283,6 +275,7 @@ if __name__ == "__main__":
                 x.tokens,
                 x["speaker"],
                 x.turn_length,
+                use_bi_grams=args.use_bi_grams,
                 action_tokens=None if not args.use_action else x.action_tokens,
                 repetitions=None
                 if not args.use_repetitions

@@ -74,6 +74,8 @@ if __name__ == "__main__":
     model_path = args.model + os.sep + "model.pycrfsuite"
     features_path = args.model + os.sep + "features.json"
 
+    # TODO load metadata to know used features
+
     data = pd.DataFrame(data).reset_index(drop=False)
 
     # Add turn length column
@@ -95,6 +97,7 @@ if __name__ == "__main__":
             x.tokens,
             x["speaker"],
             x.turn_length,
+            use_bi_grams=args.use_bi_grams,
         ),
         axis=1,
     )
