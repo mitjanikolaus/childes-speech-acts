@@ -2,15 +2,13 @@ import os
 import pickle
 import argparse
 from collections import Counter
-import json
 import ast
 from typing import Union, Tuple
 from bidict import bidict
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import sklearn
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
+from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, accuracy_score
 from sklearn.model_selection import train_test_split
 import pycrfsuite
 
@@ -118,7 +116,7 @@ def bio_classification_report(y_true, y_pred):
 	"""	
 	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
 	cm = confusion_matrix(y_true, y_pred, normalize='true')
-	acc = sklearn.metrics.accuracy_score(y_true, y_pred, normalize = True)
+	acc = accuracy_score(y_true, y_pred, normalize = True)
 	cks = cohen_kappa_score(y_true, y_pred)
 
 	print("==> Accuracy: {0:.3f}".format(acc))
@@ -134,7 +132,7 @@ def plot_testing(test_df:pd.DataFrame, file_location:str, col_ages):
 	for age in sorted(test_df[col_ages].unique().tolist()): # remove < 1Y?
 		for spks in ([[x] for x in speakers]+[speakers]):
 			age_loc_sub = test_df[(test_df[col_ages] == age) & (test_df.speaker.isin(spks))]
-			acc = sklearn.metrics.accuracy_score(age_loc_sub.y_true, age_loc_sub.y_pred, normalize=True)
+			acc = accuracy_score(age_loc_sub.y_true, age_loc_sub.y_pred, normalize=True)
 			cks = cohen_kappa_score(age_loc_sub.y_true, age_loc_sub.y_pred)
 			tmp.append({'age':age, 'locutor':'&'.join(spks), 'accuracy':acc, 'agreement': cks, 'nb_labels': len(age_loc_sub.y_true.unique().tolist())})
 		# also do CHI/MOT separately
@@ -204,7 +202,8 @@ if __name__ == '__main__':
 	# Loading features
 	with open(features_path, 'rb') as pickle_file:
 		features_idx = pickle.load(pickle_file)
-	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x.turn_length,
+	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x['prev_speaker'], x.turn_length,
+																			use_bi_grams=args.use_bi_grams,
 																			action_tokens=None if not args.use_action else x.action_tokens,
 																			repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
 																			past_tokens=None if not args.use_past else x.past,

@@ -105,9 +105,11 @@ def add_feature_columns(
     * number of repeated words
     * ratio of words that were repeated from previous sentence over sentence length
     """
-    # sentence: using tokens to count & all
     p["tokens"] = p.tokens
     p["turn_length"] = p.tokens.apply(len)
+
+    p["prev_speaker"] = p["speaker"].shift(1)
+    p["prev_speaker"].iloc[0] = p["speaker"].iloc[0]
 
     # action: creating action tokens
     if use_action:
@@ -159,7 +161,7 @@ def add_feature_columns(
 
 
 def get_features_from_row(
-    features: dict, tokens: list, speaker: str, ln: int, use_bi_grams, **kwargs
+    features: dict, tokens: list, speaker: str, prev_speaker: str, ln: int, use_bi_grams, **kwargs
 ):
     """Replacing input list tokens with feature index
 
@@ -201,6 +203,8 @@ def get_features_from_row(
     feat_glob["words"] = Counter([w for w in tokens if (w in features["words"].keys())])
 
     feat_glob["speaker"] = 1.0 if speaker == ADULT else 0.0
+    feat_glob["speaker_changed"] = 1.0 if speaker != prev_speaker else 0.0
+
     feat_glob["length"] = {
         k: (1 if ln < float(k.split("-")[1]) and ln >= float(k.split("-")[0]) else 0)
         for k in features["length_bins"].keys()
@@ -452,6 +456,7 @@ if __name__ == "__main__":
             feature_vocabs,
             x.tokens,
             x["speaker"],
+            x["prev_speaker"],
             x.turn_length,
             use_bi_grams = args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,
@@ -526,6 +531,7 @@ if __name__ == "__main__":
             feature_vocabs,
             x.tokens,
             x["speaker"],
+            x["prev_speaker"],
             x.turn_length,
             use_bi_grams=args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,

@@ -28,28 +28,20 @@ AGE_MONTHS_GROUPS = {
     20: [18, 19, 20, 21],
     32: [27, 28, 29, 30, 31, 32, 33],
 }
-#### Read Data functions
+
 def argparser():
-    """Creating arparse.ArgumentParser and returning arguments"""
     argparser = argparse.ArgumentParser(
         description="Perform cross-validation for the CRF",
     )
     # Data files
     argparser.add_argument("--data", type=str, help="file listing all dialogs")
-    argparser.add_argument(
-        "--txt_columns",
-        nargs="+",
-        type=str,
-        default=[],
-        help=""".txt columns name (in order); most basic txt is ['spa_all', 'ut', 'time', 'speaker', 'sentence']""",
-    )
     # Operations on data
     argparser.add_argument(
         "--age", type=int, default=None, help="filter data for children's age"
     )
     # parameters for training:
     argparser.add_argument(
-        "--nb_occurrences",
+        "--nb-occurrences",
         "-noc",
         type=int,
         default=5,
@@ -68,25 +60,25 @@ def argparser():
         help="whether to use bi-gram features to train the algorithm",
     )
     argparser.add_argument(
-        "--use_action",
+        "--use-action",
         "-act",
         action="store_true",
         help="whether to use action features to train the algorithm, if they are in the data",
     )
     argparser.add_argument(
-        "--use_past",
+        "--use-past",
         "-past",
         action="store_true",
         help="whether to add previous sentence as features",
     )
     argparser.add_argument(
-        "--use_repetitions",
+        "--use-repetitions",
         "-rep",
         action="store_true",
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
     argparser.add_argument(
-        "--use_past_actions",
+        "--use-past_actions",
         "-pa",
         action="store_true",
         help="whether to add actions from the previous sentence to features",
@@ -97,7 +89,7 @@ def argparser():
         help="Whether to display training iterations output.",
     )
     argparser.add_argument(
-        "--prediction_mode",
+        "--prediction-mode",
         choices=["raw", "exclude_ool"],
         default="exclude_ool",
         type=str,
@@ -125,34 +117,6 @@ if __name__ == "__main__":
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
         use_pastact=args.use_past_actions,
-    )
-
-    print("### Creating features:")
-    feature_vocabs = generate_features_vocabs(
-        data,
-        args.nb_occurrences,
-        args.use_bi_grams,
-        args.use_action,
-        args.use_repetitions,
-        bin_cut=number_segments_length_feature,
-    )
-
-    # creating crf features set for train
-    data["features"] = data.apply(
-        lambda x: get_features_from_row(
-            feature_vocabs,
-            x.tokens,
-            x["speaker"],
-            x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
-            repetitions=None
-            if not args.use_repetitions
-            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-        ),
-        axis=1,
     )
 
     # Location for weight save
@@ -217,6 +181,7 @@ if __name__ == "__main__":
                 features_idx,
                 x.tokens,
                 x["speaker"],
+                x["prev_speaker"],
                 x.turn_length,
                 use_bi_grams=args.use_bi_grams,
                 action_tokens=None if not args.use_action else x.action_tokens,
@@ -274,6 +239,7 @@ if __name__ == "__main__":
                 features_idx,
                 x.tokens,
                 x["speaker"],
+                x["prev_speaker"],
                 x.turn_length,
                 use_bi_grams=args.use_bi_grams,
                 action_tokens=None if not args.use_action else x.action_tokens,
