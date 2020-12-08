@@ -76,7 +76,7 @@ def load_utts(age):
         print(corpus)
 
         transcripts = get_transcripts(corpus=corpus["corpus_name"], db_args=DB_ARGS)
-        utts = get_utterances(corpus=corpus["corpus_name"], db_args=DB_ARGS)
+        utts = get_utterances(corpus=corpus["corpus_name"], language="eng", db_args=DB_ARGS)
 
         # Filter transcripts by child age
         transcripts = transcripts.loc[
