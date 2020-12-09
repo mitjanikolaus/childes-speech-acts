@@ -617,11 +617,6 @@ if __name__ == "__main__":
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
     data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
-
-    acc = accuracy_score(
-        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), normalize=True
-    )
-
     report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())
     pickle.dump(report.T, open("data/classification_scores_crf.p", "wb"))
 
