@@ -1,5 +1,6 @@
 import pickle
 import argparse
+import warnings
 
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score
@@ -15,6 +16,9 @@ import seaborn as sns
 
 MIN_NUM_UTTERANCES = 500
 THRESHOLD_ACQUIRED = 1
+AGE_MONTHS_BIN_SIZE = 2
+MIN_AGE = 12
+MAX_AGE = 60
 
 
 def parse_args():
@@ -27,9 +31,6 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-
-    min_age = 12
-    max_age = 60
 
     # Model prediction accuracies
     scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     observed_speech_acts = [k for k, v in scores_f1.items() if v > .6 and k in frequencies_adults.keys()]
 
     # dev: use only subset
-    observed_speech_acts = observed_speech_acts[:10]
+    observed_speech_acts = observed_speech_acts[:20]
 
     speech_acts_children = pd.read_hdf("data/speech_acts_chi.h5")
 
@@ -53,10 +54,10 @@ if __name__ == "__main__":
     age_of_acquisition = {}
 
     for speech_act in observed_speech_acts:
-        age_of_acquisition[speech_act] = max_age
-        for month in range(min_age, max_age):
+        age_of_acquisition[speech_act] = MAX_AGE
+        for month in range(MIN_AGE, MAX_AGE, AGE_MONTHS_BIN_SIZE):
             prev_fraction = 0
-            speech_acts_children_month = speech_acts_children[speech_acts_children["child_age"] == month]
+            speech_acts_children_month = speech_acts_children[(speech_acts_children["child_age"] >= month) & (speech_acts_children["child_age"] < month+AGE_MONTHS_BIN_SIZE)]
             children_ids = speech_acts_children_month["child_id"].unique()
             n_children = 0
             n_acquired = 0
@@ -74,9 +75,9 @@ if __name__ == "__main__":
                 fraction = n_acquired / n_children
             else:
                 # not enough data, use data of previous month
-                # TODO probably better increase bin size..
+                warnings.warn(f"speech act {speech_act}: month {month}: Not enough data (only {n_children} children). Using value of previous month. Increase age bin size?")
                 fraction = prev_fraction
-            print(f"{speech_act}: {month}: {n_children}")
+            # print(f"{speech_act}: {month}: {n_children}")
 
             fraction_acquired_speech_act.append({
                 "speech_act": speech_act,
@@ -89,11 +90,6 @@ if __name__ == "__main__":
                 age_of_acquisition[speech_act] = min(month, age_of_acquisition[speech_act])
 
     fraction_acquired_speech_act = pd.DataFrame(fraction_acquired_speech_act)
-
-    sns.set_palette("tab20")
-    sns.lineplot(data = fraction_acquired_speech_act, x = "month", y="fraction", hue="speech_act")
-    # sns.lmplot(data = fraction_acquired_speech_act, x = "month", y="fraction", hue="speech_act")
-
 
 
     frequencies_adults_observed = [frequencies_adults[s] for s in observed_speech_acts]
@@ -111,6 +107,12 @@ if __name__ == "__main__":
     y_pred = reg.predict(features)
     print("Explained variance (freq + f1 scores):", explained_variance_score(targets, y_pred))
 
+    sns.set_palette("tab20")
+    # sns.lineplot(data=fraction_acquired_speech_act, x="month", y="fraction", hue="speech_act")
+    g = sns.lmplot(data=fraction_acquired_speech_act, x="month", y="fraction", hue="speech_act", logistic=True, ci=None)
+    g.set(ylim=(0, 1))
+
+    plt.show()
 
 
 
