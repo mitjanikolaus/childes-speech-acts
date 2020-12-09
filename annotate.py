@@ -29,8 +29,7 @@ def annotate(args):
     label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    data = pickle.load(open(args.data + args.corpus, "rb"))
-    data = pd.DataFrame(data)
+    data = pd.read_hdf(args.data)
 
     # Replace speaker column values
     data["speaker"] = data["speaker"].apply(
@@ -117,14 +116,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="data/",
-        help="location of the data corpus and vocabs",
-    )
-    parser.add_argument(
-        "--corpus",
-        type=str,
-        default="speech_acts_data_newengland.h5",
-        help="name of the corpus file",
+        default="data/utterances.h5",
+        help="pat to the data file",
     )
     parser.add_argument(
         "--compare", type=str, required=True, help="Path to frequencies to compare to"

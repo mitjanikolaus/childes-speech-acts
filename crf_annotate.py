@@ -12,7 +12,7 @@ from scipy.stats import entropy
 import pycrfsuite
 
 from crf_test import crf_predict
-from crf_train import get_features_from_row
+from crf_train import get_features_from_row, add_feature_columns
 from preprocess import CHILD, ADULT
 
 
@@ -48,11 +48,16 @@ def compare_frequencies(frequencies, args):
     labels = list(gold_frequencies.keys()) * 2
     source = ["Gold"] * len(gold_frequencies) + ["Predicted"] * len(gold_frequencies)
     frequencies = list(gold_frequencies.values()) + list(frequencies.values())
-    df = pd.DataFrame(zip(labels, source, frequencies), columns=["speech_act", "source", "frequency"])
+    df = pd.DataFrame(
+        zip(labels, source, frequencies), columns=["speech_act", "source", "frequency"]
+    )
     plt.figure(figsize=(10, 6))
     sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
-    plt.title(f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}")
+    plt.title(
+        f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}"
+    )
     plt.show()
+
 
 def calculate_frequencies(data: list):
     frequencies = Counter(data)
@@ -64,19 +69,21 @@ def calculate_frequencies(data: list):
 
     return frequencies
 
+
 if __name__ == "__main__":
     args = parse_args()
 
     # Loading data
-    data = pickle.load(open(args.data, "rb"))
+    data = pd.read_hdf(args.data)
 
     # Loading model
     model_path = args.model + os.sep + "model.pycrfsuite"
     features_path = args.model + os.sep + "features.json"
 
     # TODO load metadata to know used features
+    use_bi_grams = False
 
-    data = pd.DataFrame(data).reset_index(drop=False)
+    data = data.reset_index(drop=False)
 
     # Add turn length column
     data["turn_length"] = data.tokens.apply(len)
@@ -91,13 +98,18 @@ if __name__ == "__main__":
         features_idx = json.load(json_file)
 
     # TODO use more features?
+    data = add_feature_columns(
+        data,
+    )
+
     data["features"] = data.apply(
         lambda x: get_features_from_row(
             features_idx,
             x.tokens,
+            x["prev_speaker"],
             x["speaker"],
             x.turn_length,
-            use_bi_grams=args.use_bi_grams,
+            use_bi_grams=use_bi_grams,
         ),
         axis=1,
     )
@@ -122,15 +134,14 @@ if __name__ == "__main__":
 
     speech_acts_adults = data_adults["y_pred"].tolist()
 
-    pickle.dump(data_children[["file_id", "y_pred"]], open(args.data.replace("utterances", "speech_acts_chi"), "wb"))
-    pickle.dump(data_adults[["file_id", "y_pred"]], open(args.data.replace("utterances", "speech_acts_adu"), "wb"))
+    data_children.to_hdf("data/speech_acts_chi.h5", key="speech_acts")
+    data_adults.to_hdf("data/speech_acts_adu.h5", key="speech_acts")
 
-    frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())
 
     if args.compare:
+        frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())
         compare_frequencies(frequencies_children, args)
 
     #
     # for _, row in data.iterrows():
     #     print(f"({row.y_pred}) {row.speaker}: {' '.join(row.tokens)}")
-
