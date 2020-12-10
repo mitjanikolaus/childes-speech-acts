@@ -39,27 +39,24 @@ def read_files(input_dir, input_format="xml"):
     """
     # create a df to store all data
     df = []
-    # loop
-    for dir in [
-        x for x in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, x))
-    ]:
-        in_dir = os.path.join(input_dir, dir)
 
-        for file in [x for x in os.listdir(in_dir) if input_format in x]:
-            in_file = os.path.join(in_dir, file)
+    for root, dirs, files in os.walk(input_dir):
+        for file_name in files:
+            in_file = os.path.join(root, file_name)
             print(in_file)
-            d = get_xml_as_dict(in_file)
-            try:
-                df_transcript = parse_xml(d)
-                df_transcript["file_id"] = in_file
-                df.append(df_transcript)
+            if input_format in file_name:
+                d = get_xml_as_dict(in_file)
+                try:
+                    df_transcript = parse_xml(d)
+                    df_transcript["file_id"] = in_file
+                    df.append(df_transcript)
 
-            except ValueError as e:
-                print("Dummy file: ", in_file)
-                pass
-            except:  # raise other exceptions
-                print("Unexpected error:", sys.exc_info()[0])
-                raise
+                except ValueError:
+                    print("Dummy file: ", in_file)
+                    pass
+                except:  # raise other exceptions
+                    print("Unexpected error:", sys.exc_info()[0])
+                    raise
 
     df = pd.concat(df, ignore_index=True)
 
@@ -69,7 +66,9 @@ def read_files(input_dir, input_format="xml"):
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     # Data files
-    argparser.add_argument("--input-dir", "-i", required=True)
+    argparser.add_argument("--input-dir", "-i", type=str, required=True)
+    argparser.add_argument("--output-path", "-o", type=str, required=True)
+
     argparser.add_argument(
         "--keep-untagged",
         action="store_true",
@@ -106,7 +105,7 @@ if __name__ == "__main__":
         (pd.concat([data[col] != "" for col in drop_subset], axis=1)).any(axis=1)
     ]
 
-    data['speaker'] = data['speaker'].apply(lambda x: x if x == CHILD else ADULT)
+    data["speaker"] = data["speaker"].apply(lambda x: x if x == CHILD else ADULT)
 
     if not args.keep_untagged:
         data.drop(
@@ -116,5 +115,4 @@ if __name__ == "__main__":
     data["index"] = range(len(data))
     data.set_index("index")
 
-    filepath = os.path.join("data", "new_england_preprocessed.p")
-    data.to_pickle(filepath)
+    data.to_pickle(args.output_path)

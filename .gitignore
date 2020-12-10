@@ -7,5 +7,6 @@ results/*
 .idea/*
 chatter.jar
 java_out/*
+java_out_rollins/*
 checkpoints/*
 outputs/*
