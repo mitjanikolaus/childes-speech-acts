@@ -622,6 +622,5 @@ if __name__ == "__main__":
     data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
     report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())
-    pickle.dump(report.T, open("data/classification_scores_crf.p", "wb"))
 
 

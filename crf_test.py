@@ -159,6 +159,7 @@ if __name__ == '__main__':
 	model_path = name + os.path.sep + 'model.pycrfsuite'
 	report_path = name + os.path.sep + args.data.replace('/', '_')+'_report.xlsx'
 	plot_path = name + os.path.sep + args.data.split('/')[-1]+'_agesevol.png'
+	classification_scores_path = name + os.path.sep + "classification_scores.p"
 
 	# Loading data
 	data = pd.read_pickle(args.data)
@@ -217,7 +218,7 @@ if __name__ == '__main__':
 		'learned_transitions': transitions.pivot(index='label_from', columns='label', values='likelihood') 
 	}
 
-	pickle.dump(report.T, open("data/classification_scores_crf.p","wb"))
+	pickle.dump(report.T, open(classification_scores_path,"wb"))
 
 	if args.col_ages is not None:
 		plot_testing(data_test, plot_path, args.col_ages)
