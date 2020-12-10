@@ -28,6 +28,7 @@ if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
     scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
+
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
@@ -37,6 +38,7 @@ if __name__ == "__main__":
 
     # Filter for speech acts that can be predicted with at least 60%
     # TODO justify
+    # TODO instead use speech acts that occur in at least 1% of gold data (new england)?
     observed_speech_acts = [
         k for k, v in scores_f1.items() if v > 0.6 and k in frequencies_adults.keys()
     ]

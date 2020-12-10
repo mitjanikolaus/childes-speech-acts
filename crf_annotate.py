@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import entropy
 import pycrfsuite
 
-from crf_test import crf_predict
+from crf_test import crf_predict, load_training_args
 from crf_train import get_features_from_row, add_feature_columns
 from preprocess import CHILD, ADULT
 
@@ -72,21 +72,17 @@ def calculate_frequencies(data: list):
 
 if __name__ == "__main__":
     args = parse_args()
+    args = load_training_args(args)
+    print(args)
 
     # Loading data
     data = pd.read_hdf(args.data)
 
     # Loading model
     model_path = args.model + os.sep + "model.pycrfsuite"
-    features_path = args.model + os.sep + "features.json"
-
-    # TODO load metadata to know used features
-    use_bi_grams = False
+    features_path = args.model + os.sep + "feature_vocabs.p"
 
     data = data.reset_index(drop=False)
-
-    # Add turn length column
-    data["turn_length"] = data.tokens.apply(len)
 
     # Replace speaker column values
     data["speaker"] = data["speaker"].apply(
@@ -94,22 +90,34 @@ if __name__ == "__main__":
     )
 
     # Loading features
-    with open(features_path, "r") as json_file:
-        features_idx = json.load(json_file)
+    with open(features_path, "rb") as pickle_file:
+        feature_vocabs = pickle.load(pickle_file)
 
-    # TODO use more features?
     data = add_feature_columns(
         data,
+        use_action=args.use_action,
+        match_age=args.match_age,
+        check_repetition=args.use_repetitions,
+        use_past=args.use_past,
+        use_pastact=args.use_past_actions,
+        use_pos=args.use_pos,
     )
 
     data["features"] = data.apply(
         lambda x: get_features_from_row(
-            features_idx,
+            feature_vocabs,
             x.tokens,
-            x["prev_speaker"],
             x["speaker"],
+            x["prev_speaker"],
             x.turn_length,
-            use_bi_grams=use_bi_grams,
+            use_bi_grams=args.use_bi_grams,
+            action_tokens=None if not args.use_action else x.action_tokens,
+            repetitions=None
+            if not args.use_repetitions
+            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+            past_tokens=None if not args.use_past else x.past,
+            pastact_tokens=None if not args.use_past_actions else x.past_act,
+            pos_tags=None if not args.use_pos else x.pos,
         ),
         axis=1,
     )

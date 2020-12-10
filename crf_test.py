@@ -39,6 +39,7 @@ def load_training_args(args):
             "use_repetitions",
             "use_past_actions",
             "use_pos",
+            "match_age",
         ]:
             try:
                 setattr(args, arg_name, ast.literal_eval(value))
@@ -103,49 +104,7 @@ def parse_args():
 
     args = argparser.parse_args()
 
-    args = load_training_args(args)
-
     return args
-
-
-def baseline_predict(
-    model,
-    data,
-    labels: bidict,
-    mode: str = "raw",
-    exclude_labels: list = ["NOL", "NAT", "NEE"],
-) -> Union[list, Tuple[list, pd.DataFrame]]:
-    """Return predictions for the test data. 3 modes for return:
-    * Return raw predictions (raw)
-    * Return predictions with only valid tags (exclude_ool)
-    * Return predictions (valid tags) and probabilities for each class (rt_proba)
-    """
-    if mode not in ["raw", "exclude_ool", "rt_proba"]:
-        raise ValueError(
-            f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}"
-        )
-
-    if mode == "raw":
-        # still need to transform class to label
-        return [
-            labels.inverse[x] for x in model.predict(data)
-        ]  # predicting int version of labels, not ordered number
-
-    y_proba = model.predict_proba(data)  # predict proba to remove extra labels
-    classes_names = [
-        labels.inverse[x] for x in model.classes_
-    ]  # proba ordered by classes_ => label
-    y_proba = pd.DataFrame(y_proba, columns=classes_names)
-    # filter & predict
-    y_pred = (
-        y_proba[[col for col in y_proba.columns if col not in exclude_labels]]
-        .idxmax(axis=1)
-        .tolist()
-    )
-
-    if mode == "rt_proba":
-        return y_pred, y_proba
-    return y_pred  # else
 
 
 #### Report functions
@@ -231,6 +190,7 @@ def report_to_file(dfs: dict, file_location: str):
 #### MAIN
 if __name__ == "__main__":
     args = parse_args()
+    args = load_training_args(args)
     print(args)
 
     # Loading model
@@ -238,23 +198,6 @@ if __name__ == "__main__":
     if os.path.isdir(name):
         if name[-1] == "/":
             name = name[:-1]
-    elif os.path.isfile(name + "_model.pycrfsuite"):
-        linker = "_"
-        # get args from name if possible
-        try:
-            (
-                rp,
-                args.use_action,
-                args.use_repetitions,
-                args.use_past,
-                args.use_past_actions,
-            ) = name.split("/")[-1].split("_")
-        except ValueError as e:
-            if "unpack" in str(e):
-                raise AttributeError(
-                    "Cannot find model metadata - args need to be set."
-                )
-        args.baseline = None  # default
     else:
         raise FileNotFoundError(f"Cannot find model {name}.")
     # update paths for input/output
