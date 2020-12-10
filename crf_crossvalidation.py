@@ -118,6 +118,7 @@ if __name__ == "__main__":
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
         use_pastact=args.use_past_actions,
+        use_pos=args.use_pos,
     )
 
     # Location for weight save

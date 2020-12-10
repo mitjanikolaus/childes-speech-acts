@@ -176,9 +176,9 @@ if __name__ == '__main__':
 
 	# Loading features
 	with open(features_path, 'rb') as pickle_file:
-		features_idx = pickle.load(pickle_file)
+		feature_vocabs = pickle.load(pickle_file)
 
-	data_test['features'] = data_test.apply(lambda x: get_features_from_row(features_idx, x.tokens, x['speaker'], x['prev_speaker'], x.turn_length,
+	data_test['features'] = data_test.apply(lambda x: get_features_from_row(feature_vocabs, x.tokens, x['speaker'], x['prev_speaker'], x.turn_length,
 																			use_bi_grams=args.use_bi_grams,
 																			action_tokens=None if not args.use_action else x.action_tokens,
 																			repetitions=None if not args.use_repetitions else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
@@ -189,24 +189,23 @@ if __name__ == '__main__':
 	# Predictions
 	tagger = pycrfsuite.Tagger()
 	tagger.open(model_path)
-	
+
 	data_test.dropna(subset=[SPEECH_ACT], inplace=True)
-	X_dev = data_test.groupby(by=['file_id']).agg({ 
+	grouped_test = data_test.groupby(by=['file_id']).agg({
 		'features' : lambda x: [y for y in x],
 		'index': min
 	})
-	# parameter 'raw' vs 'exclude_ool': remove ['NOL', 'NAT', 'NEE'] from predictions, predict closest label
-	y_pred = crf_predict(tagger, X_dev.sort_values('index', ascending=True)['features'], mode=args.prediction_mode) 
+
+	y_pred = crf_predict(tagger, grouped_test.sort_values('index', ascending=True)['features'], mode=args.prediction_mode)
 	data_test['y_pred'] = [y for x in y_pred for y in x] # flatten
-	data_test['y_true'] = data_test[SPEECH_ACT]
-	data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
+	data_test['pred_OK'] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
 	# only report on tags where y_true != NOL, NAT, NEE
-	data_crf = data_test[~data_test['y_true'].isin(['NOL', 'NAT', 'NEE'])]
+	data_crf = data_test[~data_test[SPEECH_ACT].isin(['NOL', 'NAT', 'NEE'])]
 	# reports
-	report, mat, acc, cks = bio_classification_report(data_crf['y_true'].tolist(), data_crf['y_pred'].tolist())
+	report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())
 	states, transitions = features_report(tagger)
 	
-	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_test.columns if 'spa_' in x] + (['child'] if args.consistency_check else [])+ ['y_true', 'y_pred', 'pred_OK']
+	int_cols = ['file_id', 'speaker'] + ([args.col_ages] if args.col_ages is not None else []) + [x for x in data_test.columns if 'spa_' in x] + (['child'] if args.consistency_check else [])+ [SPEECH_ACT, 'y_pred', 'pred_OK']
 
 	report_d = {
 		'test_data': data_crf[int_cols],

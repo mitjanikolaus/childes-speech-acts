@@ -157,7 +157,7 @@ def add_feature_columns(
         )
 
     if use_pos:
-        p['pos'] = p.pos.apply(lambda x: x.lower().split())
+        p['pos'] = p.pos.apply(lambda x: x.lower().split(" "))
 
     # remove helper columns
     p = p.drop(columns=["prev_spk", "prev_st", "prev_file", "prev_act"], errors="ignore")
@@ -369,7 +369,8 @@ def generate_features_vocabs(
 
         pos_vocab = Counter()
         for tags in data.pos.tolist():
-            pos_vocab.update(tags)
+            if tags:
+                pos_vocab.update(tags)
 
         pos_vocab = dict(pos_vocab)
         # filtering features
@@ -484,6 +485,7 @@ if __name__ == "__main__":
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
         use_pastact=args.use_past_actions,
+        use_pos=args.use_pos,
     )
 
     data_train, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
@@ -521,8 +523,9 @@ if __name__ == "__main__":
 
     # Once the features are done, groupby name and extract a list of lists
     # The list contains transcripts, which each contain a list of utterances
+    data_train.dropna(subset=[SPEECH_ACT], inplace=True)
     grouped_train = (
-        data_train.dropna(subset=[SPEECH_ACT])
+        data_train
         .groupby(by=["file_id"])
         .agg(
             {
@@ -597,13 +600,13 @@ if __name__ == "__main__":
 
     # Once the features are done, groupby name and extract a list of lists
     # The list contains transcripts, which each contain a list of utterances
+    data_test.dropna(subset=[SPEECH_ACT], inplace=True)
     grouped_test = (
-        data_test.dropna(subset=[SPEECH_ACT])
+        data_test
             .groupby(by=["file_id"])
             .agg(
             {
                 "features": lambda x: [y for y in x],
-                SPEECH_ACT: lambda x: [y for y in x],
                 "index": min,
             }
         )
@@ -615,6 +618,7 @@ if __name__ == "__main__":
         mode="exclude_ool",
     )
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+
     data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
     report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())

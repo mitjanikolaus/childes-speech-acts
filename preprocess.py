@@ -115,4 +115,5 @@ if __name__ == "__main__":
     data["index"] = range(len(data))
     data.set_index("index")
 
+    print(f"Preprocessed {len(data)} utterances.")
     data.to_pickle(args.output_path)
