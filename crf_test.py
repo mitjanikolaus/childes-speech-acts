@@ -16,7 +16,7 @@ from preprocess import SPEECH_ACT
 from crf_train import add_feature_columns, get_features_from_row, crf_predict, bio_classification_report
 
 
-def argparser():
+def parse_args():
 	argparser = argparse.ArgumentParser(description='Test a previously trained CRF')
 	argparser.add_argument('data', type=str, help="file listing all dialogs")
 	argparser.add_argument(
@@ -40,7 +40,7 @@ def argparser():
 	lines = text_file.readlines() # lines ending with "\n"
 	for line in lines:
 		arg_name, value = line[:-1].split(":\t")
-		if arg_name not in ['format', 'txt_columns', 'match_age']: # don't replace existing arguments!
+		if arg_name not in ['format', 'txt_columns', 'match_age', 'test_ratio', 'data']: # don't replace existing arguments!
 			try:
 				setattr(args, arg_name, ast.literal_eval(value))
 			except ValueError as e:
@@ -135,7 +135,8 @@ def report_to_file(dfs:dict, file_location:str):
 
 #### MAIN
 if __name__ == '__main__':
-	args = argparser()
+	args = parse_args()
+	print(args)
 
 	# Loading model
 	name = args.model
@@ -173,6 +174,7 @@ if __name__ == '__main__':
 	)
 
 	_, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
+	print(f"Testing on {len(data_test)} utterances")
 
 	# Loading features
 	with open(features_path, 'rb') as pickle_file:
