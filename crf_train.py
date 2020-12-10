@@ -72,7 +72,7 @@ def argparser():
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
     argparser.add_argument(
-        "--use-past_actions",
+        "--use-past-actions",
         "-pa",
         action="store_true",
         help="whether to add actions from the previous sentence to features",
