@@ -29,7 +29,14 @@ python crf_train.py data/new_england_preprocessed.p [optional_feature_args]
 
 # Test CRF classifier
 
-
+Test the classifier on the same corpus:
 ```
 python crf_test.py data/new_england_preprocessed.p -m checkpoints/crf/
 ```
+
+Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/Eng-NA/Rollins.html):
+1. Use the steps described above to download the corpus and preprocess it.
+2. Test the classifier on the corpus.
+   ```
+   python crf_test.py data/rollins_preprocessed.p -m checkpoints/crf/
+   ```
