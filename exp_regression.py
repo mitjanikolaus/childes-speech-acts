@@ -14,11 +14,12 @@ import pandas as pd
 
 import seaborn as sns
 
-from utils import COLORS_PLOT_CATEGORICAL
+from utils import COLORS_PLOT_CATEGORICAL, SPEECH_ACTS_MIN_PERCENT_CHILDREN
 
-MIN_NUM_UTTERANCES = 500
+MIN_NUM_UTTERANCES = 100
 MIN_CHILDREN_REQUIRED = 3
 THRESHOLD_ACQUIRED = 1
+THRESHOLD_FRACTION_ACQUIRED = 0.5
 AGE_MONTHS_BIN_SIZE = 1
 MIN_AGE = 12
 MAX_AGE = 60
@@ -27,7 +28,8 @@ MAX_AGE = 60
 if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
-    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
+    # TODO use classification scores on other dataset?
+    scores = pickle.load(open("data/classification_scores_crf_rollins.p", "rb"))
 
     scores_f1 = scores["f1-score"].to_dict()
 
@@ -40,8 +42,11 @@ if __name__ == "__main__":
     # TODO justify
     # TODO instead use speech acts that occur in at least 1% of gold data (new england)?
     observed_speech_acts = [
-        k for k, v in scores_f1.items() if v > 0.6 and k in frequencies_adults.keys()
+        k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
     ]
+    # observed_speech_acts = [k for k in scores_f1.keys() if k in frequencies_adults.keys()]
+
+    # observed_speech_acts =  SPEECH_ACTS_MIN_PERCENT_CHILDREN
 
     # dev: use only subset
     # observed_speech_acts = observed_speech_acts[:20]
@@ -52,7 +57,25 @@ if __name__ == "__main__":
 
     print("Processing speech acts...")
     for speech_act in observed_speech_acts:
-        prev_fraction = 0
+
+        # Add start: at 10 months children don't produce any speech act
+        fraction_acquired_speech_act.append(
+            {
+                "speech_act": speech_act,
+                "month": 10,
+                "fraction": 0.0,
+            }
+        )
+        # Add end: at 18 years children know all speech acts
+        fraction_acquired_speech_act.append(
+            {
+                "speech_act": speech_act,
+                "month": 12 * 18,
+                "fraction": 1.0,
+            }
+        )
+
+        prev_fraction = 0.0
         for month in range(MIN_AGE, MAX_AGE, AGE_MONTHS_BIN_SIZE):
             speech_acts_children_month = speech_acts_children[
                 (speech_acts_children["child_age"] >= month)
@@ -108,21 +131,40 @@ if __name__ == "__main__":
         ci=None,
         legend=True,
     )
-    g.set(ylim=(0, 1))
+    g.set(ylim=(0, 1), xlim=(MIN_AGE, MAX_AGE))
     plt.setp(g.legend.get_texts(), fontsize="10")
-    # plt.legend(fontsize='20', title_fontsize='40', loc)
 
     # Read estimated ages of acquisition from the logistic regression plot data
     age_of_acquisition = {}
     for i, speech_act in enumerate(observed_speech_acts):
         fractions = g.ax.get_lines()[i].get_ydata()
         ages = g.ax.get_lines()[i].get_xdata()
-        if np.where(fractions > 0.5)[0].size > 0:
-            age_of_acquisition[speech_act] = ages[np.min(np.where(fractions > 0.5))]
+
+        # If the logistic regression has failed: use data from points
+        # TODO: improve.
+        if np.isnan(fractions).all():
+            warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
+            fractions_speech_act_acquired = fraction_acquired_speech_act[
+                (fraction_acquired_speech_act["speech_act"] == speech_act)
+                & fraction_acquired_speech_act["fraction"]
+                >= THRESHOLD_FRACTION_ACQUIRED
+            ]
+            if len(fractions_speech_act_acquired) > 0:
+                age_of_acquisition[speech_act] = min(
+                    fraction_acquired_speech_act["month"]
+                )
+            else:
+                age_of_acquisition[speech_act] = MAX_AGE
+
+        # Take data from logistic regression curve
         else:
-            age_of_acquisition[speech_act] = MAX_AGE
+            if np.where(fractions > 0.5)[0].size > 0:
+                age_of_acquisition[speech_act] = ages[np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))]
+            else:
+                age_of_acquisition[speech_act] = MAX_AGE
         print(
-            f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f}"
+            f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} |"
+            f" Freq: {frequencies_adults_observed[i]} | F1: {scores_observed[i]}"
         )
 
     features = np.array(frequencies_adults_observed).reshape(-1, 1)

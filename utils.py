@@ -33,6 +33,9 @@ PUNCTUATION = {
     "self interruption": "-",
 }
 
+SPEECH_ACTS_MIN_PERCENT_CHILDREN = ['YY', 'OO', 'RD', 'RT', 'TO', 'PF', 'SA', 'RP', 'MK', 'AA', 'ST', 'PR', 'AC', 'AD', 'SI', 'QN', 'YQ']
+
+
 ### Read/Write JSON
 def get_xml_as_dict(filepath: str):
     with open(filepath) as in_file:
@@ -140,6 +143,15 @@ def age_months(s: str) -> int:
         age = int(age) * 12  # only 1 argument
     return age
 
+def calculate_frequencies(data: list):
+    frequencies = Counter(data)
+    for k in frequencies.keys():
+        if frequencies[k]:
+            frequencies[k] /= len(data)
+        else:
+            frequencies[k] = 0
+
+    return frequencies
 
 def parse_xml(d: dict):
     """

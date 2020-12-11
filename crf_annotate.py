@@ -14,6 +14,7 @@ import pycrfsuite
 from crf_test import crf_predict, load_training_args
 from crf_train import get_features_from_row, add_feature_columns
 from preprocess import CHILD, ADULT
+from utils import calculate_frequencies
 
 
 def parse_args():
@@ -57,18 +58,6 @@ def compare_frequencies(frequencies, args):
         f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}"
     )
     plt.show()
-
-
-def calculate_frequencies(data: list):
-    frequencies = Counter(data)
-    for k in frequencies.keys():
-        if frequencies[k]:
-            frequencies[k] /= len(data)
-        else:
-            frequencies[k] = 0
-
-    return frequencies
-
 
 if __name__ == "__main__":
     args = parse_args()
