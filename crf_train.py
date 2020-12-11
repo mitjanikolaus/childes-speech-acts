@@ -11,12 +11,17 @@ import matplotlib.pyplot as plt
 import sklearn
 from nltk import ngrams
 from sklearn.metrics import (
-    accuracy_score, classification_report, confusion_matrix, cohen_kappa_score,
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    cohen_kappa_score,
 )
 from sklearn.model_selection import train_test_split
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
+from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
+
 
 def argparser():
     argparser = argparse.ArgumentParser(
@@ -43,7 +48,7 @@ def argparser():
     argparser.add_argument(
         "--test-ratio",
         type=float,
-        default=.2,
+        default=0.2,
         help="Ratio of dataset to be used to testing",
     )
     argparser.add_argument(
@@ -58,7 +63,12 @@ def argparser():
         action="store_true",
         help="whether to use action features to train the algorithm, if they are in the data",
     )
-    argparser.add_argument('--use-pos', '-pos', action='store_true', help="whether to add POS tags to features")
+    argparser.add_argument(
+        "--use-pos",
+        "-pos",
+        action="store_true",
+        help="whether to add POS tags to features",
+    )
     argparser.add_argument(
         "--use-past",
         "-past",
@@ -95,7 +105,7 @@ def add_feature_columns(
     use_action: bool = False,
     use_past: bool = False,
     use_pastact: bool = False,
-    use_pos:bool = False,
+    use_pos: bool = False,
     check_repetition: bool = False,
 ):
     """Function adding features to the data:
@@ -129,9 +139,7 @@ def add_feature_columns(
     if check_repetition or use_past or use_pastact:
         p["prev_file"] = p.file_id.shift(1).fillna(p.file_id.iloc[0])
         p["prev_spk"] = p.speaker.shift(1).fillna(p.speaker.iloc[0])
-        p["prev_st"] = p.tokens.shift(
-            1
-        )
+        p["prev_st"] = p.tokens.shift(1)
         p["prev_st"].iloc[0] = p.tokens.iloc[0]
 
     if check_repetition:
@@ -157,17 +165,25 @@ def add_feature_columns(
         )
 
     if use_pos:
-        p['pos'] = p.pos.apply(lambda x: x.lower().split(" "))
+        p["pos"] = p.pos.apply(lambda x: x.lower().split(" "))
 
     # remove helper columns
-    p = p.drop(columns=["prev_spk", "prev_st", "prev_file", "prev_act"], errors="ignore")
+    p = p.drop(
+        columns=["prev_spk", "prev_st", "prev_file", "prev_act"], errors="ignore"
+    )
 
     # return Dataframe
     return p
 
 
 def get_features_from_row(
-    features: dict, tokens: list, speaker: str, prev_speaker: str, ln: int, use_bi_grams, **kwargs
+    features: dict,
+    tokens: list,
+    speaker: str,
+    prev_speaker: str,
+    ln: int,
+    use_bi_grams,
+    **kwargs,
 ):
     """Replacing input list tokens with feature index
 
@@ -217,7 +233,11 @@ def get_features_from_row(
     }
 
     if use_bi_grams:
-        bi_grams = ["-".join(n_gram) for n_gram in get_n_grams(tokens, 2) if n_gram in features["bigrams"].keys()]
+        bi_grams = [
+            "-".join(n_gram)
+            for n_gram in get_n_grams(tokens, 2)
+            if n_gram in features["bigrams"].keys()
+        ]
         feat_glob["bigrams"] = Counter(bi_grams)
 
     if ("action_tokens" in kwargs) and (kwargs["action_tokens"] is not None):
@@ -257,9 +277,12 @@ def get_features_from_row(
             [w for w in kwargs["pastact_tokens"] if (w in features["action"].keys())]
         )
 
-    if ('pos_tags' in kwargs) and (kwargs['pos_tags'] is not None):
-        feat_glob['pos'] = Counter([w for w in kwargs['pos_tags'] if (w in features['pos'].keys())])
+    if ("pos_tags" in kwargs) and (kwargs["pos_tags"] is not None):
+        feat_glob["pos"] = Counter(
+            [w for w in kwargs["pos_tags"] if (w in features["pos"].keys())]
+        )
     return feat_glob
+
 
 def get_n_grams(utterance, n):
     # Cut off punctuation
@@ -267,12 +290,14 @@ def get_n_grams(utterance, n):
     n_grams = ngrams(utterance, n)
     return n_grams
 
+
 def get_n_grams_counter(utterances, n):
     counter = Counter()
     for utterance in utterances:
         n_grams = get_n_grams(utterance, n)
         counter.update(n_grams)
     return counter
+
 
 def generate_features_vocabs(
     data: pd.DataFrame,
@@ -296,7 +321,9 @@ def generate_features_vocabs(
     count_vocabulary = {k: v for k, v in count_vocabulary.items() if v > nb_occ}
 
     # turning vocabulary into numbered features - ordered vocabulary
-    feature_vocabs["words"] = {k: i for i, k in enumerate(sorted(count_vocabulary.keys()))}
+    feature_vocabs["words"] = {
+        k: i for i, k in enumerate(sorted(count_vocabulary.keys()))
+    }
     print("\nThere are {} words in the vocab".format(len(feature_vocabs["words"])))
 
     # Features: sentence length (+ logging counts)
@@ -318,10 +345,14 @@ def generate_features_vocabs(
         bi_grams_counter = get_n_grams_counter(data.tokens.tolist(), 2)
         bi_grams_vocab = {k: v for k, v in dict(bi_grams_counter).items() if v > nb_occ}
         nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
-        feature_vocabs["bigrams"] = {k: nb_feat+i for i, k in enumerate(sorted(bi_grams_vocab.keys()))}
+        feature_vocabs["bigrams"] = {
+            k: nb_feat + i for i, k in enumerate(sorted(bi_grams_vocab.keys()))
+        }
 
         print("\nMost common bigrams: ", bi_grams_counter.most_common(20))
-        print("There are {} bigrams in the vocab".format(len(feature_vocabs["bigrams"])))
+        print(
+            "There are {} bigrams in the vocab".format(len(feature_vocabs["bigrams"]))
+        )
 
     # Features: actions
     if use_action:
@@ -334,7 +365,9 @@ def generate_features_vocabs(
         feature_vocabs["action"] = {
             k: i + nb_feat for i, k in enumerate(sorted(count_actions.keys()))
         }
-        print("\nThere are {} words in the actions".format(len(feature_vocabs["action"])))
+        print(
+            "\nThere are {} words in the actions".format(len(feature_vocabs["action"]))
+        )
 
     # Features: repetitions of previous utterance
     if use_repetitions:
@@ -376,8 +409,12 @@ def generate_features_vocabs(
         # filtering features
         pos_vocab = {k: v for k, v in pos_vocab.items() if v > nb_occ}
         # turning vocabulary into numbered features - ordered vocabulary
-        feature_vocabs['pos'] = {k: i + nb_feat for i, k in enumerate(sorted(pos_vocab.keys()))}
-        print("\nThere are {} pos tags in the features".format(len(feature_vocabs['pos'])))
+        feature_vocabs["pos"] = {
+            k: i + nb_feat for i, k in enumerate(sorted(pos_vocab.keys()))
+        }
+        print(
+            "\nThere are {} pos tags in the features".format(len(feature_vocabs["pos"]))
+        )
 
     return feature_vocabs
 
@@ -442,28 +479,39 @@ def crf_predict(
 
 
 def bio_classification_report(y_true, y_pred):
-	"""
-	Classification report for a list of BIO-encoded sequences.
-	It computes token-level metrics and discards "O" labels.
-	Requires scikit-learn 0.20+
+    """
+    Classification report for a list of BIO-encoded sequences.
+    It computes token-level metrics and discards "O" labels.
+    Requires scikit-learn 0.20+
 
-	Output:
-	--------
-	cr: pd.DataFrame
+    Output:
+    --------
+    cr: pd.DataFrame
 
-	cm: np.array
+    cm: np.array
 
-	acc: float
-	"""
-	cr = classification_report(y_true, y_pred, digits = 3, output_dict=True)
-	cm = confusion_matrix(y_true, y_pred, normalize='true')
-	acc = accuracy_score(y_true, y_pred, normalize = True)
-	cks = cohen_kappa_score(y_true, y_pred)
+    acc: float
+    """
+    cr = classification_report(y_true, y_pred, digits=3, output_dict=True)
+    cm = confusion_matrix(y_true, y_pred, normalize="true")
+    acc = accuracy_score(y_true, y_pred, normalize=True)
+    cks = cohen_kappa_score(y_true, y_pred)
 
-	print("==> Accuracy: {0:.3f}".format(acc))
-	print("==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(cks, 1./len(set(y_true))))
-	# using both as index in case not the same labels in it
-	return pd.DataFrame(cr), pd.DataFrame(cm, index=sorted(set(y_true+y_pred)), columns=sorted(set(y_true+y_pred))), acc, cks
+    print("==> Accuracy: {0:.3f}".format(acc))
+    print(
+        "==> Cohen Kappa Score: {0:.3f} \t(pure chance: {1:.3f})".format(
+            cks, 1.0 / len(set(y_true))
+        )
+    )
+    # using both as index in case not the same labels in it
+    return (
+        pd.DataFrame(cr),
+        pd.DataFrame(
+            cm, index=sorted(set(y_true + y_pred)), columns=sorted(set(y_true + y_pred))
+        ),
+        acc,
+        cks,
+    )
 
 
 #### MAIN
@@ -488,7 +536,9 @@ if __name__ == "__main__":
         use_pos=args.use_pos,
     )
 
-    data_train, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
+    data_train, data_test = train_test_split(
+        data, test_size=args.test_ratio, shuffle=False
+    )
 
     print("### Creating features:")
     feature_vocabs = generate_features_vocabs(
@@ -509,31 +559,26 @@ if __name__ == "__main__":
             x["speaker"],
             x["prev_speaker"],
             x.turn_length,
-            use_bi_grams = args.use_bi_grams,
+            use_bi_grams=args.use_bi_grams,
             action_tokens=None if not args.use_action else x.action_tokens,
             repetitions=None
             if not args.use_repetitions
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
             past_tokens=None if not args.use_past else x.past,
             pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos
+            pos_tags=None if not args.use_pos else x.pos,
         ),
         axis=1,
     )
 
     # Once the features are done, groupby name and extract a list of lists
     # The list contains transcripts, which each contain a list of utterances
-    data_train.dropna(subset=[SPEECH_ACT], inplace=True)
-    grouped_train = (
-        data_train
-        .groupby(by=["file_id"])
-        .agg(
-            {
-                "features": lambda x: [y for y in x],
-                SPEECH_ACT: lambda x: [y for y in x],
-                "index": min,
-            }
-        )
+    grouped_train = data_train.groupby(by=["file_id"]).agg(
+        {
+            "features": lambda x: [y for y in x],
+            SPEECH_ACT: lambda x: [y for y in x],
+            "index": min,
+        }
     )
 
     grouped_train = sklearn.utils.shuffle(grouped_train)
@@ -600,16 +645,11 @@ if __name__ == "__main__":
 
     # Once the features are done, groupby name and extract a list of lists
     # The list contains transcripts, which each contain a list of utterances
-    data_test.dropna(subset=[SPEECH_ACT], inplace=True)
-    grouped_test = (
-        data_test
-            .groupby(by=["file_id"])
-            .agg(
-            {
-                "features": lambda x: [y for y in x],
-                "index": min,
-            }
-        )
+    grouped_test = data_test.groupby(by=["file_id"]).agg(
+        {
+            "features": lambda x: [y for y in x],
+            "index": min,
+        }
     )
 
     y_pred = crf_predict(
@@ -619,8 +659,13 @@ if __name__ == "__main__":
     )
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
 
-    data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
+    # Remove uninformative tags before doing analysis
+    data_crf = data_test[
+        ~data_test[SPEECH_ACT].isin(
+            ["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION]
+        )
+    ]
 
-    report, mat, acc, cks = bio_classification_report(data_crf[SPEECH_ACT].tolist(), data_crf['y_pred'].tolist())
-
-
+    report, mat, acc, cks = bio_classification_report(
+        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
+    )

@@ -15,7 +15,7 @@ import seaborn as sns
 from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
-from utils import SPEECH_ACT_DESCRIPTIONS
+from utils import SPEECH_ACT_DESCRIPTIONS, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -138,6 +138,7 @@ if __name__ == "__main__":
 
     # Gather ground-truth label distributions:
     data_children = data[data.speaker == "CHI"]
+    data_children = data_children[~data_children[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
     counts = Counter(data_children[SPEECH_ACT])
     observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.Name.keys() if counts[k] > 0]
     counters["gold"] = dict.fromkeys(observed_labels)
@@ -200,7 +201,7 @@ if __name__ == "__main__":
 
         # Once the features are done, groupby name and extract a list of lists
         grouped_train = (
-            data_train.dropna(subset=[SPEECH_ACT])
+            data_train
             .groupby(by=["file_id"])
             .agg(
                 {
@@ -267,13 +268,13 @@ if __name__ == "__main__":
             mode=args.prediction_mode,
         )
         data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
-        data_test["y_true"] = data_test[SPEECH_ACT]
-        data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x.y_true), axis=1)
-        # remove ['NOL', 'NAT', 'NEE'] for prediction and reports
-        data_crf = data_test[~data_test["y_true"].isin(["NOL", "NAT", "NEE"])]
+        data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
+
+        # Remove uninformative tags before doing analysis
+        data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
         # reports
         report, mat, acc, cks = bio_classification_report(
-            data_crf["y_true"].tolist(), data_crf["y_pred"].tolist()
+            data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
         )
         logger[i] = acc
         freport[i] = {"report": report, "cm": mat}

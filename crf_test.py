@@ -24,6 +24,7 @@ from crf_train import (
     crf_predict,
     bio_classification_report,
 )
+from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
 
 
 def load_training_args(args):
@@ -250,7 +251,6 @@ if __name__ == "__main__":
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
 
-    data_test.dropna(subset=[SPEECH_ACT], inplace=True)
     grouped_test = data_test.groupby(by=["file_id"]).agg(
         {"features": lambda x: [y for y in x], "index": min}
     )
@@ -264,8 +264,8 @@ if __name__ == "__main__":
     data_test["pred_OK"] = data_test.apply(
         lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
     )
-    # only report on tags where y_true != NOL, NAT, NEE
-    data_crf = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
+    # Remove uninformative tags before doing analysis
+    data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
     # reports
     report, mat, acc, cks = bio_classification_report(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()

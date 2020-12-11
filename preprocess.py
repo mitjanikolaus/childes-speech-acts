@@ -1,14 +1,8 @@
-import xmltodict
-import json
 import os, sys
-from collections import Counter, OrderedDict
-import numpy as np
 import pandas as pd
-import time, datetime
 import argparse
-import re
 
-from utils import parse_xml, get_xml_as_dict, calculate_frequencies
+from utils import parse_xml, get_xml_as_dict, calculate_frequencies, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
 
 SPEECH_ACT = "speech_act"
 
@@ -70,9 +64,9 @@ if __name__ == "__main__":
     argparser.add_argument("--output-path", "-o", type=str, required=True)
 
     argparser.add_argument(
-        "--keep-untagged",
+        "--drop-untagged",
         action="store_true",
-        help="Keep utterances that have not been annotated",
+        help="Drop utterances that have not been annotated",
     )
     args = argparser.parse_args()
 
@@ -90,7 +84,12 @@ if __name__ == "__main__":
         "age_months",
     ]
 
-    data[SPEECH_ACT] = data[SPEECH_ACT].fillna("NOL")
+    data[SPEECH_ACT] = data[SPEECH_ACT].fillna(SPEECH_ACT_UNINTELLIGIBLE)
+
+    if args.drop_untagged:
+        data.drop(
+            data[data[SPEECH_ACT].isin([SPEECH_ACT_UNINTELLIGIBLE, "NAT", "NEE"])].index, inplace=True
+        )
 
     frequencies = calculate_frequencies(data[SPEECH_ACT])
     print(f"Speech act frequencies:")
@@ -114,11 +113,6 @@ if __name__ == "__main__":
     ]
 
     data["speaker"] = data["speaker"].apply(lambda x: x if x == CHILD else ADULT)
-
-    if not args.keep_untagged:
-        data.drop(
-            data[data[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])].index, inplace=True
-        )
 
     data["index"] = range(len(data))
     data.set_index("index")

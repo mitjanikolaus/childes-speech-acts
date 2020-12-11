@@ -33,6 +33,9 @@ PUNCTUATION = {
     "self interruption": "-",
 }
 
+SPEECH_ACT_UNINTELLIGIBLE = "OO"
+SPEECH_ACT_NO_FUNCTION = "YY"
+
 SPEECH_ACTS_MIN_PERCENT_CHILDREN = ['YY', 'OO', 'RD', 'RT', 'TO', 'PF', 'SA', 'RP', 'MK', 'AA', 'ST', 'PR', 'AC', 'AD', 'SI', 'QN', 'YQ']
 
 
