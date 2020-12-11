@@ -20,14 +20,15 @@ Data for supervised training is taken from the [New England corpus](https://chil
     ```
     python preprocess.py --input-path java_out/ --output-path data/new_england_preprocessed.p
    ```
-   
-# Train CRF classifier
+  
+# CRF  
+## Train CRF classifier
 
 ```
 python crf_train.py data/new_england_preprocessed.p [optional_feature_args]
 ```
 
-# Test CRF classifier
+## Test CRF classifier
 
 Test the classifier on the same corpus:
 ```
@@ -40,3 +41,14 @@ Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/
    ```
    python crf_test.py data/rollins_preprocessed.p -m checkpoints/crf/
    ```
+# Neural Networks
+## Train LSTM classifier
+```
+python nn_train.py --data data/new_england_preprocessed.p --model lstm --epochs 50
+```
+
+## Test LSTM classifier
+```
+python nn_test.py --model out --data data/new_england_preprocessed.p
+```
+

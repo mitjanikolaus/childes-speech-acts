@@ -7,11 +7,14 @@ import pickle
 import pandas as pd
 
 import torch
+from sklearn.model_selection import train_test_split
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from dataset import SpeechActsDataset
-from models import SpeechActLSTM, SpeechActDistilBERT
+from nn_dataset import SpeechActsDataset
+from nn_models import SpeechActLSTM, SpeechActDistilBERT
+from preprocess import SPEECH_ACT
+from utils import build_vocabulary, dataset_labels, preprend_speaker_token
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -30,17 +33,43 @@ def detach_hidden(h):
 def train(args):
     print("Start training with args: ", args)
     print("Device: ", device)
+
     # Load data
-    vocab = pickle.load(open(args.data + "vocab.p", "rb"))
-    label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
+    data = pd.read_pickle(args.data)
 
-    train_dataframe = pd.read_hdf(args.data + args.corpus, "train")
-    val_dataframe = pd.read_hdf(args.data + args.corpus, "val")
-    test_dataframe = pd.read_hdf(args.data + args.corpus, "test")
+    print("Building vocabulary..")
+    vocab = build_vocabulary(data["tokens"])
+    if not os.path.isdir(args.out):
+        os.mkdir(args.out)
+    pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
 
-    dataset_train = SpeechActsDataset(train_dataframe)
-    dataset_val = SpeechActsDataset(val_dataframe)
-    dataset_test = SpeechActsDataset(test_dataframe)
+    label_vocab = dataset_labels(SPEECH_ACT)
+    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+
+    # Preprend speaker tokens
+    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
+
+    # Convert words and labels to indices using the respective vocabs
+    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
+    data["labels"] = data[SPEECH_ACT].apply(lambda l: label_vocab[l])
+
+    # Group by transcript (file name), each transcript is treated as one long input sequence
+    grouped_data = data.groupby(by=['file_id']).agg({
+        'utterances': lambda x: [y for y in x],
+        'labels': lambda x: [y for y in x],
+        'age_months': min,
+    })
+
+    data_train, data_test = train_test_split(
+        grouped_data, test_size=args.test_ratio, shuffle=False
+    )
+    data_train, data_val = train_test_split(
+        data_train, test_size=.1, shuffle=False
+    )
+
+    dataset_train = SpeechActsDataset(data_train)
+    dataset_val = SpeechActsDataset(data_val)
+    dataset_test = SpeechActsDataset(data_test)
 
     train_loader = DataLoader(
         dataset_train,
@@ -69,7 +98,7 @@ def train(args):
     elif args.model == MODEL_TRANSFORMER:
         model = SpeechActDistilBERT(len(label_vocab), args.dropout)
     else:
-        raise RuntimeError("Unknown model type: ",args.model)
+        raise RuntimeError("Unknown model type: ", args.model)
 
     model.to(device)
 
@@ -158,7 +187,7 @@ def train(args):
             print("-" * 89)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_acc or val_accuracy > best_val_acc:
-                with open(args.save, "wb") as f:
+                with open(f"{args.out}/model.pt", "wb") as f:
                     torch.save(model, f)
                 best_val_acc = val_accuracy
 
@@ -167,7 +196,7 @@ def train(args):
         print("Exiting from training early")
 
     # Load the best saved model.
-    with open(args.save, "rb") as f:
+    with open(f"{args.out}/model.pt", "rb") as f:
         model = torch.load(f)
 
     # Run on test data.
@@ -186,14 +215,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="./data/",
-        help="location of the data corpus and vocabs",
+        required=True,
+        help="path to the data corpus",
     )
     parser.add_argument(
-        "--corpus",
+        "--out",
         type=str,
-        default="speech_acts_data_newengland.h5",
-        help="name of the corpus file",
+        default="out/",
+        help="directory to store result files",
     )
     parser.add_argument(
         "--model",
@@ -201,6 +230,12 @@ if __name__ == "__main__":
         default=MODEL_TRANSFORMER,
         choices=[MODEL_TRANSFORMER, MODEL_LSTM],
         help="model architecture",
+    )
+    parser.add_argument(
+        "--test-ratio",
+        type=float,
+        default=0.2,
+        help="Ratio of dataset to be used to testing",
     )
     parser.add_argument(
         "--emsize", type=int, default=300, help="size of word embeddings"
@@ -213,7 +248,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--nlayers", type=int, default=2, help="number of layers of the lower-level LSTM")
-    parser.add_argument("--lr", type=float, default=0.001, help="initial learning rate")
+    parser.add_argument("--lr", type=float, default=0.0001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")
     # TODO fix: works only with batch size one at the moment
@@ -229,9 +264,6 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
     parser.add_argument(
         "--log-interval", type=int, default=200, metavar="N", help="report interval"
-    )
-    parser.add_argument(
-        "--save", type=str, default="model.pt", help="path to save the final model"
     )
 
     parser.add_argument(

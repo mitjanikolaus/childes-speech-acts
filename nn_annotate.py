@@ -1,4 +1,5 @@
 import argparse
+import os
 import pickle
 from collections import Counter
 
@@ -11,8 +12,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from dataset import SpeechActsDataset, SpeechActsTestDataset
-from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD, UNKNOWN, preprend_speaker_token
+from nn_dataset import SpeechActsDataset, SpeechActsTestDataset
+from utils import PADDING, preprend_speaker_token, SPEAKER_CHILD
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,8 +26,9 @@ def annotate(args):
     print("Start annotation with args: ", args)
     print("Device: ", device)
     # Load data
-    vocab = pickle.load(open(args.data + "vocab.p", "rb"))
-    label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
+
+    vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
+    label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))
 
     print("Loading data..")
     data = pd.read_hdf(args.data)
@@ -36,21 +38,22 @@ def annotate(args):
         lambda x: "CHI" if x == "Target_Child" else "MOT"
     )
 
-    data["tokens"] = data.apply(lambda row: preprend_speaker_token(row["tokens"], row["speaker"]), axis=1)
+    # Preprend speaker tokens
+    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
     data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
 
     data = data.groupby(by=["file_id"]).agg({"utterances": lambda x: [y for y in x]})
 
-    dataset_test = SpeechActsTestDataset(data)
+    dataset = SpeechActsTestDataset(data)
 
-    test_loader = DataLoader(
-        dataset_test,
+    dataset_loader = DataLoader(
+        dataset,
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=0,
     )
 
-    print("Test samples: ", len(dataset_test))
+    print("Data samples: ", len(dataset))
 
     def evaluate(data_loader):
         # Turn on evaluation mode which disables dropout.
@@ -103,12 +106,12 @@ def annotate(args):
         plt.show()
 
     # Load the saved model checkpoint.
-    with open(args.checkpoint, "rb") as f:
+    with open(os.path.join(args.model, "model.pt"), "rb") as f:
         model = torch.load(f, map_location=device)
 
     # Run on test data.
     print("Eval:")
-    evaluate(test_loader)
+    evaluate(dataset_loader)
 
 
 if __name__ == "__main__":
@@ -116,8 +119,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="data/utterances.h5",
-        help="pat to the data file",
+        required=True,
+        help="path to the data file",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="data/",
+        help="directory of the model checkpoint and vocabs",
     )
     parser.add_argument(
         "--compare", type=str, required=True, help="Path to frequencies to compare to"
@@ -127,12 +136,7 @@ if __name__ == "__main__":
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
-    parser.add_argument(
-        "--checkpoint",
-        type=str,
-        default="model.pt",
-        help="path to saved model checkpoint",
-    )
+
     parser.add_argument('--verbose', '-v', action="store_true",
                            help="Increase verbosity")
 

@@ -1,5 +1,4 @@
 import pickle
-import argparse
 import warnings
 
 from sklearn.linear_model import LinearRegression
@@ -14,7 +13,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from utils import COLORS_PLOT_CATEGORICAL, SPEECH_ACTS_MIN_PERCENT_CHILDREN
+from utils import COLORS_PLOT_CATEGORICAL
 
 MIN_NUM_UTTERANCES = 100
 MIN_CHILDREN_REQUIRED = 3

@@ -6,14 +6,14 @@ import numpy as np
 import torch
 import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, plot_confusion_matrix
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 import matplotlib.pyplot as plt
 
-from dataset import SpeechActsDataset
-from generate_dataset import PADDING, SPEAKER_ADULT, SPEAKER_CHILD, UNKNOWN
-from models import SpeechActLSTM
-from utils import SPEECH_ACT_DESCRIPTIONS
+from nn_dataset import SpeechActsDataset
+from preprocess import SPEECH_ACT
+from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD, PADDING, preprend_speaker_token
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -35,14 +35,32 @@ def age_bin(age):
 def test(args):
     print("Start evaluation with args: ", args)
     print("Device: ", device)
-    # Load data
-    vocab = pickle.load(open(args.data + "vocab.p", "rb"))
-    label_vocab = pickle.load(open(args.data + "vocab_labels.p", "rb"))
 
     print("Loading data..")
-    data = pd.read_hdf(args.data + args.corpus, "test")
+    data = pd.read_pickle(args.data)
 
-    dataset_test = SpeechActsDataset(data)
+    vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
+    label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))
+
+    # Preprend speaker tokens
+    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
+
+    # Convert words and labels to indices using the respective vocabs
+    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
+    data["labels"] = data[SPEECH_ACT].apply(lambda l: label_vocab[l])
+
+    # Group by transcript (file name), each transcript is treated as one long input sequence
+    grouped_data = data.groupby(by=['file_id']).agg({
+        'utterances': lambda x: [y for y in x],
+        'labels': lambda x: [y for y in x],
+        'age_months': min,
+    })
+
+    _, data_test = train_test_split(
+        grouped_data, test_size=args.test_ratio, shuffle=False
+    )
+
+    dataset_test = SpeechActsDataset(data_test)
 
     test_loader = DataLoader(
         dataset_test,
@@ -146,7 +164,7 @@ def test(args):
 
 
     # Load the saved model checkpoint.
-    with open(args.checkpoint, "rb") as f:
+    with open(os.path.join(args.model, "model.pt"), "rb") as f:
         model = torch.load(f, map_location=device)
 
     # Run on test data.
@@ -159,26 +177,26 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="data/",
-        help="location of the data corpus and vocabs",
+        default="data/new_england_preprocessed.p",
+        help="path to the data corpus",
     )
     parser.add_argument(
-        "--corpus",
+        "--model",
         type=str,
-        default="speech_acts_data_newengland.h5",
-        help="name of the corpus file",
+        default="data/",
+        help="directory of the model checkpoint and vocabs",
+    )
+    parser.add_argument(
+        "--test-ratio",
+        type=float,
+        default=0.2,
+        help="Ratio of dataset to be used to testing",
     )
     # TODO fix: works only with batch size one at the moment
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
-    parser.add_argument(
-        "--checkpoint",
-        type=str,
-        default="model.pt",
-        help="path to saved model checkpoint",
-    )
     parser.add_argument('--verbose', '-v', action="store_true",
                            help="Increase verbosity")
 

@@ -2,13 +2,12 @@
 Collection of functions to parse XML files
 ==> Avoid code duplication & others
 """
+import pickle
 
 import xmltodict
-import os, sys
 from collections import Counter, OrderedDict
-import numpy as np
 import pandas as pd
-import time, datetime
+from torchtext import vocab
 import re
 from bidict import (
     bidict,
@@ -37,6 +36,37 @@ SPEECH_ACT_UNINTELLIGIBLE = "OO"
 SPEECH_ACT_NO_FUNCTION = "YY"
 
 SPEECH_ACTS_MIN_PERCENT_CHILDREN = ['YY', 'OO', 'RD', 'RT', 'TO', 'PF', 'SA', 'RP', 'MK', 'AA', 'ST', 'PR', 'AC', 'AD', 'SI', 'QN', 'YQ']
+
+PADDING = "<pad>"
+UNKNOWN = "<unk>"
+SPEAKER_CHILD = "<chi>"
+SPEAKER_ADULT = "<adu>"
+
+
+def build_vocabulary(data):
+    word_counter = Counter()
+    for tokens in data:
+        word_counter.update(tokens)
+    print(f"Vocab: {word_counter.most_common(100)}")
+    print(f"Total number of words length: {len(word_counter)}")
+    vocabulary = vocab.Vocab(
+        word_counter,
+        max_size=10000,
+        specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
+    )
+
+    return vocabulary
+
+def preprend_speaker_token(tokens, speaker):
+    """Prepend speaker special token"""
+    if speaker in ["MOT", "FAT", "INV", "ADU"]:
+        tokens = [SPEAKER_ADULT] + tokens
+    elif speaker in ["CHI", "AMY"]:
+        tokens = [SPEAKER_CHILD] + tokens
+    else:
+        raise RuntimeError("Unknown speaker code: ", speaker)
+
+    return tokens
 
 
 ### Read/Write JSON
