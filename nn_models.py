@@ -77,8 +77,6 @@ class SpeechActLSTM(nn.Module):
         # return torch.stack(outputs)
 
     def forward_decode(self,  input):
-        # TODO use targets to train using teacher forcing
-
         sequence_lengths = [len(i) for i in input]
         padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 

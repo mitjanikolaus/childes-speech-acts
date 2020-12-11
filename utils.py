@@ -47,8 +47,8 @@ def build_vocabulary(data):
     word_counter = Counter()
     for tokens in data:
         word_counter.update(tokens)
+    print(f"Total number of words: {len(word_counter)}")
     print(f"Vocab: {word_counter.most_common(100)}")
-    print(f"Total number of words length: {len(word_counter)}")
     vocabulary = vocab.Vocab(
         word_counter,
         max_size=10000,

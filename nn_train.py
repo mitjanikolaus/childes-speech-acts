@@ -43,8 +43,11 @@ def train(args):
         os.mkdir(args.out)
     pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
 
-    label_vocab = dataset_labels(SPEECH_ACT)
+    label_vocab = dataset_labels()
     pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+
+    #TODO
+    # data.drop(data[data[SPEECH_ACT].isin(['NOL', 'NAT', 'NEE'])].index, inplace=True)
 
     # Preprend speaker tokens
     data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
@@ -238,19 +241,19 @@ if __name__ == "__main__":
         help="Ratio of dataset to be used to testing",
     )
     parser.add_argument(
-        "--emsize", type=int, default=300, help="size of word embeddings"
+        "--emsize", type=int, default=200, help="size of word embeddings"
     )
     parser.add_argument(
         "--nhid-words-lstm", type=int, default=200, help="number of hidden units of the lower-level LSTM"
     )
     parser.add_argument(
-        "--nhid-utterance-lstm", type=int, default=200, help="number of hidden units of the higher-level LSTM"
+        "--nhid-utterance-lstm", type=int, default=100, help="number of hidden units of the higher-level LSTM"
     )
 
     parser.add_argument("--nlayers", type=int, default=2, help="number of layers of the lower-level LSTM")
     parser.add_argument("--lr", type=float, default=0.0001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
-    parser.add_argument("--epochs", type=int, default=20, help="upper epoch limit")
+    parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
     # TODO fix: works only with batch size one at the moment
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
@@ -263,7 +266,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
     parser.add_argument(
-        "--log-interval", type=int, default=200, metavar="N", help="report interval"
+        "--log-interval", type=int, default=30, metavar="N", help="report interval"
     )
 
     parser.add_argument(
