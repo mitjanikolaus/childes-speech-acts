@@ -15,7 +15,8 @@ import seaborn as sns
 from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
-from utils import SPEECH_ACT_DESCRIPTIONS, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
+from utils import SPEECH_ACT_DESCRIPTIONS, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, \
+    TRAIN_TEST_SPLIT_RANDOM_STATE
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     counts_predicted = Counter()
 
     # Split data
-    kf = KFold(n_splits=args.num_splits, random_state=0)
+    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
 
     file_names = data["file_id"].unique().tolist()
     for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):

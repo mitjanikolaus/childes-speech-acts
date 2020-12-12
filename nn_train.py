@@ -15,12 +15,15 @@ from torch.utils.data import DataLoader
 from nn_dataset import SpeechActsDataset
 from nn_models import SpeechActLSTM, SpeechActDistilBERT
 from preprocess import SPEECH_ACT
-from utils import build_vocabulary, dataset_labels, preprend_speaker_token, get_words
+from utils import build_vocabulary, dataset_labels, preprend_speaker_token, get_words, TRAIN_TEST_SPLIT_RANDOM_STATE, \
+    make_train_test_splits
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MODEL_TRANSFORMER = "transformer"
 MODEL_LSTM = "lstm"
+
+VAL_SPLIT_SIZE = .1
 
 def detach_hidden(h):
     """Detach hidden states from their history."""
@@ -31,28 +34,8 @@ def detach_hidden(h):
         return tuple(detach_hidden(v) for v in h)
 
 
-def train(args):
-    print("Start training with args: ", args)
-    print("Device: ", device)
-
-    data = pd.read_pickle(args.data)
-
-    # TODO use nltk tokenizer?
-    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
-
-    print("Building vocabulary..")
-    vocab = build_vocabulary(data["tokens"])
-    if not os.path.isdir(args.out):
-        os.mkdir(args.out)
-    pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
-
-    label_vocab = dataset_labels()
-    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
-
-    #TODO
-    # data.drop(data[data[SPEECH_ACT].isin(['NOL', 'NAT', 'NEE'])].index, inplace=True)
-
-    # Preprend speaker tokens
+def prepare_data(data, vocab, label_vocab):
+    # Prepend speaker tokens
     data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
 
     # Convert words and labels to indices using the respective vocabs
@@ -60,17 +43,36 @@ def train(args):
     data["labels"] = data[SPEECH_ACT].apply(lambda l: label_vocab[l])
 
     # Group by transcript (file name), each transcript is treated as one long input sequence
-    grouped_data = data.groupby(by=['file_id']).agg({
+    data_grouped = data.groupby(by=['file_id']).agg({
         'utterances': lambda x: [y for y in x],
         'labels': lambda x: [y for y in x],
         'age_months': min,
     })
+    return data_grouped
 
-    data_train, data_test = train_test_split(
-        grouped_data, test_size=args.test_ratio, shuffle=False
-    )
+def train(args):
+    print("Start training with args: ", args)
+    print("Device: ", device)
+
+    # Load data
+    data = pd.read_pickle(args.data)
+
+    data_train, data_test = make_train_test_splits(data, args.test_ratio)
+
+    print("Building vocabulary..")
+    vocab = build_vocabulary(data_train["tokens"])
+    if not os.path.isdir(args.out):
+        os.mkdir(args.out)
+    pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
+
+    label_vocab = dataset_labels()
+    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+
+    data_train = prepare_data(data_train, vocab, label_vocab)
+    data_test = prepare_data(data_test, vocab, label_vocab)
+
     data_train, data_val = train_test_split(
-        data_train, test_size=.1, shuffle=False
+        data_train, test_size=VAL_SPLIT_SIZE, shuffle=True, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE
     )
 
     dataset_train = SpeechActsDataset(data_train)

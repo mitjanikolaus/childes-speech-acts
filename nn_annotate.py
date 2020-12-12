@@ -25,8 +25,8 @@ def get_words(indices, vocab):
 def annotate(args):
     print("Start annotation with args: ", args)
     print("Device: ", device)
-    # Load data
 
+    # Load data
     vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
     label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))
 

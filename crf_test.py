@@ -24,7 +24,8 @@ from crf_train import (
     crf_predict,
     bio_classification_report,
 )
-from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
+from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
+    make_train_test_splits
 
 
 def load_training_args(args):
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         use_pos=args.use_pos,
     )
 
-    _, data_test = train_test_split(data, test_size=args.test_ratio, shuffle=False)
+    _, data_test = make_train_test_splits(data, args.test_ratio)
     print(f"Testing on {len(data_test)} utterances")
 
     # Loading features

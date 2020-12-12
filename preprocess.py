@@ -2,6 +2,8 @@ import os, sys
 import pandas as pd
 import argparse
 
+from nltk import word_tokenize
+
 from utils import parse_xml, get_xml_as_dict, calculate_frequencies, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
 
 SPEECH_ACT = "speech_act"
@@ -104,7 +106,10 @@ if __name__ == "__main__":
     print(f"Speech acts that form at least .5% of the data of children's utterances ({len(speech_acts_relevant_child)}): {speech_acts_relevant_child}")
 
     # Clean single-token utterances (these are only punctuation)
-    data[data["tokens"].map(len) == 1] = ""
+    data.loc[data.tokens.map(len) == 1, "tokens"] = ""
+
+    # Use nltk tokenizer instead of just splitting on space
+    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
 
     # If no tokens and no action and no translation: data is removed
     drop_subset = [col for col in ["tokens", "action"] if col in columns]

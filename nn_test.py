@@ -5,16 +5,15 @@ import pickle
 import numpy as np
 import torch
 import pandas as pd
-from nltk import word_tokenize
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, plot_confusion_matrix
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 import matplotlib.pyplot as plt
 
 from nn_dataset import SpeechActsDataset
-from preprocess import SPEECH_ACT
-from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD, PADDING, preprend_speaker_token
+from nn_train import prepare_data
+from utils import TRAIN_TEST_SPLIT_RANDOM_STATE, make_train_test_splits, get_words
+from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD, preprend_speaker_token
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -37,29 +36,12 @@ def test(args):
     print("Loading data..")
     data = pd.read_pickle(args.data)
 
-    # TODO use nltk tokenizer?
-    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
-
     vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
     label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))
 
-    # Preprend speaker tokens
-    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
+    _, data_test = make_train_test_splits(data, args.test_ratio)
 
-    # Convert words and labels to indices using the respective vocabs
-    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
-    data["labels"] = data[SPEECH_ACT].apply(lambda l: label_vocab[l])
-
-    # Group by transcript (file name), each transcript is treated as one long input sequence
-    grouped_data = data.groupby(by=['file_id']).agg({
-        'utterances': lambda x: [y for y in x],
-        'labels': lambda x: [y for y in x],
-        'age_months': min,
-    })
-
-    _, data_test = train_test_split(
-        grouped_data, test_size=args.test_ratio, shuffle=False
-    )
+    data_test = prepare_data(data_test, vocab, label_vocab)
 
     dataset_test = SpeechActsDataset(data_test)
 

@@ -7,6 +7,7 @@ import pickle
 import xmltodict
 from collections import Counter, OrderedDict
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from torchtext import vocab
 import re
 from bidict import (
@@ -41,6 +42,17 @@ PADDING = "<pad>"
 UNKNOWN = "<unk>"
 SPEAKER_CHILD = "<chi>"
 SPEAKER_ADULT = "<adu>"
+
+TRAIN_TEST_SPLIT_RANDOM_STATE = 1
+
+def make_train_test_splits(data, test_split_ratio):
+    data_train_ids, data_test_ids = train_test_split(
+        data["file_id"].unique(), test_size=test_split_ratio, shuffle=True, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE
+    )
+    data_train = data[data["file_id"].isin(data_train_ids.tolist())]
+    data_test = data[data["file_id"].isin(data_test_ids.tolist())]
+
+    return data_train, data_test
 
 
 def build_vocabulary(data):

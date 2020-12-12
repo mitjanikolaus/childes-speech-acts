@@ -18,7 +18,8 @@ from sklearn.model_selection import train_test_split
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
-from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
+from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
+    make_train_test_splits
 
 
 def argparser():
@@ -534,9 +535,7 @@ if __name__ == "__main__":
         use_pos=args.use_pos,
     )
 
-    data_train, data_test = train_test_split(
-        data, test_size=args.test_ratio, shuffle=False
-    )
+    data_train, data_test = make_train_test_splits(data, args.test_ratio)
 
     print("### Creating features:")
     feature_vocabs = generate_features_vocabs(
