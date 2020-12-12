@@ -20,45 +20,33 @@ MIN_NUM_UTTERANCES = 100
 MIN_CHILDREN_REQUIRED = 3
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
-AGE_MONTHS_BIN_SIZE = 1
-MIN_AGE = 12
-MAX_AGE = 60
 
 
 if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
     # TODO use classification scores on other dataset?
-    scores = pickle.load(open("data/classification_scores_crf_rollins.p", "rb"))
+    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
 
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
-    speech_acts_adult = pd.read_hdf("data/speech_acts_adu.h5")
-    counts_adults = speech_acts_adult["y_pred"].to_list()
-    frequencies_adults = calculate_frequencies(counts_adults)
-
-    # Load gold data to get frequencies
     data = pd.read_pickle('data/new_england_preprocessed.p')
+    data_adults = data[data["speaker"] != "CHI"]
     data_children = data[data["speaker"] == "CHI"]
+
+    frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
     frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
 
-    # Filter speech acts
-    # TODO justify
-    observed_speech_acts =  [k for k, v in frequencies_children.items() if k in scores_f1 and v > .001 and scores_f1[k] > 0]
-
+    # TODO
     # observed_speech_acts = [
     #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
     # ]
-    # observed_speech_acts = [k for k in scores_f1.keys() if k in frequencies_adults.keys()]
-    # observed_speech_acts =  SPEECH_ACTS_MIN_PERCENT_CHILDREN
+    observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1 and v > .001]
 
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
 
-    # dev: use only subset
-    # observed_speech_acts = observed_speech_acts[:20]
-
-    speech_acts_children = pd.read_hdf("data/speech_acts_chi.h5")
+    ages = data_children["age_months"].unique()
 
     fraction_acquired_speech_act = []
 
@@ -83,22 +71,19 @@ if __name__ == "__main__":
         )
 
         prev_fraction = 0.0
-        for month in range(MIN_AGE, MAX_AGE, AGE_MONTHS_BIN_SIZE):
-            speech_acts_children_month = speech_acts_children[
-                (speech_acts_children["child_age"] >= month)
-                & (speech_acts_children["child_age"] < month + AGE_MONTHS_BIN_SIZE)
-            ]
-            children_ids = speech_acts_children_month["child_id"].unique()
+        for month in ages:
+            speech_acts_children_month = data_children[data_children["age_months"] == month]
+            children_ids = speech_acts_children_month["file_id"].unique()
             n_children = 0
             n_acquired = 0
             for child_id in children_ids:
                 speech_acts_child = speech_acts_children_month[
-                    speech_acts_children_month["child_id"] == child_id
+                    speech_acts_children_month["file_id"] == child_id
                 ]
                 if len(speech_acts_child) > MIN_NUM_UTTERANCES:
                     n_children += 1
                     target_speech_acts_child = speech_acts_child[
-                        speech_acts_child["y_pred"] == speech_act
+                        speech_acts_child[SPEECH_ACT] == speech_act
                     ]
                     if len(target_speech_acts_child) >= THRESHOLD_ACQUIRED:
                         n_acquired += 1
@@ -138,7 +123,7 @@ if __name__ == "__main__":
         ci=None,
         legend=True,
     )
-    g.set(ylim=(0, 1), xlim=(MIN_AGE, MAX_AGE))
+    g.set(ylim=(0, 1), xlim=(min(ages), max(ages)))
     plt.setp(g.legend.get_texts(), fontsize="10")
 
     # Read estimated ages of acquisition from the logistic regression plot data
@@ -161,14 +146,14 @@ if __name__ == "__main__":
                     fraction_acquired_speech_act["month"]
                 )
             else:
-                age_of_acquisition[speech_act] = MAX_AGE
+                age_of_acquisition[speech_act] = max(ages)
 
         # Take data from logistic regression curve
         else:
             if np.where(fractions > 0.5)[0].size > 0:
                 age_of_acquisition[speech_act] = ages[np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))]
             else:
-                age_of_acquisition[speech_act] = MAX_AGE
+                age_of_acquisition[speech_act] = max(ages)
         print(
             f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} |"
             f" Freq: {frequencies_adults_observed[i]} | F1: {scores_observed[i]}"

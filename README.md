@@ -18,7 +18,7 @@ Data for supervised training is taken from the [New England corpus](https://chil
     ```
 3. Preprocess data
     ```
-    python preprocess.py --input-path java_out/ --output-path data/new_england_preprocessed.p
+    python preprocess.py --input-path java_out/ --output-path data/new_england_preprocessed.p --drop-untagged
    ```
   
 # CRF  
