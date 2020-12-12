@@ -38,7 +38,7 @@ class SpeechActLSTM(nn.Module):
         self.n_layers_words_lstm = n_layers_words_lstm
 
     def forward(self, input, targets):
-        # TODO use targets to train using teacher forcing
+        # TODO use targets to train using teacher forcing?
 
         sequence_lengths = [len(i) for i in input]
         padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
@@ -56,14 +56,11 @@ class SpeechActLSTM(nn.Module):
         utterance_representations = output[indices, range(batch_size)]
 
         hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
-        outputs = []
-        for utt in utterance_representations:
-            utt = utt.unsqueeze(0).unsqueeze(0) # add batch size and sequence length dimension
-            output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
 
-            outputs.append(self.decoder(output_utterance_level[0][0]))
+        utterance_representations = utterance_representations.unsqueeze(1) # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations, hidden_utterance_lstm)
 
-        outputs = torch.stack(outputs)
+        outputs = self.decoder(output_utterance_level.squeeze(1))
 
         decoded = outputs.unsqueeze(1)
         targets = targets.unsqueeze(1)
@@ -73,8 +70,6 @@ class SpeechActLSTM(nn.Module):
         loss = -log_likelihood
 
         return loss
-
-        # return torch.stack(outputs)
 
     def forward_decode(self,  input):
         sequence_lengths = [len(i) for i in input]
@@ -93,14 +88,12 @@ class SpeechActLSTM(nn.Module):
         utterance_representations = output[indices, range(batch_size)]
 
         hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
-        outputs = []
-        for utt in utterance_representations:
-            utt = utt.unsqueeze(0).unsqueeze(0)  # add batch size and sequence length dimension
-            output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utt, hidden_utterance_lstm)
 
-            outputs.append(self.decoder(output_utterance_level[0][0]))
+        utterance_representations = utterance_representations.unsqueeze(1)  # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations,
+                                                                            hidden_utterance_lstm)
 
-        outputs = torch.stack(outputs)
+        outputs = self.decoder(output_utterance_level.squeeze(1))
 
         decoded = outputs.unsqueeze(1)
 
