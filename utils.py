@@ -57,6 +57,9 @@ def build_vocabulary(data):
 
     return vocabulary
 
+def get_words(indices, vocab):
+    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
+
 def preprend_speaker_token(tokens, speaker):
     """Prepend speaker special token"""
     if speaker in ["MOT", "FAT", "INV", "ADU"]:

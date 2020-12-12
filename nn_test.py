@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import torch
 import pandas as pd
+from nltk import word_tokenize
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, plot_confusion_matrix
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -18,9 +19,6 @@ from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD, PADDING, preprend_spea
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 PUNCTUATION = [".","!","?"]
-
-def get_words(indices, vocab):
-    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
 
 def age_bin(age):
     """Return the corresponding age bin (14, 20 or 32) for a given age"""
@@ -38,6 +36,9 @@ def test(args):
 
     print("Loading data..")
     data = pd.read_pickle(args.data)
+
+    # TODO use nltk tokenizer?
+    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
 
     vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
     label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))

@@ -7,6 +7,7 @@ import pickle
 import pandas as pd
 
 import torch
+from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -14,7 +15,7 @@ from torch.utils.data import DataLoader
 from nn_dataset import SpeechActsDataset
 from nn_models import SpeechActLSTM, SpeechActDistilBERT
 from preprocess import SPEECH_ACT
-from utils import build_vocabulary, dataset_labels, preprend_speaker_token
+from utils import build_vocabulary, dataset_labels, preprend_speaker_token, get_words
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -34,8 +35,10 @@ def train(args):
     print("Start training with args: ", args)
     print("Device: ", device)
 
-    # Load data
     data = pd.read_pickle(args.data)
+
+    # TODO use nltk tokenizer?
+    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
 
     print("Building vocabulary..")
     vocab = build_vocabulary(data["tokens"])

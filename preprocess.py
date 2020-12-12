@@ -84,11 +84,11 @@ if __name__ == "__main__":
         "age_months",
     ]
 
-    data[SPEECH_ACT] = data[SPEECH_ACT].fillna(SPEECH_ACT_UNINTELLIGIBLE)
+    data[SPEECH_ACT] = data[SPEECH_ACT].fillna("NOL")
 
     if args.drop_untagged:
         data.drop(
-            data[data[SPEECH_ACT].isin([SPEECH_ACT_UNINTELLIGIBLE, "NAT", "NEE"])].index, inplace=True
+            data[data[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])].index, inplace=True
         )
 
     frequencies = calculate_frequencies(data[SPEECH_ACT])
