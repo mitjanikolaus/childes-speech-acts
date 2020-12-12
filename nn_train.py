@@ -7,7 +7,6 @@ import pickle
 import pandas as pd
 
 import torch
-from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -60,7 +59,7 @@ def train(args):
     data_train, data_test = make_train_test_splits(data, args.test_ratio)
 
     print("Building vocabulary..")
-    vocab = build_vocabulary(data_train["tokens"])
+    vocab = build_vocabulary(data_train["tokens"], args.vocab_size)
     if not os.path.isdir(args.out):
         os.mkdir(args.out)
     pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
@@ -244,6 +243,12 @@ if __name__ == "__main__":
         type=float,
         default=0.2,
         help="Ratio of dataset to be used to testing",
+    )
+    parser.add_argument(
+        "--vocab-size",
+        type=int,
+        default=2000,
+        help="Maxmimum size of the vocabulary",
     )
     parser.add_argument(
         "--emsize", type=int, default=200, help="size of word embeddings"

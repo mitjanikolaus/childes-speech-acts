@@ -55,7 +55,7 @@ def make_train_test_splits(data, test_split_ratio):
     return data_train, data_test
 
 
-def build_vocabulary(data):
+def build_vocabulary(data, max_vocab_size):
     word_counter = Counter()
     for tokens in data:
         word_counter.update(tokens)
@@ -63,7 +63,7 @@ def build_vocabulary(data):
     print(f"Vocab: {word_counter.most_common(100)}")
     vocabulary = vocab.Vocab(
         word_counter,
-        max_size=10000,
+        max_size=max_vocab_size,
         specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
     )
 
