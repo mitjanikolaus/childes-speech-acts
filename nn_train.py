@@ -62,10 +62,10 @@ def train(args):
     vocab = build_vocabulary(data_train["tokens"], args.vocab_size)
     if not os.path.isdir(args.out):
         os.mkdir(args.out)
-    pickle.dump(vocab, open(args.out + "vocab.p", "wb"))
+    pickle.dump(vocab, open(os.path.join(args.out, "vocab.p"), "wb"))
 
     label_vocab = dataset_labels()
-    pickle.dump(label_vocab, open(args.out + "vocab_labels.p", "wb"))
+    pickle.dump(label_vocab, open(os.path.join(args.out, "vocab_labels.p"), "wb"))
 
     data_train = prepare_data(data_train, vocab, label_vocab)
     data_test = prepare_data(data_test, vocab, label_vocab)
@@ -194,7 +194,7 @@ def train(args):
             print("-" * 89)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_acc or val_accuracy > best_val_acc:
-                with open(f"{args.out}/model.pt", "wb") as f:
+                with open(os.path.join(args.out, "model.pt"), "wb") as f:
                     torch.save(model, f)
                 best_val_acc = val_accuracy
 
