@@ -11,3 +11,4 @@ java_out_rollins/*
 checkpoints/*
 outputs/*
 out/*
+adjacency_pairs/*

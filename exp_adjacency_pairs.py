@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import matplotlib
 from sklearn.preprocessing import OrdinalEncoder
@@ -114,55 +116,74 @@ def gen_seq_data(data, age: int = None):
 
 
 def create_2_sankey(
-    spa_sequences, source: str = ADULT, target: str = CHILD, min_percent: float = 0.1
+    spa_sequences, age, source: str = ADULT, target: str = CHILD, min_percent: float = 0.1
 ):
-    """# for now source = 1 and target = 0"""
+    # for now source = 1 and target = 0
+    spa_sequences.rename({"speaker_1": "source", "speaker_0": "target"}, axis='columns', inplace=True)
+    speaker_source = "source"
+    speaker_target = "target"
+    spa_source = "speech_act_1"
+    spa_target = "speech_act_0"
+
     # 1. Choose illocutionary or interchange, remove unused sequences, remove NAs, select direction (MOT => CHI or CHI => MOT)
-    col_keep = SPEECH_ACT
-    spa_filtered = spa_sequences[
-        [col for col in spa_sequences.columns if (int(col[-1]) <= 1)]
-    ]  # nb_sequences = 1
-    spa_filtered.dropna(how="any", inplace=True)
+    spa_sequences.dropna(how="any", inplace=True)
     if source is not None and source in [CHILD, ADULT]:
-        spa_filtered = spa_filtered[(spa_filtered["speaker_0"] == target)]
+        spa_sequences = spa_sequences[(spa_sequences[speaker_target] == target)]
     if target is not None and target in [CHILD, ADULT]:
-        spa_filtered = spa_filtered[(spa_filtered["speaker_1"] == source)]
+        spa_sequences = spa_sequences[(spa_sequences[speaker_source] == source)]
     # 2. Groupby, unstack and orderby
-    int_cols = [col_keep + "_0", col_keep + "_1"]
     spa_gp = (
-        spa_filtered.groupby(by=int_cols)
-        .agg({"speaker_0": "count"})
+        spa_sequences.groupby(by=[spa_target, spa_source])
+        .agg({speaker_target: "count"})
         .reset_index(drop=False)
     )
     # 3. Filter out infrequent sequences
-    spa_gp["v_percent"] = spa_gp["speaker_0"] / spa_gp["speaker_0"].sum()
+    # TODO by source or target?
+    spa_gp["v_percent"] = spa_gp[speaker_target] / spa_gp[speaker_target].sum()
     spa_gp = spa_gp[spa_gp["v_percent"] >= min_percent].reset_index(drop=True)
+
+    percentages = []
+    # Save frequency data
+    for speech_act_source in spa_gp[spa_source].unique():
+        speech_acts_target = spa_gp[spa_gp[spa_source] == speech_act_source]
+        for speech_act_target in speech_acts_target[spa_target]:
+            count = speech_acts_target[speech_acts_target[spa_target] == speech_act_target][speaker_target].values[0]
+            fraction = count / speech_acts_target[speaker_target].sum()
+            percentages.append({
+                speaker_source: speech_act_source,
+                speaker_target: speech_act_target,
+                "fraction": fraction,
+            })
+    percentages = pd.DataFrame(percentages)
+    out_dir = "adjacency_pairs"
+    os.makedirs(out_dir, exist_ok=True)
+    percentages.to_csv(os.path.join(out_dir, f"{source}-{target}_age_{age}.csv"))
 
     # 5.1 Apply encoder to get labels as numbers => idx in sankey (source, target)
     enc = OrdinalEncoder()
     trf_spa = pd.DataFrame(
-        enc.fit_transform(spa_gp[int_cols]), columns=["target", "source"]
+        enc.fit_transform(spa_gp[[spa_target, spa_source]]), columns=["target", "source"]
     )
-    enc_cat = {col: list(ar) for col, ar in zip(int_cols, enc.categories_)}
+    enc_cat = {col: list(ar) for col, ar in zip([spa_target, spa_source], enc.categories_)}
 
-    trf_spa[["value", "v_percent"]] = spa_gp[["speaker_0", "v_percent"]]
+    trf_spa[["value", "v_percent"]] = spa_gp[[speaker_target, "v_percent"]]
     # 5.2 Add link colors
     # 5.3 Update categories for target columns
-    n = len(enc_cat[col_keep + "_0"])
+    n = len(enc_cat[spa_target])
     trf_spa["source"] = trf_spa["source"] + n
     # 6.2 Plot
     fig = plot_sankey(
-        node_labels=(enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"]),
+        node_labels=(enc_cat[spa_target] + enc_cat[spa_source]),
         node_colors=[
             node_colors_2[x]
-            for x in (enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"])
+            for x in (enc_cat[spa_target] + enc_cat[spa_source])
         ],
         link_source=trf_spa["source"],
         link_target=trf_spa["target"],
         link_value=trf_spa["value"],
         node_customdata=[
             node_descr[x]
-            for x in (enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"])
+            for x in (enc_cat[spa_target] + enc_cat[spa_source])
         ],
         sk_title=f"{source} to {target} sequences in data",
     )
@@ -193,13 +214,13 @@ app.layout = html.Div(
                         dcc.Dropdown(
                             id="source",
                             options=[{"label": i, "value": i} for i in [CHILD, ADULT]],
-                            value=CHILD,
+                            value=ADULT,
                         ),
                         "target",
                         dcc.Dropdown(
                             id="target",
                             options=[{"label": i, "value": i} for i in [CHILD, ADULT]],
-                            value=ADULT,
+                            value=CHILD,
                         ),
                         "child age",
                         dcc.Dropdown(
@@ -212,7 +233,7 @@ app.layout = html.Div(
                             id="percentage",
                             options=[
                                 {"label": i, "value": i}
-                                for i in [0.001, 0.005, 0.01, 0.012, 0.015, 0.02, 0.025]
+                                for i in [0, 0.001, 0.005, 0.01, 0.012, 0.015, 0.02, 0.025]
                             ],
                             value=0.01,
                         ),
@@ -245,7 +266,7 @@ def update_graph(dataset, source, target, age_months, percentage):
     )
     # Filter data
     spa_seq = gen_seq_data(data, age=age_months)
-    fig = create_2_sankey(spa_seq, min_percent=percentage, source=source, target=target)
+    fig = create_2_sankey(spa_seq, age=age_months, min_percent=percentage, source=source, target=target)
 
     return fig
 
