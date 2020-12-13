@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib
-import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 import random
 
@@ -8,18 +7,17 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.express as px
 import plotly.graph_objects as go
 
 from preprocess import SPEECH_ACT, CHILD, ADULT
 from utils import SPEECH_ACT_DESCRIPTIONS
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 ###### Information
 ds_list = {
-    'New England': "data/new_england_preprocessed.p",
+    "New England": "data/new_england_preprocessed.p",
 }
 
 # Colors
@@ -32,166 +30,225 @@ for name, hex in matplotlib.colors.cnames.items():
     rgb_colors_dic[name] = matplotlib.colors.to_rgb(hex)
 
 ILL = SPEECH_ACT_DESCRIPTIONS.reset_index()
-ILL['spa_2a'] = ILL['Name'].apply(lambda x: x[:3].upper())
-node_colors_2a = {x : random.choice(hex_colors_only) for x in ILL['spa_2a'].unique().tolist()}
-ILL['colors'] = ILL['spa_2a'].apply(lambda x: None if x not in node_colors_2a.keys() else node_colors_2a[x])
-node_colors_2 = ILL[['Code', 'colors']].set_index('Code').to_dict()['colors'] # no duplicates
+ILL["spa_2a"] = ILL["Name"].apply(lambda x: x[:3].upper())
+node_colors_2a = {
+    x: random.choice(hex_colors_only) for x in ILL["spa_2a"].unique().tolist()
+}
+ILL["colors"] = ILL["spa_2a"].apply(
+    lambda x: None if x not in node_colors_2a.keys() else node_colors_2a[x]
+)
+node_colors_2 = (
+    ILL[["Code", "colors"]].set_index("Code").to_dict()["colors"]
+)  # no duplicates
 
-ILL['concat'] = ILL.apply(lambda x: f"{x.Name} - {x.Description}", axis=1)
-node_descr = ILL[['Code', 'concat']].set_index('Code').to_dict()['concat']
+ILL["concat"] = ILL.apply(lambda x: f"{x.Name} - {x.Description}", axis=1)
+node_descr = ILL[["Code", "concat"]].set_index("Code").to_dict()["concat"]
 
 ###### SANKEY / PARSING FUNCTIONS
-def plot_sankey(node_labels:list, node_colors:list, 
-                link_source:list, link_target:list, link_value:list, 
-                sk_title:str,
-                node_customdata:list=None, link_customdata:list=None):
+def plot_sankey(
+    node_labels: list,
+    node_colors: list,
+    link_source: list,
+    link_target: list,
+    link_value: list,
+    sk_title: str,
+    node_customdata: list = None,
+    link_customdata: list = None,
+):
     d_node = dict(
-            pad = 15,
-            thickness = 15,
-            line = dict(color = "black", width = 0.5),
-            label = node_labels,
-            color = node_colors,
-        )
-    d_link = dict(
-            source = link_source,
-            target = link_target,
-            value = link_value,
+        pad=15,
+        thickness=15,
+        line=dict(color="black", width=0.5),
+        label=node_labels,
+        color=node_colors,
     )
-    
-    if (node_customdata is not None):
-        d_node['customdata'] = node_customdata
-        d_node['hovertemplate'] = '%{label}: %{customdata}<extra>%{value}</extra>'
-        if (link_customdata is not None):
-            d_link['customdata'] = link_customdata
-            d_link['hovertemplate'] = 'Link from node %{source.customdata}<br /> to node%{target.customdata}<br />has value %{value} <br />and data %{customdata}<extra></extra>'
+    d_link = dict(
+        source=link_source,
+        target=link_target,
+        value=link_value,
+    )
 
-    fig = go.Figure(data=[go.Sankey(
-        valueformat = ".0f",
-        valuesuffix = "TWh",
-        node = d_node,
-        link = d_link)])
+    if node_customdata is not None:
+        d_node["customdata"] = node_customdata
+        d_node["hovertemplate"] = "%{label}: %{customdata}<extra>%{value}</extra>"
+        if link_customdata is not None:
+            d_link["customdata"] = link_customdata
+            d_link[
+                "hovertemplate"
+            ] = "Link from node %{source.customdata}<br /> to node%{target.customdata}<br />has value %{value} <br />and data %{customdata}<extra></extra>"
+
+    fig = go.Figure(
+        data=[go.Sankey(valueformat=".0f", valuesuffix="TWh", node=d_node, link=d_link)]
+    )
 
     fig.update_layout(
-        hovermode = 'x',
-        title = sk_title,
-        font = dict(size = 10, color = 'black'),
+        hovermode="x",
+        title=sk_title,
+        font=dict(size=10, color="black"),
     )
 
     return fig
 
-def gen_seq_data(data, age:int=None):
+
+def gen_seq_data(data, age: int = None):
     # 0. Choose age
     if age is not None:
-        data_age = data[data['age_months'] == age]
+        data_age = data[data["age_months"] == age]
     # 1. Sequence extraction & columns names
-    spa_shifted = {0 : data_age[[SPEECH_ACT, 'speaker', 'file_id']]}
-    for i in range(1,5):
-        spa_shifted[i] = spa_shifted[0].shift(periods=1, fill_value=None).rename(columns={col:col+f'_{i}' for col in spa_shifted[0].columns})
-    spa_shifted[0] = spa_shifted[0].rename(columns={col:col+'_0' for col in spa_shifted[0].columns})
+    spa_shifted = {0: data_age[[SPEECH_ACT, "speaker", "file_id"]]}
+    spa_shifted[1] = (
+        spa_shifted[0]
+        .shift(periods=1, fill_value=None)
+        .rename(columns={col: col + "_1" for col in spa_shifted[0].columns})
+    )
+    spa_shifted[0] = spa_shifted[0].rename(
+        columns={col: col + "_0" for col in spa_shifted[0].columns}
+    )
     # 2. Merge
     spa_compare = pd.concat(spa_shifted.values(), axis=1)
     # 3. Add empty slots for file changes
-    for i in range(1,5):
-        spa_compare.loc[(spa_compare['file_id_0'] != spa_compare[f'file_id_{i}']), [f'{SPEECH_ACT}_{i}']] = None
-    return spa_compare[[col for col in spa_compare.columns if 'file_id' not in col]]
+    spa_compare.loc[
+        (spa_compare["file_id_0"] != spa_compare["file_id_1"]), [f"{SPEECH_ACT}_1"]
+    ] = None
+    return spa_compare[[col for col in spa_compare.columns if "file_id" not in col]]
 
-def create_2_sankey(spa_sequences, filter:str='ILLOC', source:str=ADULT, target:str=CHILD, min_percent:float = 0.1, no_loops=True):
-    """ # for now source = 1 and target = 0
-    """
+
+def create_2_sankey(
+    spa_sequences, source: str = ADULT, target: str = CHILD, min_percent: float = 0.1
+):
+    """# for now source = 1 and target = 0"""
     # 1. Choose illocutionary or interchange, remove unused sequences, remove NAs, select direction (MOT => CHI or CHI => MOT)
     col_keep = SPEECH_ACT
-    # col_rm = SPEECH_ACT + "_" + str(-(filter == 'ILLOC') +2)
-    spa_filtered = spa_sequences[[col for col in spa_sequences.columns if (int(col[-1]) <= 1)]] # nb_sequences = 1
-    spa_filtered.dropna(how='any', inplace=True)
+    spa_filtered = spa_sequences[
+        [col for col in spa_sequences.columns if (int(col[-1]) <= 1)]
+    ]  # nb_sequences = 1
+    spa_filtered.dropna(how="any", inplace=True)
     if source is not None and source in [CHILD, ADULT]:
-        spa_filtered = spa_filtered[(spa_filtered['speaker_0'] == target)]
+        spa_filtered = spa_filtered[(spa_filtered["speaker_0"] == target)]
     if target is not None and target in [CHILD, ADULT]:
-        spa_filtered = spa_filtered[(spa_filtered['speaker_1'] == source)]
+        spa_filtered = spa_filtered[(spa_filtered["speaker_1"] == source)]
     # 2. Groupby, unstack and orderby
-    int_cols = [col_keep+'_0', col_keep+'_1']
-    spa_gp = spa_filtered.groupby(by=int_cols).agg({'speaker_0':'count'}).reset_index(drop=False)
-    # 3. Filter out unfrequent sequences
-    spa_gp['v_percent'] = spa_gp['speaker_0']/spa_gp['speaker_0'].sum()
-    spa_gp = spa_gp[spa_gp['v_percent'] >= min_percent].reset_index(drop=True)
+    int_cols = [col_keep + "_0", col_keep + "_1"]
+    spa_gp = (
+        spa_filtered.groupby(by=int_cols)
+        .agg({"speaker_0": "count"})
+        .reset_index(drop=False)
+    )
+    # 3. Filter out infrequent sequences
+    spa_gp["v_percent"] = spa_gp["speaker_0"] / spa_gp["speaker_0"].sum()
+    spa_gp = spa_gp[spa_gp["v_percent"] >= min_percent].reset_index(drop=True)
 
-    # 5.1 Apply encoder to get labels as numbers => idx in sandkey (source, target)
+    # 5.1 Apply encoder to get labels as numbers => idx in sankey (source, target)
     enc = OrdinalEncoder()
-    trf_spa = pd.DataFrame(enc.fit_transform(spa_gp[int_cols]), columns=['target', 'source']) 
-    enc_cat = {col:list(ar) for col, ar in zip(int_cols, enc.categories_)}
+    trf_spa = pd.DataFrame(
+        enc.fit_transform(spa_gp[int_cols]), columns=["target", "source"]
+    )
+    enc_cat = {col: list(ar) for col, ar in zip(int_cols, enc.categories_)}
 
-    trf_spa[['value', 'v_percent']] = spa_gp[['speaker_0', 'v_percent']]
+    trf_spa[["value", "v_percent"]] = spa_gp[["speaker_0", "v_percent"]]
     # 5.2 Add link colors
     # 5.3 Update categories for target columns
-    n = len(enc_cat[col_keep+'_0'])
-    trf_spa['source'] = trf_spa['source'] + n
-    # 6.1 Custom data
-    # TODO - join trf_spa and spa_gp to have all data in one table
+    n = len(enc_cat[col_keep + "_0"])
+    trf_spa["source"] = trf_spa["source"] + n
     # 6.2 Plot
-    fig = plot_sankey(node_labels = (enc_cat[SPEECH_ACT+'_0'] + enc_cat[SPEECH_ACT+'_1']),
-        node_colors = [node_colors_2[x] for x in (enc_cat[SPEECH_ACT+'_0'] + enc_cat[SPEECH_ACT+'_1'])],
-        link_source = trf_spa['source'], 
-        link_target= trf_spa['target'], 
-        link_value= trf_spa['value'], 
-        node_customdata = [node_descr[x] for x in (enc_cat[SPEECH_ACT+'_0'] + enc_cat[SPEECH_ACT+'_1'])],
-        sk_title=f"{source} to {target} sequences in data"
+    fig = plot_sankey(
+        node_labels=(enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"]),
+        node_colors=[
+            node_colors_2[x]
+            for x in (enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"])
+        ],
+        link_source=trf_spa["source"],
+        link_target=trf_spa["target"],
+        link_value=trf_spa["value"],
+        node_customdata=[
+            node_descr[x]
+            for x in (enc_cat[SPEECH_ACT + "_0"] + enc_cat[SPEECH_ACT + "_1"])
+        ],
+        sk_title=f"{source} to {target} sequences in data",
     )
 
     return fig
 
 
 ###### LAYOUT
-app.layout = html.Div(children=[
-    html.H1(children='CHILDES - Analysis of Parent-Children Speech Acts'),
-    html.Div([
-        html.Div(children=['Pick a dataset:', 
-            dcc.Dropdown(
-                id='dataset-choice',
-                options=[{'label': i, 'value': i} for i in ds_list.keys()],
-                value='New England'
-            )],
-            style={'width': '48%', 'display': 'inline-block'}),
-        
-        html.Div(children=[ 'source',
-                dcc.Dropdown(id='source',
-                    options=[{'label': i, 'value': i} for i in [CHILD, ADULT]],
-                    value=CHILD), 
-                'target',
-                dcc.Dropdown(id='target',
-                    options=[{'label': i, 'value': i} for i in [CHILD, ADULT]],
-                    value=ADULT),
-                'child age',
-                dcc.Dropdown(id='age_months',
-                    options=[{'label': i, 'value': i} for i in [14, 20, 32]],
-                    value=32),
-                'percentage',
-                dcc.Dropdown(id='percentage',
-                    options=[{'label': i, 'value': i} for i in [0.001, 0.005, 0.01, 0.012, 0.015, 0.02, 0.025]],
-                    value=0.01),
-
-            ],
-            style={'width': '24%', 'display': 'inline-block'})
-    ]),
-
-    dcc.Graph( id='sankey' ) # will be updated through callbacks
-])
+app.layout = html.Div(
+    children=[
+        html.H1(children="CHILDES - Analysis of Parent-Children Speech Acts"),
+        html.Div(
+            [
+                html.Div(
+                    children=[
+                        "Pick a dataset:",
+                        dcc.Dropdown(
+                            id="dataset-choice",
+                            options=[{"label": i, "value": i} for i in ds_list.keys()],
+                            value="New England",
+                        ),
+                    ],
+                    style={"width": "48%", "display": "inline-block"},
+                ),
+                html.Div(
+                    children=[
+                        "source",
+                        dcc.Dropdown(
+                            id="source",
+                            options=[{"label": i, "value": i} for i in [CHILD, ADULT]],
+                            value=CHILD,
+                        ),
+                        "target",
+                        dcc.Dropdown(
+                            id="target",
+                            options=[{"label": i, "value": i} for i in [CHILD, ADULT]],
+                            value=ADULT,
+                        ),
+                        "child age",
+                        dcc.Dropdown(
+                            id="age_months",
+                            options=[{"label": i, "value": i} for i in [14, 20, 32]],
+                            value=32,
+                        ),
+                        "percentage",
+                        dcc.Dropdown(
+                            id="percentage",
+                            options=[
+                                {"label": i, "value": i}
+                                for i in [0.001, 0.005, 0.01, 0.012, 0.015, 0.02, 0.025]
+                            ],
+                            value=0.01,
+                        ),
+                    ],
+                    style={"width": "24%", "display": "inline-block"},
+                ),
+            ]
+        ),
+        dcc.Graph(id="sankey"),  # will be updated through callbacks
+    ]
+)
 
 ###### CALLBACKS
 @app.callback(
-    Output('sankey', 'figure'),
-    [Input('dataset-choice', 'value'), Input('source', 'value'), 
-    Input('target', 'value'), Input('age_months', 'value'),
-    Input('percentage', 'value')]
+    Output("sankey", "figure"),
+    [
+        Input("dataset-choice", "value"),
+        Input("source", "value"),
+        Input("target", "value"),
+        Input("age_months", "value"),
+        Input("percentage", "value"),
+    ],
 )
 def update_graph(dataset, source, target, age_months, percentage):
     # Load data
     data = pd.read_pickle(ds_list[dataset])
     match_age = [14, 20, 32]
-    data['age_months'] = data.age_months.apply(lambda age: min(match_age, key=lambda x:abs(x-age)))
+    data["age_months"] = data.age_months.apply(
+        lambda age: min(match_age, key=lambda x: abs(x - age))
+    )
     # Filter data
     spa_seq = gen_seq_data(data, age=age_months)
     fig = create_2_sankey(spa_seq, min_percent=percentage, source=source, target=target)
 
     return fig
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run_server(debug=True)
