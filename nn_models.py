@@ -40,16 +40,20 @@ class SpeechActLSTM(nn.Module):
     def forward(self, input, targets):
         # TODO use targets to train using teacher forcing?
 
-        hidden = self.init_hidden(self.n_layers_words_lstm, 1, self.n_hidden_units_words_lstm)
-        outputs = []
-        for inp in input:
-            inp = torch.tensor(inp, device=device)
-            emb = self.embeddings(inp)
-            emb = emb.unsqueeze(1) # Add batch size dimension
-            output, hidden = self.lstm_words(emb, hidden)
-            outputs.append(output[-1][0])
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 
-        utterance_representations = torch.stack(outputs)
+        emb = self.embeddings(padded_inputs)
+        batch_size = emb.size(1)
+        hidden = self.init_hidden(self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm)
+
+        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
+        output, hidden = self.lstm_words(packed_emb, hidden)
+        output, _ = nn.utils.rnn.pad_packed_sequence(output)
+
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths]
+        utterance_representations = output[indices, range(batch_size)]
 
         hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
 
@@ -68,18 +72,20 @@ class SpeechActLSTM(nn.Module):
         return loss
 
     def forward_decode(self,  input):
-        hidden = self.init_hidden(self.n_layers_words_lstm, 1, self.n_hidden_units_words_lstm)
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 
-        # packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
-        outputs = []
-        for inp in input:
-            inp = torch.tensor(inp, device=device)
-            emb = self.embeddings(inp)
-            emb = emb.unsqueeze(1)  # Add batch size dimension
-            output, hidden = self.lstm_words(emb, hidden)
-            outputs.append(output[-1][0])
+        emb = self.embeddings(padded_inputs)
+        batch_size = emb.size(1)
+        hidden = self.init_hidden(self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm)
 
-        utterance_representations = torch.stack(outputs)
+        packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
+        output, hidden = self.lstm_words(packed_emb, hidden)
+        output, _ = nn.utils.rnn.pad_packed_sequence(output)
+
+        # Take last output for each sample (which depends on the sequence length)
+        indices = [s - 1 for s in sequence_lengths]
+        utterance_representations = output[indices, range(batch_size)]
 
         hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
 
