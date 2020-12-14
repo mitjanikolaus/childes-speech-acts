@@ -196,18 +196,18 @@ if __name__ == "__main__":
     print(args)
 
     # Loading model
-    name = args.model
-    if os.path.isdir(name):
-        if name[-1] == "/":
-            name = name[:-1]
+    model_dir = args.model
+    if os.path.isdir(model_dir):
+        if model_dir[-1] == "/":
+            model_dir = model_dir[:-1]
     else:
-        raise FileNotFoundError(f"Cannot find model {name}.")
+        raise FileNotFoundError(f"Cannot find model {model_dir}.")
     # update paths for input/output
-    features_path = name + os.path.sep + "feature_vocabs.p"
-    model_path = name + os.path.sep + "model.pycrfsuite"
-    report_path = name + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
-    plot_path = name + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
-    classification_scores_path = name + os.path.sep + "classification_scores.p"
+    features_path = model_dir + os.path.sep + "feature_vocabs.p"
+    model_path = model_dir + os.path.sep + "model.pycrfsuite"
+    report_path = model_dir + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
+    plot_path = model_dir + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
+    classification_scores_path = model_dir + os.path.sep + "classification_scores.p"
 
     # Loading data
     data = pd.read_pickle(args.data)

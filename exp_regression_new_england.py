@@ -29,6 +29,7 @@ if __name__ == "__main__":
     print("Loading data...")
     # TODO use classification scores on other dataset?
     scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
+    # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
 
     scores_f1 = scores["f1-score"].to_dict()
 

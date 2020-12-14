@@ -133,8 +133,11 @@ def test(args):
             kappa = cohen_kappa_score(true_labels, predicted_labels)
             print("cohen's kappa: ", kappa)
             report = classification_report(true_labels, predicted_labels,  labels=label_indices, target_names=labels)
-            print(report)
 
+            print(report)
+            path = os.path.join("results", "nn")
+            os.makedirs(path, exist_ok=True)
+            pickle.dump(report, open(os.path.join(path, f"classification_scores_{args.model}.p"), "wb"))
 
     # Load the saved model checkpoint.
     with open(os.path.join(args.model, "model.pt"), "rb") as f:
