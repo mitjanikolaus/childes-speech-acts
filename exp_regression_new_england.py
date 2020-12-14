@@ -18,7 +18,7 @@ from utils import COLORS_PLOT_CATEGORICAL, age_bin
 
 from statsmodels.api import Logit
 
-MIN_NUM_UTTERANCES = 100
+MIN_NUM_UTTERANCES = 50
 MIN_CHILDREN_REQUIRED = 3
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
@@ -136,7 +136,6 @@ if __name__ == "__main__":
     #     plt.plot(pred_input, predictions)
     #     plt.xlim(min(ages)-4, max(ages)+12)
     #     plt.show()
-    #     print("greoihg")
 
 
     sns.set_palette(COLORS_PLOT_CATEGORICAL)
@@ -184,6 +183,15 @@ if __name__ == "__main__":
             f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} |"
             f" Freq: {frequencies_adults_observed[i]} | F1: {scores_observed[i]}"
         )
+
+    plt.show(block=False)
+
+    X = list(age_of_acquisition.values())
+    plt.figure()
+    plt.scatter(X, list(scores_observed), label="scores")
+    plt.scatter(X, list(frequencies_adults_observed), label="frequencies")
+    plt.legend()
+    plt.show(block=False)
 
     features = np.array(frequencies_adults_observed).reshape(-1, 1)
     targets = list(age_of_acquisition.values())
