@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
     # TODO use classification scores on other dataset?
-    scores = pickle.load(open("data/classification_scores_crf_rollins.p", "rb"))
+    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
 
     scores_f1 = scores["f1-score"].to_dict()
 
@@ -42,10 +42,11 @@ if __name__ == "__main__":
     data = pd.read_pickle('data/new_england_preprocessed.p')
     data_children = data[data["speaker"] == "CHI"]
     frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
+    frequencies = calculate_frequencies(data[SPEECH_ACT])
 
     # Filter speech acts
     # TODO justify
-    observed_speech_acts =  [k for k, v in frequencies_children.items() if k in scores_f1 and v > .001 and scores_f1[k] > 0]
+    observed_speech_acts =  [k for k, v in frequencies.items() if k in scores_f1 and v > .01] # and scores_f1[k] > 0
 
     # observed_speech_acts = [
     #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()

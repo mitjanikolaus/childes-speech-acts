@@ -19,16 +19,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 PUNCTUATION = [".","!","?"]
 
-def age_bin(age):
-    """Return the corresponding age bin (14, 20 or 32) for a given age"""
-    if age < 17:
-        return 14
-    elif age < 26:
-        return 20
-    else:
-        return 32
-
-
 def test(args):
     print("Start evaluation with args: ", args)
     print("Device: ", device)

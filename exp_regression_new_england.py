@@ -14,7 +14,9 @@ import pandas as pd
 import seaborn as sns
 
 from preprocess import SPEECH_ACT
-from utils import COLORS_PLOT_CATEGORICAL
+from utils import COLORS_PLOT_CATEGORICAL, age_bin
+
+from statsmodels.api import Logit
 
 MIN_NUM_UTTERANCES = 100
 MIN_CHILDREN_REQUIRED = 3
@@ -37,16 +39,22 @@ if __name__ == "__main__":
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
     frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
+    frequencies = calculate_frequencies(data[SPEECH_ACT])
 
     # TODO
     # observed_speech_acts = [
     #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
     # ]
-    observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1 and v > .001]
+    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > .01]
+    # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
 
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
 
-    ages = data_children["age_months"].unique()
+    # ages = data_children["age_months"].unique()
+    ages = [14, 20, 32]
+    # map ages to corresponding bins
+    data_children["age_months"] = data_children["age_months"].apply(age_bin)
+
 
     fraction_acquired_speech_act = []
 
@@ -113,6 +121,22 @@ if __name__ == "__main__":
 
     scores_observed = [scores_f1[s] for s in observed_speech_acts]
 
+    # for speech_act in observed_speech_acts:
+    #     fractions_speech_act = fraction_acquired_speech_act[fraction_acquired_speech_act["speech_act"] == speech_act]
+    #     months = fractions_speech_act["month"].values
+    #     fractions = fractions_speech_act["fraction"].values
+    #     log_reg = Logit(fractions, months).fit()
+    #
+    #     pred_input = np.linspace(min(ages)-4, max(ages)+12, 100)
+    #     predictions = log_reg.predict(pred_input)
+    #
+    #     plt.scatter(months, fractions)
+    #     plt.plot(pred_input, predictions)
+    #     plt.xlim(min(ages)-4, max(ages)+12)
+    #     plt.show()
+    #     print("greoihg")
+
+
     sns.set_palette(COLORS_PLOT_CATEGORICAL)
     g = sns.lmplot(
         data=fraction_acquired_speech_act,
@@ -123,7 +147,7 @@ if __name__ == "__main__":
         ci=None,
         legend=True,
     )
-    g.set(ylim=(0, 1), xlim=(min(ages), max(ages)))
+    g.set(ylim=(0, 1), xlim=(min(ages)-4, max(ages)+12))
     plt.setp(g.legend.get_texts(), fontsize="10")
 
     # Read estimated ages of acquisition from the logistic regression plot data

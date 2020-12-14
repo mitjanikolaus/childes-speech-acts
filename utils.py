@@ -201,6 +201,16 @@ def calculate_frequencies(data: list):
 
     return frequencies
 
+def age_bin(age):
+    """Return the corresponding age bin (14, 20 or 32) for a given age"""
+    if age < 17:
+        return 14
+    elif age < 26:
+        return 20
+    else:
+        return 32
+
+
 def parse_xml(d: dict):
     """
     Input:
