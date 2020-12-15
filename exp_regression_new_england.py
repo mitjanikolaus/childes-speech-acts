@@ -237,12 +237,14 @@ if __name__ == "__main__":
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
     print("Explained variance (only freq):", explained_variance_score(targets, y_pred))
+    print("Regression parameters: ", reg.coef_)
 
     features = np.array(scores_f1).reshape(-1, 1)
     targets = list(age_of_acquisition.values())
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
     print("Explained variance (only f1 scores):", explained_variance_score(targets, y_pred))
+    print("Regression parameters: ", reg.coef_)
 
     features = np.array(list(zip(frequencies_adults, scores_f1)))
     reg = LinearRegression().fit(features, targets)
@@ -251,5 +253,6 @@ if __name__ == "__main__":
         "Explained variance (freq + f1 scores):",
         explained_variance_score(targets, y_pred),
     )
+    print("Regression parameters: ", reg.coef_)
 
     plt.show()
