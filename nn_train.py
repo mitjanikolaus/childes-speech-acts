@@ -247,7 +247,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vocab-size",
         type=int,
-        default=2000,
+        default=1000,
         help="Maxmimum size of the vocabulary",
     )
     parser.add_argument(
