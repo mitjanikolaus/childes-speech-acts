@@ -16,48 +16,50 @@ import seaborn as sns
 from preprocess import SPEECH_ACT
 from utils import COLORS_PLOT_CATEGORICAL, age_bin
 
-from statsmodels.api import Logit
-
 MIN_NUM_UTTERANCES = 50
 MIN_CHILDREN_REQUIRED = 3
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
+def get_fraction_contingent_responses(ages, observed_speech_acts):
+    """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
+    fraction_contingent_responses = []
 
-if __name__ == "__main__":
-    # Model prediction accuracies
-    print("Loading data...")
-    # TODO use classification scores on other dataset?
-    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
-    # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
-    # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
+    for month in ages:
+        contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv")
 
-    scores_f1 = scores["f1-score"].to_dict()
+        for speech_act in observed_speech_acts:
+            # Add start: at 10 months children don't produce any speech act
+            fraction_contingent_responses.append(
+                {
+                    "speech_act": speech_act,
+                    "month": 10,
+                    "fraction": 0.0,
+                }
+            )
+            # Add end: at 18 years children know all speech acts
+            fraction_contingent_responses.append(
+                {
+                    "speech_act": speech_act,
+                    "month": 12 * 18,
+                    "fraction": 1.0,
+                }
+            )
 
-    # Calculate overall adult speech act frequencies
-    data = pd.read_pickle('data/new_england_preprocessed.p')
-    data_adults = data[data["speaker"] != "CHI"]
-    data_children = data[data["speaker"] == "CHI"]
+            fraction = contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == 1)]["fraction"].sum()
 
-    frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
-    frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
-    frequencies = calculate_frequencies(data[SPEECH_ACT])
+            fraction_contingent_responses.append(
+                {
+                    "speech_act": speech_act,
+                    "month": month,
+                    "fraction": fraction,
+                }
+            )
 
-    # TODO
-    # observed_speech_acts = [
-    #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
-    # ]
-    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > .01]
-    # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
-
-    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
-
-    # ages = data_children["age_months"].unique()
-    ages = [14, 20, 32]
-    # map ages to corresponding bins
-    data_children["age_months"] = data_children["age_months"].apply(age_bin)
+    return pd.DataFrame(fraction_contingent_responses)
 
 
+def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts):
     fraction_acquired_speech_act = []
 
     print("Processing speech acts...")
@@ -89,12 +91,12 @@ if __name__ == "__main__":
             for child_id in children_ids:
                 speech_acts_child = speech_acts_children_month[
                     speech_acts_children_month["file_id"] == child_id
-                ]
+                    ]
                 if len(speech_acts_child) > MIN_NUM_UTTERANCES:
                     n_children += 1
                     target_speech_acts_child = speech_acts_child[
                         speech_acts_child[SPEECH_ACT] == speech_act
-                    ]
+                        ]
                     if len(target_speech_acts_child) >= THRESHOLD_ACQUIRED:
                         n_acquired += 1
 
@@ -106,7 +108,6 @@ if __name__ == "__main__":
                     f"speech act {speech_act}: month {month}: Not enough data (only {n_children} children). Using value of previous month. Increase age bin size?"
                 )
                 fraction = prev_fraction
-            # print(f"{speech_act}: {month}: {n_children}")
 
             fraction_acquired_speech_act.append(
                 {
@@ -117,30 +118,50 @@ if __name__ == "__main__":
             )
             prev_fraction = fraction
 
-    fraction_acquired_speech_act = pd.DataFrame(fraction_acquired_speech_act)
+    return pd.DataFrame(fraction_acquired_speech_act)
 
-    frequencies_adults_observed = [frequencies_adults[s] for s in observed_speech_acts]
 
-    scores_observed = [scores_f1[s] for s in observed_speech_acts]
+if __name__ == "__main__":
+    print("Loading data...")
+    # TODO use classification scores on other dataset?
+    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
+    # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
+    # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
+    scores_f1 = scores["f1-score"].to_dict()
 
-    # for speech_act in observed_speech_acts:
-    #     fractions_speech_act = fraction_acquired_speech_act[fraction_acquired_speech_act["speech_act"] == speech_act]
-    #     months = fractions_speech_act["month"].values
-    #     fractions = fractions_speech_act["fraction"].values
-    #     log_reg = Logit(fractions, months).fit()
-    #
-    #     pred_input = np.linspace(min(ages)-4, max(ages)+12, 100)
-    #     predictions = log_reg.predict(pred_input)
-    #
-    #     plt.scatter(months, fractions)
-    #     plt.plot(pred_input, predictions)
-    #     plt.xlim(min(ages)-4, max(ages)+12)
-    #     plt.show()
+    # Calculate overall adult speech act frequencies
+    data = pd.read_pickle('data/new_england_preprocessed.p')
+    data_adults = data[data["speaker"] != "CHI"]
+    data_children = data[data["speaker"] == "CHI"]
 
+    frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
+    frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
+    frequencies = calculate_frequencies(data[SPEECH_ACT])
+
+    # TODO
+    # observed_speech_acts = [
+    #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
+    # ]
+    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > .01]
+    # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
+
+    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
+
+    ages = [14, 20, 32]
+    # map ages to corresponding bins
+    data_children["age_months"] = data_children["age_months"].apply(age_bin)
+
+    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    fraction_data = fraction_producing_speech_act
+
+    # Filter data for observed speech acts
+    frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
+    scores_f1 = [scores_f1[s] for s in observed_speech_acts]
 
     sns.set_palette(COLORS_PLOT_CATEGORICAL)
     g = sns.lmplot(
-        data=fraction_acquired_speech_act,
+        data=fraction_data,
         x="month",
         y="fraction",
         hue="speech_act",
@@ -161,14 +182,14 @@ if __name__ == "__main__":
         # TODO: improve.
         if np.isnan(fractions).all():
             warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
-            fractions_speech_act_acquired = fraction_acquired_speech_act[
-                (fraction_acquired_speech_act["speech_act"] == speech_act)
-                & fraction_acquired_speech_act["fraction"]
+            fractions_speech_act_acquired = fraction_data[
+                (fraction_data["speech_act"] == speech_act)
+                & fraction_data["fraction"]
                 >= THRESHOLD_FRACTION_ACQUIRED
-            ]
+                ]
             if len(fractions_speech_act_acquired) > 0:
                 age_of_acquisition[speech_act] = min(
-                    fraction_acquired_speech_act["month"]
+                    fraction_data["month"]
                 )
             else:
                 age_of_acquisition[speech_act] = max(ages)
@@ -181,25 +202,25 @@ if __name__ == "__main__":
                 age_of_acquisition[speech_act] = max(ages)
         print(
             f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} |"
-            f" Freq: {frequencies_adults_observed[i]} | F1: {scores_observed[i]}"
+            f" Freq: {frequencies_adults[i]} | F1: {scores_f1[i]}"
         )
 
     plt.show(block=False)
 
     X = list(age_of_acquisition.values())
     plt.figure()
-    plt.scatter(X, list(scores_observed), label="scores")
-    plt.scatter(X, list(frequencies_adults_observed), label="frequencies")
+    plt.scatter(X, list(scores_f1), label="scores")
+    plt.scatter(X, list(frequencies_adults), label="frequencies")
     plt.legend()
     plt.show(block=False)
 
-    features = np.array(frequencies_adults_observed).reshape(-1, 1)
+    features = np.array(frequencies_adults).reshape(-1, 1)
     targets = list(age_of_acquisition.values())
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
     print("Explained variance (only freq):", explained_variance_score(targets, y_pred))
 
-    features = np.array(list(zip(frequencies_adults_observed, scores_observed)))
+    features = np.array(list(zip(frequencies_adults, scores_f1)))
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
     print(
