@@ -155,6 +155,9 @@ def create_2_sankey(
                 "fraction": fraction,
             })
     percentages = pd.DataFrame(percentages)
+    percentages["source_description"] = percentages["source"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
+    percentages["target_description"] = percentages["target"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
+
     out_dir = "adjacency_pairs"
     os.makedirs(out_dir, exist_ok=True)
     percentages.to_csv(os.path.join(out_dir, f"{source}-{target}_age_{age}.csv"))
