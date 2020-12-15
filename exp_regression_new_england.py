@@ -207,11 +207,29 @@ if __name__ == "__main__":
 
     plt.show(block=False)
 
-    X = list(age_of_acquisition.values())
+
+    fig, ax = plt.subplots()
+    x = list(age_of_acquisition.values())
+    y = list(scores_f1)
+    ax.scatter(x, y)
+    plt.xlabel("age of acquisition (months)")
+    plt.ylabel("classification score (F1)")
+
+    for i, speech_act in enumerate(observed_speech_acts):
+        ax.annotate(speech_act, (x[i], y[i]))
+
     plt.figure()
-    plt.scatter(X, list(scores_f1), label="scores")
-    plt.scatter(X, list(frequencies_adults), label="frequencies")
-    plt.legend()
+
+    fig, ax = plt.subplots()
+    x = list(age_of_acquisition.values())
+    y = list(frequencies_adults)
+    ax.scatter(x, y)
+    plt.xlabel("age of acquisition (months)")
+    plt.ylabel("frequency (%)")
+
+    for i, speech_act in enumerate(observed_speech_acts):
+        ax.annotate(speech_act, (x[i], y[i]))
+
     plt.show(block=False)
 
     features = np.array(frequencies_adults).reshape(-1, 1)
@@ -219,6 +237,12 @@ if __name__ == "__main__":
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
     print("Explained variance (only freq):", explained_variance_score(targets, y_pred))
+
+    features = np.array(scores_f1).reshape(-1, 1)
+    targets = list(age_of_acquisition.values())
+    reg = LinearRegression().fit(features, targets)
+    y_pred = reg.predict(features)
+    print("Explained variance (only f1 scores):", explained_variance_score(targets, y_pred))
 
     features = np.array(list(zip(frequencies_adults, scores_f1)))
     reg = LinearRegression().fit(features, targets)
