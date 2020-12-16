@@ -27,7 +27,7 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
     fraction_contingent_responses = []
 
     for month in ages:
-        contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv")
+        contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_collapsed_contingency.csv")
 
         for speech_act in observed_speech_acts:
             # Add start: at 6 months children don't produce any speech act
@@ -48,6 +48,7 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
             )
 
             fraction = contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == 1)]["fraction"].sum()
+            fraction += .5 * contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == .5)]["fraction"].sum()
 
             fraction_contingent_responses.append(
                 {
@@ -154,9 +155,9 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
-    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
-    fraction_data = fraction_producing_speech_act
+    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    fraction_data = fraction_contingent_responses
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
