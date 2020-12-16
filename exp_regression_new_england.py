@@ -126,7 +126,7 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 if __name__ == "__main__":
     print("Loading data...")
     # TODO use classification scores on other dataset?
-    scores = pickle.load(open("checkpoints/crf/classification_scores.p", "rb"))
+    scores = pickle.load(open("checkpoints/crf_collapsed/classification_scores.p", "rb"))
     # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
     # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
     scores_f1 = scores["f1-score"].to_dict()
@@ -139,16 +139,8 @@ if __name__ == "__main__":
     data_children = data[data["speaker"] == "CHI"]
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
-    frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
-    frequencies = calculate_frequencies(data[SPEECH_ACT])
 
-    # TODO
-    # observed_speech_acts = [
-    #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
-    # ]
-    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > 0]
-    # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
-
+    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > 10 and label in scores_f1]
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
 
     ages = [14, 20, 32]
@@ -200,7 +192,7 @@ if __name__ == "__main__":
 
         # Take data from logistic regression curve
         else:
-            if np.where(fractions > 0.5)[0].size > 0:
+            if np.where(fractions > THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
                 age_of_acquisition[speech_act] = ages[np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))]
             else:
                 age_of_acquisition[speech_act] = max(ages)
@@ -215,7 +207,12 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     x = list(age_of_acquisition.values())
     y = list(scores_f1)
-    ax.scatter(x, y)
+    g = sns.regplot(
+        x, y,
+        ci=None,
+        order=1,
+    )
+
     plt.xlabel("age of acquisition (months)")
     plt.ylabel("classification score (F1)")
 
@@ -225,7 +222,11 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     x = list(age_of_acquisition.values())
     y = list(frequencies_adults)
-    ax.scatter(x, y)
+    g = sns.regplot(
+        x, y,
+        ci=None,
+        order=1,
+    )
     plt.xlabel("age of acquisition (months)")
     plt.ylabel("frequency (%)")
 

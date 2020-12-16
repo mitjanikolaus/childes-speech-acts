@@ -16,7 +16,7 @@ from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
 from utils import SPEECH_ACT_DESCRIPTIONS, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, \
-    TRAIN_TEST_SPLIT_RANDOM_STATE
+    TRAIN_TEST_SPLIT_RANDOM_STATE, COLLAPSED_FORCE_CODES_TRANSLATIONS, COLLAPSED_FORCE_CODES
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -113,6 +113,8 @@ if __name__ == "__main__":
 
     data = pd.read_pickle(args.data)
 
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
+
     data = add_feature_columns(
         data,
         use_action=args.use_action,
@@ -141,7 +143,7 @@ if __name__ == "__main__":
     data_children = data[data.speaker == "CHI"]
     data_children = data_children[~data_children[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
     counts = Counter(data_children[SPEECH_ACT])
-    observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.Name.keys() if counts[k] > 0]
+    observed_labels = [k for k in COLLAPSED_FORCE_CODES.index.values if counts[k] > 0]
     counters["gold"] = dict.fromkeys(observed_labels)
     counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
     for k in counters["gold"].keys():
