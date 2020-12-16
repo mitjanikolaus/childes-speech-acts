@@ -146,7 +146,7 @@ if __name__ == "__main__":
     # observed_speech_acts = [
     #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
     # ]
-    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > .01]
+    observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > 0]
     # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
 
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
@@ -155,9 +155,9 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
-    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
-    fraction_data = fraction_contingent_responses
+    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    fraction_data = fraction_producing_speech_act
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
@@ -193,7 +193,7 @@ if __name__ == "__main__":
                 ]
             if len(fractions_speech_act_acquired) > 0:
                 age_of_acquisition[speech_act] = min(
-                    fraction_data["month"]
+                    fractions_speech_act_acquired["month"]
                 )
             else:
                 age_of_acquisition[speech_act] = max(ages)
