@@ -92,9 +92,10 @@ QA Questions QA "Answer a question with a wh-question."
 
 YA Questions YA "Answer a question with a yes/no question."
 
-YQTQRQ Questions YQ "Ask a yes/no question."
-YQTQRQ Questions TQ "Ask a limited-alternative yes/no question."
-YQTQRQ Directives RQ "Yes/no question or suggestion about hearer's wishes and intentions"
+YQTQ Questions YQ "Ask a yes/no question."
+YQTQ Questions TQ "Ask a limited-alternative yes/no question."
+
+RQ Directives RQ "Yes/no question or suggestion about hearer's wishes and intentions"
 
 FP Commitments FP "Ask for permission to carry out act."
 
