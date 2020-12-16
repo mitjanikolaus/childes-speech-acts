@@ -109,7 +109,7 @@ def test(args):
             cm = confusion_matrix(true_labels, predicted_labels, normalize='true', labels=list(label_vocab.values()))
 
             for label_idx in label_vocab.inverse.keys():
-                confusions = [label_vocab.inverse[i] for i in np.where(cm[label_idx] > .1)[0] if i != label_idx]
+                confusions = [label_vocab.inverse[i] for i in np.where(cm.T[label_idx] > .1)[0] if i != label_idx]
                 label = label_vocab.inverse[label_idx]
                 if confusions:
                     print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")

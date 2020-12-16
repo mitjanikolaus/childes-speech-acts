@@ -3,8 +3,7 @@ import pickle
 import argparse
 from collections import Counter
 import ast
-from typing import Union, Tuple
-from bidict import bidict
+import numpy as np
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,7 +24,7 @@ from crf_train import (
     bio_classification_report,
 )
 from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits
+    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS
 
 
 def load_training_args(args):
@@ -268,7 +267,7 @@ if __name__ == "__main__":
     # Remove uninformative tags before doing analysis
     data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
     # reports
-    report, mat, acc, cks = bio_classification_report(
+    report, confusion_matrix, acc, cks = bio_classification_report(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
     )
     states, transitions = features_report(tagger)
@@ -284,7 +283,7 @@ if __name__ == "__main__":
     report_d = {
         "test_data": data_crf[int_cols],
         "classification_report": report.T,
-        "confusion_matrix": mat,
+        "confusion_matrix": confusion_matrix,
         "weights": states,
         "learned_transitions": transitions.pivot(
             index="label_from", columns="label", values="likelihood"
@@ -292,6 +291,15 @@ if __name__ == "__main__":
     }
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
+
+    for label in np.unique(data_test[SPEECH_ACT]):
+        confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
+        confusions = np.delete(confusions, np.where(confusions == label))
+        if len(confusions) > 0:
+            print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")
+            for confusion in confusions:
+                print(confusion, SPEECH_ACT_DESCRIPTIONS.Description[confusion])
+            print("")
 
     if args.col_ages is not None:
         plot_testing(data_test, plot_path, args.col_ages)
