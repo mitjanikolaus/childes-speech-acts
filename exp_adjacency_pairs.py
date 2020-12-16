@@ -12,7 +12,7 @@ from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 
 from preprocess import SPEECH_ACT, CHILD, ADULT
-from utils import SPEECH_ACT_DESCRIPTIONS
+from utils import COLLAPSED_FORCE_CODES_TRANSLATIONS, COLLAPSED_FORCE_CODES
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -31,8 +31,8 @@ for name, hex in matplotlib.colors.cnames.items():
     hex_colors_dic[name] = hex
     rgb_colors_dic[name] = matplotlib.colors.to_rgb(hex)
 
-ILL = SPEECH_ACT_DESCRIPTIONS.reset_index()
-ILL["spa_2a"] = ILL["Name"].apply(lambda x: x[:3].upper())
+ILL = COLLAPSED_FORCE_CODES #.reset_index()
+ILL["spa_2a"] = ILL["Category"].apply(lambda x: x[:3].upper())
 node_colors_2a = {
     x: random.choice(hex_colors_only) for x in ILL["spa_2a"].unique().tolist()
 }
@@ -40,11 +40,11 @@ ILL["colors"] = ILL["spa_2a"].apply(
     lambda x: None if x not in node_colors_2a.keys() else node_colors_2a[x]
 )
 node_colors_2 = (
-    ILL[["Code", "colors"]].set_index("Code").to_dict()["colors"]
+    ILL[["Code", "colors"]].to_dict()["colors"]
 )  # no duplicates
 
-ILL["concat"] = ILL.apply(lambda x: f"{x.Name} - {x.Description}", axis=1)
-node_descr = ILL[["Code", "concat"]].set_index("Code").to_dict()["concat"]
+ILL["concat"] = ILL.apply(lambda x: f"{x.Category} - {x.Description}", axis=1)
+node_descr = ILL[["concat"]].to_dict()["concat"]
 
 ###### SANKEY / PARSING FUNCTIONS
 def plot_sankey(
@@ -155,8 +155,8 @@ def create_2_sankey(
                 "fraction": fraction,
             })
     percentages = pd.DataFrame(percentages)
-    percentages["source_description"] = percentages["source"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
-    percentages["target_description"] = percentages["target"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
+    percentages["source_description"] = percentages["source"].apply(lambda sp: COLLAPSED_FORCE_CODES.loc[sp].Description)
+    percentages["target_description"] = percentages["target"].apply(lambda sp: COLLAPSED_FORCE_CODES.loc[sp].Description)
 
     out_dir = "adjacency_pairs"
     os.makedirs(out_dir, exist_ok=True)
@@ -263,6 +263,8 @@ app.layout = html.Div(
 def update_graph(dataset, source, target, age_months, percentage):
     # Load data
     data = pd.read_pickle(ds_list[dataset])
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
+
     match_age = [14, 20, 32]
     data["age_months"] = data.age_months.apply(
         lambda age: min(match_age, key=lambda x: abs(x - age))

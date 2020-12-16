@@ -24,7 +24,7 @@ from crf_train import (
     bio_classification_report,
 )
 from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS, COLLAPSED_FORCE_CODES
+    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS, COLLAPSED_FORCE_CODES_TRANSLATIONS, COLLAPSED_FORCE_CODES
 
 
 def load_training_args(args):
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     # Loading data
     data = pd.read_pickle(args.data)
 
-    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES.loc[x].Group)
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
 
     data = add_feature_columns(
         data,
@@ -294,12 +294,12 @@ if __name__ == "__main__":
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
 
-    COLLAPSED_FORCE_CODES = COLLAPSED_FORCE_CODES.set_index("Group")
+    # COLLAPSED_FORCE_CODES_TRANSLATIONS = COLLAPSED_FORCE_CODES_TRANSLATIONS.set_index("Group")
     for label in np.unique(data_test[SPEECH_ACT]):
         confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
         confusions = np.delete(confusions, np.where(confusions == label))
 
-        label_category = COLLAPSED_FORCE_CODES.loc[label]["Category"]
+        # label_category = COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[label]["Category"]
         genuine_confusions = confusions #[]
         # for confusion in confusions:
         #     confused_label_category = COLLAPSED_FORCE_CODES.loc[COLLAPSED_FORCE_CODES["Group"] == confusion]["Category"].values[0]

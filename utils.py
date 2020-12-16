@@ -19,8 +19,11 @@ SPEECH_ACT_DESCRIPTIONS = pd.read_csv(
     "illocutionary_force_codes.csv", sep=" ", header=0, keep_default_na=False
 ).set_index("Code")
 
-COLLAPSED_FORCE_CODES = pd.read_csv('illocutionary_force_codes_collapsed.csv', sep=' ', header=0, keep_default_na=False).set_index('Code')
-COLLAPSED_FORCE_CODES_VOCAB = bidict({label: i for i, label in enumerate(np.unique(COLLAPSED_FORCE_CODES.Group.values))})
+COLLAPSED_FORCE_CODES_TRANSLATIONS = pd.read_csv('illocutionary_force_codes_translations.csv', sep=' ', header=0, keep_default_na=False).set_index('Code')
+COLLAPSED_FORCE_CODES_VOCAB = bidict({label: i for i, label in enumerate(np.unique(COLLAPSED_FORCE_CODES_TRANSLATIONS.Group.values))})
+
+COLLAPSED_FORCE_CODES = pd.read_csv('illocutionary_force_codes_collapsed.csv', sep=' ', header=0, keep_default_na=False).set_index('Group')
+
 
 PUNCTUATION = {
     "p": ".",

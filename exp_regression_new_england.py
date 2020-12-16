@@ -15,7 +15,7 @@ import pandas as pd
 import seaborn as sns
 
 from preprocess import SPEECH_ACT
-from utils import COLORS_PLOT_CATEGORICAL, age_bin, COLLAPSED_FORCE_CODES
+from utils import COLORS_PLOT_CATEGORICAL, age_bin, COLLAPSED_FORCE_CODES_TRANSLATIONS
 
 MIN_NUM_UTTERANCES = 0
 MIN_CHILDREN_REQUIRED = 0
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     # Calculate overall adult speech act frequencies
     data = pd.read_pickle('data/new_england_preprocessed.p')
-    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES.loc[x].Group)
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
 
     data_adults = data[data["speaker"] != "CHI"]
     data_children = data[data["speaker"] == "CHI"]

@@ -19,7 +19,7 @@ import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
 from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits, COLLAPSED_FORCE_CODES
+    make_train_test_splits, COLLAPSED_FORCE_CODES_TRANSLATIONS
 
 
 def argparser():
@@ -525,7 +525,7 @@ if __name__ == "__main__":
 
     data = pd.read_pickle(args.data)
 
-    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES.loc[x].Group)
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
 
     data = add_feature_columns(
         data,
