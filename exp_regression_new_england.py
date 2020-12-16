@@ -15,7 +15,7 @@ import pandas as pd
 import seaborn as sns
 
 from preprocess import SPEECH_ACT
-from utils import COLORS_PLOT_CATEGORICAL, age_bin
+from utils import COLORS_PLOT_CATEGORICAL, age_bin, COLLAPSED_FORCE_CODES
 
 MIN_NUM_UTTERANCES = 0
 MIN_CHILDREN_REQUIRED = 0
@@ -30,11 +30,11 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
         contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv")
 
         for speech_act in observed_speech_acts:
-            # Add start: at 10 months children don't produce any speech act
+            # Add start: at 6 months children don't produce any speech act
             fraction_contingent_responses.append(
                 {
                     "speech_act": speech_act,
-                    "month": 10,
+                    "month": 6,
                     "fraction": 0.0,
                 }
             )
@@ -66,11 +66,11 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
     print("Processing speech acts...")
     for speech_act in observed_speech_acts:
 
-        # Add start: at 10 months children don't produce any speech act
+        # Add start: at 6 months children don't produce any speech act
         fraction_acquired_speech_act.append(
             {
                 "speech_act": speech_act,
-                "month": 10,
+                "month": 6,
                 "fraction": 0.0,
             }
         )
@@ -125,13 +125,15 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 if __name__ == "__main__":
     print("Loading data...")
     # TODO use classification scores on other dataset?
-    scores = pickle.load(open("data/classification_scores_crf.p", "rb"))
+    scores = pickle.load(open("checkpoints/crf/classification_scores.p", "rb"))
     # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
     # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
     data = pd.read_pickle('data/new_england_preprocessed.p')
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES.loc[x].Group)
+
     data_adults = data[data["speaker"] != "CHI"]
     data_children = data[data["speaker"] == "CHI"]
 
@@ -146,15 +148,15 @@ if __name__ == "__main__":
     observed_speech_acts = [k for k, v in frequencies.items() if k in scores_f1 and v > .01]
     # observed_speech_acts = [k for k, v in frequencies_children.items() if k in scores_f1]
 
-    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
+    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
 
     ages = [14, 20, 32]
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
-    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
-    fraction_data = fraction_contingent_responses
+    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    fraction_data = fraction_producing_speech_act
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]

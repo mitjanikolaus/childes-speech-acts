@@ -13,10 +13,14 @@ import re
 from bidict import (
     bidict,
 )  # bidirectional dictionary - allows for looking up key from value
+import numpy as np
 
 SPEECH_ACT_DESCRIPTIONS = pd.read_csv(
     "illocutionary_force_codes.csv", sep=" ", header=0, keep_default_na=False
 ).set_index("Code")
+
+COLLAPSED_FORCE_CODES = pd.read_csv('illocutionary_force_codes_collapsed.csv', sep=' ', header=0, keep_default_na=False).set_index('Code')
+COLLAPSED_FORCE_CODES_VOCAB = bidict({label: i for i, label in enumerate(np.unique(COLLAPSED_FORCE_CODES.Group.values))})
 
 PUNCTUATION = {
     "p": ".",

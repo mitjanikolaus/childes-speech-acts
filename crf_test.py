@@ -24,7 +24,7 @@ from crf_train import (
     bio_classification_report,
 )
 from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS
+    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS, COLLAPSED_FORCE_CODES
 
 
 def load_training_args(args):
@@ -211,6 +211,8 @@ if __name__ == "__main__":
     # Loading data
     data = pd.read_pickle(args.data)
 
+    data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES.loc[x].Group)
+
     data = add_feature_columns(
         data,
         use_action=args.use_action,
@@ -292,21 +294,30 @@ if __name__ == "__main__":
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
 
+    COLLAPSED_FORCE_CODES = COLLAPSED_FORCE_CODES.set_index("Group")
     for label in np.unique(data_test[SPEECH_ACT]):
         confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
         confusions = np.delete(confusions, np.where(confusions == label))
 
-        label_category = SPEECH_ACT_DESCRIPTIONS.loc[label]["Category"]
-        genuine_confusions = []
-        for confusion in confusions:
-            confused_label_category = SPEECH_ACT_DESCRIPTIONS.loc[confusion]["Category"]
-            if label_category == confused_label_category:
-                genuine_confusions.append(confusion)
+        label_category = COLLAPSED_FORCE_CODES.loc[label]["Category"]
+        genuine_confusions = confusions #[]
+        # for confusion in confusions:
+        #     confused_label_category = COLLAPSED_FORCE_CODES.loc[COLLAPSED_FORCE_CODES["Group"] == confusion]["Category"].values[0]
+        #     if label_category == confused_label_category:
+        #         genuine_confusions.append(confusion)
 
         if len(genuine_confusions) > 0:
-            print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")
+            description = COLLAPSED_FORCE_CODES.Description[label]
+            if type(description) == str:
+                print(f"{label} ({description}) is confused with:")
+            else:
+                print(f"{label} is confused with:")
             for confusion in genuine_confusions:
-                print(confusion, SPEECH_ACT_DESCRIPTIONS.Description[confusion])
+                description = COLLAPSED_FORCE_CODES.Description[confusion]
+                if type(description) == str:
+                    print(confusion, description)
+                else:
+                    print(confusion)
             print("")
 
     if args.col_ages is not None:
