@@ -79,8 +79,9 @@ EQ Questions EQ "Eliciting question (e.g. hmm?)."
 
 NA Questions NA "Intentionally nonsatisfying answer to question"
 
-QNRR Questions QN "Ask a product-question (wh-question)"
-QNRR "Demands for clarification" RR "Request to repeat utterance."
+QN Questions QN "Ask a product-question (wh-question)"
+
+RR "Demands for clarification" RR "Request to repeat utterance."
 
 RA Questions RA "Refuse to answer."
 
@@ -99,9 +100,8 @@ RQ Directives RQ "Yes/no question or suggestion about hearer's wishes and intent
 
 FP Commitments FP "Ask for permission to carry out act."
 
-PR Performances PR "Perform verbal move in game."
-
-CN Statements CN "Count."
+PRCN Performances PR "Perform verbal move in game."
+PRCN Statements CN "Count."
 
 ABPMET Evalutions AB "Approve of appropriate behavior."
 ABPMET Evalutions PM "Praise for motor acts i.e for nonverbal behavior."

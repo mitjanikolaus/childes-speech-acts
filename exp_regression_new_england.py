@@ -22,6 +22,9 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
+# TODO justify
+THRESHOLD_SPEECH_ACT_OBSERVED = 2
+
 def get_fraction_contingent_responses(ages, observed_speech_acts):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
     fraction_contingent_responses = []
@@ -140,7 +143,7 @@ if __name__ == "__main__":
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
 
-    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > 10 and label in scores_f1]
+    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1]
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
 
     ages = [14, 20, 32]
