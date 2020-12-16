@@ -1,6 +1,7 @@
 import pickle
 import warnings
 
+from sklearn.feature_selection import f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score
 
@@ -16,8 +17,8 @@ import seaborn as sns
 from preprocess import SPEECH_ACT
 from utils import COLORS_PLOT_CATEGORICAL, age_bin
 
-MIN_NUM_UTTERANCES = 50
-MIN_CHILDREN_REQUIRED = 3
+MIN_NUM_UTTERANCES = 0
+MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
@@ -151,9 +152,9 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
-    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
-    fraction_data = fraction_producing_speech_act
+    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    fraction_data = fraction_contingent_responses
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
@@ -218,8 +219,6 @@ if __name__ == "__main__":
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
 
-    plt.figure()
-
     fig, ax = plt.subplots()
     x = list(age_of_acquisition.values())
     y = list(frequencies_adults)
@@ -254,5 +253,7 @@ if __name__ == "__main__":
         explained_variance_score(targets, y_pred),
     )
     print("Regression parameters: ", reg.coef_)
+    F, p_val = f_regression(features, targets)
+    print("p-values: ", p_val)
 
     plt.show()
