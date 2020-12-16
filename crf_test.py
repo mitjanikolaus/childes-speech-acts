@@ -295,9 +295,17 @@ if __name__ == "__main__":
     for label in np.unique(data_test[SPEECH_ACT]):
         confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
         confusions = np.delete(confusions, np.where(confusions == label))
-        if len(confusions) > 0:
+
+        label_category = SPEECH_ACT_DESCRIPTIONS.loc[label]["Category"]
+        genuine_confusions = []
+        for confusion in confusions:
+            confused_label_category = SPEECH_ACT_DESCRIPTIONS.loc[confusion]["Category"]
+            if label_category == confused_label_category:
+                genuine_confusions.append(confusion)
+
+        if len(genuine_confusions) > 0:
             print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")
-            for confusion in confusions:
+            for confusion in genuine_confusions:
                 print(confusion, SPEECH_ACT_DESCRIPTIONS.Description[confusion])
             print("")
 
