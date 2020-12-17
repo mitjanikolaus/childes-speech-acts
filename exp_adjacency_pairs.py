@@ -32,7 +32,7 @@ for name, hex in matplotlib.colors.cnames.items():
     rgb_colors_dic[name] = matplotlib.colors.to_rgb(hex)
 
 ILL = SPEECH_ACT_DESCRIPTIONS.reset_index()
-ILL["spa_2a"] = ILL["Name"].apply(lambda x: x[:3].upper())
+ILL["spa_2a"] = ILL["Category"].apply(lambda x: x[:3].upper())
 node_colors_2a = {
     x: random.choice(hex_colors_only) for x in ILL["spa_2a"].unique().tolist()
 }
@@ -43,7 +43,7 @@ node_colors_2 = (
     ILL[["Code", "colors"]].set_index("Code").to_dict()["colors"]
 )  # no duplicates
 
-ILL["concat"] = ILL.apply(lambda x: f"{x.Name} - {x.Description}", axis=1)
+ILL["concat"] = ILL.apply(lambda x: f"{x.Category} - {x.Description}", axis=1)
 node_descr = ILL[["Code", "concat"]].set_index("Code").to_dict()["concat"]
 
 ###### SANKEY / PARSING FUNCTIONS
@@ -188,7 +188,7 @@ def create_2_sankey(
             node_descr[x]
             for x in (enc_cat[spa_target] + enc_cat[spa_source])
         ],
-        sk_title=f"{source} to {target} sequences in data",
+        sk_title=f"{source} to {target} adjacency pairs | Child age: {age} months",
     )
 
     return fig
