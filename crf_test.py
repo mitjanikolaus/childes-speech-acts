@@ -292,6 +292,7 @@ if __name__ == "__main__":
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
 
+    confusion_matrix = confusion_matrix.T
     for label in np.unique(data_test[SPEECH_ACT]):
         confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
         confusions = np.delete(confusions, np.where(confusions == label))
@@ -311,6 +312,9 @@ if __name__ == "__main__":
 
     if args.col_ages is not None:
         plot_testing(data_test, plot_path, args.col_ages)
+
+    report = classification_report( data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3)
+    print(report)
 
     # Write excel with all reports
     report_to_file(report_d, report_path)
