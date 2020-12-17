@@ -160,6 +160,7 @@ def create_2_sankey(
 
     out_dir = "adjacency_pairs"
     os.makedirs(out_dir, exist_ok=True)
+    percentages = percentages[percentages["fraction"] > 0.05]
     percentages.to_csv(os.path.join(out_dir, f"{source}-{target}_age_{age}.csv"))
 
     # 5.1 Apply encoder to get labels as numbers => idx in sankey (source, target)

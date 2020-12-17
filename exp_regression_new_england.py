@@ -155,7 +155,7 @@ if __name__ == "__main__":
     fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
 
     # Take out speech acts where we have no contingency data
-    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["TA", "NA", "ND"]]
+    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["EM", "ED", "RR", "RQ", "NA", "ND"]]
     # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
     fraction_data = fraction_producing_speech_act
 
