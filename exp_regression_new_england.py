@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
 
-    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1]
+    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1 and frequencies_adults[label] > 0]
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
 
     ages = [14, 20, 32]
@@ -151,7 +151,11 @@ if __name__ == "__main__":
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
     fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+
+    # Take out speech acts where we have no contingency data
+    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["TA", "NA", "ND"]]
     # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+
     fraction_data = fraction_producing_speech_act
 
     # Filter data for observed speech acts
@@ -207,6 +211,8 @@ if __name__ == "__main__":
     plt.show(block=False)
 
 
+    frequencies_adults = np.log10(np.array(frequencies_adults))
+
     fig, ax = plt.subplots()
     x = list(age_of_acquisition.values())
     y = list(scores_f1)
@@ -238,7 +244,7 @@ if __name__ == "__main__":
 
     plt.show(block=False)
 
-    features = np.array(frequencies_adults).reshape(-1, 1)
+    features = frequencies_adults.reshape(-1, 1)
     targets = list(age_of_acquisition.values())
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
