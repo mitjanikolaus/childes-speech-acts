@@ -150,13 +150,13 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
 
     # Take out speech acts where we have no contingency data
-    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["TA", "NA", "ND"]]
-    # fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+    observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA", "ND"]]
+    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
 
-    fraction_data = fraction_producing_speech_act
+    fraction_data = fraction_contingent_responses
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
