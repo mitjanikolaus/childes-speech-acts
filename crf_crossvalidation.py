@@ -132,16 +132,15 @@ if __name__ == "__main__":
     freport = {}  # Dictionary containing reports
     counters = {}
 
-
     # Filter data by childen's age
     if args.age:
-        data = data[data.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
+        data_age_filtered = data[data.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
 
     # Gather ground-truth label distributions:
-    data_children = data[data.speaker == "CHI"]
-    data_children = data_children[~data_children[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
+    data_children = data_age_filtered[data_age_filtered.speaker == "CHI"]
+    data_children = data_children[~data_children[SPEECH_ACT].isin(["NAT", "NEE"])]
     counts = Counter(data_children[SPEECH_ACT])
-    observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.Name.keys() if counts[k] > 0]
+    observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.index if counts[k] > 0]
     counters["gold"] = dict.fromkeys(observed_labels)
     counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
     for k in counters["gold"].keys():
@@ -272,13 +271,11 @@ if __name__ == "__main__":
         data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
 
         # Remove uninformative tags before doing analysis
-        data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
-        # reports
-        report, mat, acc, cks = bio_classification_report(
-            data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
-        )
-        logger[i] = acc
-        freport[i] = {"report": report, "cm": mat}
+        data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE"])]
+
+        # Age filter before analysis
+        if args.age:
+            data_crf = data_crf[data_crf.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
 
         # Filter for children's utterances
         data_crf_children = data_crf[data_crf.speaker == "CHI"]
@@ -301,30 +298,19 @@ if __name__ == "__main__":
     splits = np.concatenate([[str(i)] * len(observed_labels) for i in counters.keys()])
     counts = np.concatenate([list(counter.values()) for counter in counters.values()])
     df = pd.DataFrame(
-        zip(labels, splits, counts), columns=["speech_act", "split", "frequency"]
+        zip(labels, splits, counts), columns=["speech_act", "source", "frequency"]
     )
     plt.figure(figsize=(10, 6))
-    sns.barplot(x="speech_act", hue="split", y="frequency", data=df)
-    plt.show()
+    sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
 
     kl_divergence = entropy(
         list(counters["pred"].values()), qk=list(counters["gold"].values())
     )
     print(f"KL Divergence: {kl_divergence:.3f}")
+    plt.title(f"Frequencies in Ground-truth vs. Predicted data. | KL Divergence: {kl_divergence:.3f} | Age: {args.age} months")
 
     train_per = pd.Series(logger, name="acc_over_train_percentage")
 
-    report_to_file(
-        {
-            **{"report_" + str(n): d["report"].T for n, d in freport.items()},
-            **{"cm_" + str(n): d["cm"].T for n, d in freport.items()},
-        },
-        os.path.join(checkpoint_path, "report.xlsx"),
-    )
-
-    with open(os.path.join(checkpoint_path, "metadata.txt"), "w") as meta_file:  # dumping metadata
-        for arg in vars(args):
-            meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
-        meta_file.write("{0}:\t{1}\n".format("Experiment", "Datasets"))
-
     print("Average accuracy over all splits: ", np.average(list(logger.values())))
+
+    plt.show()
