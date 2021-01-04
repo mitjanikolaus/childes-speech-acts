@@ -24,6 +24,7 @@ AGE_MONTHS_BIN_SIZE = 1
 MIN_AGE = 12
 MAX_AGE = 60
 
+THRESHOLD_SPEECH_ACT_OBSERVED = 2
 
 if __name__ == "__main__":
     # Model prediction accuracies
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
-    speech_acts_adult = pd.read_hdf("data/speech_acts_adu.h5")
+    speech_acts_adult = pd.read_hdf("~/Data/speech_acts/data/speech_acts_adu.h5")
     counts_adults = speech_acts_adult["y_pred"].to_list()
     frequencies_adults = calculate_frequencies(counts_adults)
 
@@ -46,7 +47,10 @@ if __name__ == "__main__":
 
     # Filter speech acts
     # TODO justify
-    observed_speech_acts =  [k for k, v in frequencies.items() if k in scores_f1 and v > .01] # and scores_f1[k] > 0
+    # observed_speech_acts =  [k for k, v in frequencies.items() if k in scores_f1 and v > .01] # and scores_f1[k] > 0
+    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if
+                            count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1 and frequencies_adults[
+                                label] > 0]
 
     # observed_speech_acts = [
     #     k for k, v in scores_f1.items() if v > 0.3 and k in frequencies_adults.keys()
@@ -59,7 +63,7 @@ if __name__ == "__main__":
     # dev: use only subset
     # observed_speech_acts = observed_speech_acts[:20]
 
-    speech_acts_children = pd.read_hdf("data/speech_acts_chi.h5")
+    speech_acts_children = pd.read_hdf("~/Data/speech_acts/data/speech_acts_chi.h5")
 
     fraction_acquired_speech_act = []
 
@@ -70,7 +74,7 @@ if __name__ == "__main__":
         fraction_acquired_speech_act.append(
             {
                 "speech_act": speech_act,
-                "month": 10,
+                "month": 6,
                 "fraction": 0.0,
             }
         )
