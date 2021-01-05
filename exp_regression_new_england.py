@@ -23,8 +23,7 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
-#TODO justify
-THRESHOLD_SPEECH_ACT_OBSERVED = 2
+THRESHOLD_SPEECH_ACT_OBSERVED = 1
 
 def get_fraction_contingent_responses(ages, observed_speech_acts):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
