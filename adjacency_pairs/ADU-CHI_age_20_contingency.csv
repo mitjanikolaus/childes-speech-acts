@@ -5,8 +5,8 @@
 3,3,3,AQ,ST,0.142857142857143,Aggravated question expression of disapproval by restating a question,Make a declarative statement.,0
 4,4,4,AQ,YY,0.142857142857143,Aggravated question expression of disapproval by restating a question,Make a word-like utterance without clear function.,0
 5,5,5,DW,AA,0.052631578947369,Disagree with proposition expressed by previous speaker.,Answer in the affirmative to yes/no question.,0
-6,6,6,DW,MK,0.052631578947369,Disagree with proposition expressed by previous speaker.,Mark occurrence of event (thank greet apologize congratulate etc.).,1
-7,7,7,DW,RT,0.157894736842105,Disagree with proposition expressed by previous speaker.,Repeat or imitate other's utterance.,1
+6,6,6,DW,MK,0.052631578947369,Disagree with proposition expressed by previous speaker.,Mark occurrence of event (thank greet apologize congratulate etc.).,0
+7,7,7,DW,RT,0.157894736842105,Disagree with proposition expressed by previous speaker.,Repeat or imitate other's utterance.,0
 8,8,8,DW,SA,0.421052631578947,Disagree with proposition expressed by previous speaker.,Answer a wh-question with a statement.,0
 9,9,9,DW,ST,0.105263157894737,Disagree with proposition expressed by previous speaker.,Make a declarative statement.,1
 10,10,10,DW,YA,0.052631578947369,Disagree with proposition expressed by previous speaker.,Answer a question with a yes/no question.,0
@@ -25,8 +25,8 @@
 23,23,74,RP,RP,0.061290322580645,Request propose or suggest an action for hearer or for hearer and speaker.,Request propose or suggest an action for hearer or for hearer and speaker.,0
 24,24,80,RP,ST,0.098387096774194,Request propose or suggest an action for hearer or for hearer and speaker.,Make a declarative statement.,0
 25,25,83,RP,YY,0.279032258064516,Request propose or suggest an action for hearer or for hearer and speaker.,Make a word-like utterance without clear function.,0
-26,26,86,RQ,AD,0.368983957219251,Yes/no question or suggestion about hearer's wishes and intentions,Agree to carry out an act requested or proposed by other.,0
-27,27,96,RQ,RD,0.192513368983957,Yes/no question or suggestion about hearer's wishes and intentions,Refuse to carry out an act requested or proposed by other.,0
+26,26,86,RQ,AD,0.368983957219251,Yes/no question or suggestion about hearer's wishes and intentions,Agree to carry out an act requested or proposed by other.,1
+27,27,96,RQ,RD,0.192513368983957,Yes/no question or suggestion about hearer's wishes and intentions,Refuse to carry out an act requested or proposed by other.,1
 28,28,106,RQ,YY,0.165775401069519,Yes/no question or suggestion about hearer's wishes and intentions,Make a word-like utterance without clear function.,0
 29,29,120,ST,RP,0.080279232111693,Make a declarative statement.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 30,30,122,ST,RT,0.116928446771379,Make a declarative statement.,Repeat or imitate other's utterance.,1
@@ -42,7 +42,7 @@
 40,40,155,YQ,ST,0.057644110275689,Ask a yes/no question.,Make a declarative statement.,0
 41,41,159,YQ,YY,0.228070175438596,Ask a yes/no question.,Make a word-like utterance without clear function.,0
 42,42,160,AA,AC,0.071428571428572,Answer in the affirmative to yes/no question.,Answer calls/ show attentiveness to communications.,1
-43,43,161,AA,CL,0.071428571428572,Answer in the affirmative to yes/no question.,Call attention to hearer by name or by substitute exclamations,0
+43,43,161,AA,CL,0.071428571428572,Answer in the affirmative to yes/no question.,Call attention to hearer by name or by substitute exclamations,1
 44,44,162,AA,MK,0.071428571428572,Answer in the affirmative to yes/no question.,Mark occurrence of event (thank greet apologize congratulate etc.).,1
 45,45,163,AA,OO,0.071428571428572,Answer in the affirmative to yes/no question.,Unintelligible vocalization.,0
 46,46,164,AA,PF,0.071428571428572,Answer in the affirmative to yes/no question.,Prohibit/forbid/protest hearer's performance of an act,1
@@ -56,8 +56,8 @@
 54,54,180,AD,ST,0.102040816326531,Agree to carry out an act requested or proposed by other.,Make a declarative statement.,1
 55,55,181,AD,YY,0.306122448979592,Agree to carry out an act requested or proposed by other.,Make a word-like utterance without clear function.,0
 56,56,182,CL,AC,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Answer calls/ show attentiveness to communications.,1
-57,57,184,CL,PF,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Prohibit/forbid/protest hearer's performance of an act,1
-58,58,186,CL,RD,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Refuse to carry out an act requested or proposed by other.,1
+57,57,184,CL,PF,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Prohibit/forbid/protest hearer's performance of an act,0
+58,58,186,CL,RD,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Refuse to carry out an act requested or proposed by other.,0
 59,59,187,CL,RP,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Request propose or suggest an action for hearer or for hearer and speaker.,1
 60,60,191,CL,ST,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Make a declarative statement.,1
 61,61,193,CL,YY,0.393939393939394,Call attention to hearer by name or by substitute exclamations,Make a word-like utterance without clear function.,0
@@ -70,8 +70,8 @@
 68,68,219,SA,ST,0.081632653061225,Answer a wh-question with a statement.,Make a declarative statement.,1
 69,69,222,SA,YY,0.204081632653061,Answer a wh-question with a statement.,Make a word-like utterance without clear function.,0
 70,70,223,SS,AC,0.162162162162162,Signal to start performing an act such as running or rolling a ball,Answer calls/ show attentiveness to communications.,1
-71,71,228,SS,RD,0.135135135135135,Signal to start performing an act such as running or rolling a ball,Refuse to carry out an act requested or proposed by other.,1
-72,72,230,SS,ST,0.108108108108108,Signal to start performing an act such as running or rolling a ball,Make a declarative statement.,0
+71,71,228,SS,RD,0.135135135135135,Signal to start performing an act such as running or rolling a ball,Refuse to carry out an act requested or proposed by other.,0
+72,72,230,SS,ST,0.108108108108108,Signal to start performing an act such as running or rolling a ball,Make a declarative statement.,1
 73,73,232,SS,YY,0.432432432432432,Signal to start performing an act such as running or rolling a ball,Make a word-like utterance without clear function.,0
 74,74,234,TX,PR,0.071428571428572,Read or recite written text aloud.,Perform verbal move in game.,1
 75,75,237,TX,RT,0.142857142857143,Read or recite written text aloud.,Repeat or imitate other's utterance.,1
@@ -79,10 +79,10 @@
 77,77,241,TX,YY,0.357142857142857,Read or recite written text aloud.,Make a word-like utterance without clear function.,0
 78,78,242,EQ,AD,0.058823529411765,Eliciting question (e.g. hmm?).,Agree to carry out an act requested or proposed by other.,0
 79,79,243,EQ,CL,0.058823529411765,Eliciting question (e.g. hmm?).,Call attention to hearer by name or by substitute exclamations,1
-80,80,244,EQ,MK,0.058823529411765,Eliciting question (e.g. hmm?).,Mark occurrence of event (thank greet apologize congratulate etc.).,1
+80,80,244,EQ,MK,0.058823529411765,Eliciting question (e.g. hmm?).,Mark occurrence of event (thank greet apologize congratulate etc.).,0
 81,81,245,EQ,PF,0.058823529411765,Eliciting question (e.g. hmm?).,Prohibit/forbid/protest hearer's performance of an act,0
 82,82,246,EQ,QN,0.058823529411765,Eliciting question (e.g. hmm?).,Ask a product-question (wh-question),1
-83,83,247,EQ,RD,0.058823529411765,Eliciting question (e.g. hmm?).,Refuse to carry out an act requested or proposed by other.,1
+83,83,247,EQ,RD,0.058823529411765,Eliciting question (e.g. hmm?).,Refuse to carry out an act requested or proposed by other.,0
 84,84,248,EQ,RP,0.117647058823529,Eliciting question (e.g. hmm?).,Request propose or suggest an action for hearer or for hearer and speaker.,1
 85,85,249,EQ,SA,0.058823529411765,Eliciting question (e.g. hmm?).,Answer a wh-question with a statement.,1
 86,86,250,EQ,SI,0.058823529411765,Eliciting question (e.g. hmm?).,State intent to carry out act by speaker.,1
@@ -95,7 +95,7 @@
 93,93,262,OO,ST,0.08,Unintelligible vocalization.,Make a declarative statement.,0
 94,94,264,OO,YY,0.24,Unintelligible vocalization.,Make a word-like utterance without clear function.,0
 95,95,271,RR,RP,0.072463768115942,Request to repeat utterance.,Request propose or suggest an action for hearer or for hearer and speaker.,0
-96,96,273,RR,SA,0.072463768115942,Request to repeat utterance.,Answer a wh-question with a statement.,0
+96,96,273,RR,SA,0.072463768115942,Request to repeat utterance.,Answer a wh-question with a statement.,1
 97,97,275,RR,ST,0.188405797101449,Request to repeat utterance.,Make a declarative statement.,0
 98,98,278,RR,YY,0.449275362318841,Request to repeat utterance.,Make a word-like utterance without clear function.,0
 99,99,281,RT,OO,0.111111111111111,Repeat or imitate other's utterance.,Unintelligible vocalization.,0
@@ -106,12 +106,12 @@
 104,104,287,RT,ST,0.222222222222222,Repeat or imitate other's utterance.,Make a declarative statement.,1
 105,105,289,RT,YY,0.148148148148148,Repeat or imitate other's utterance.,Make a word-like utterance without clear function.,0
 106,106,296,SI,PF,0.083333333333333,State intent to carry out act by speaker.,Prohibit/forbid/protest hearer's performance of an act,1
-107,107,299,SI,RP,0.138888888888889,State intent to carry out act by speaker.,Request propose or suggest an action for hearer or for hearer and speaker.,0
-108,108,300,SI,RT,0.125,State intent to carry out act by speaker.,Repeat or imitate other's utterance.,0
+107,107,299,SI,RP,0.138888888888889,State intent to carry out act by speaker.,Request propose or suggest an action for hearer or for hearer and speaker.,1
+108,108,300,SI,RT,0.125,State intent to carry out act by speaker.,Repeat or imitate other's utterance.,1
 109,109,302,SI,ST,0.083333333333333,State intent to carry out act by speaker.,Make a declarative statement.,1
 110,110,304,SI,YY,0.319444444444444,State intent to carry out act by speaker.,Make a word-like utterance without clear function.,0
-111,111,315,AP,RT,0.077464788732394,Agree with proposition or proposal expressed by previous speaker,Repeat or imitate other's utterance.,0
-112,112,318,AP,ST,0.422535211267606,Agree with proposition or proposal expressed by previous speaker,Make a declarative statement.,0
+111,111,315,AP,RT,0.077464788732394,Agree with proposition or proposal expressed by previous speaker,Repeat or imitate other's utterance.,1
+112,112,318,AP,ST,0.422535211267606,Agree with proposition or proposal expressed by previous speaker,Make a declarative statement.,1
 113,113,321,AP,YY,0.21830985915493,Agree with proposition or proposal expressed by previous speaker,Make a word-like utterance without clear function.,0
 114,114,329,PR,PR,0.153846153846154,Perform verbal move in game.,Perform verbal move in game.,1
 115,115,332,PR,RP,0.083916083916084,Perform verbal move in game.,Request propose or suggest an action for hearer or for hearer and speaker.,1
@@ -132,9 +132,9 @@
 130,130,359,DC,TO,0.083333333333333,Create a new state of affairs by declaration,Mark transfer of object to hearer,1
 131,131,360,DC,YY,0.25,Create a new state of affairs by declaration,Make a word-like utterance without clear function.,0
 132,132,364,EI,RT,0.580645161290323,Elicit imitation of word or sentence by modelling or by explicit command,Repeat or imitate other's utterance.,1
-133,133,366,EI,ST,0.161290322580645,Elicit imitation of word or sentence by modelling or by explicit command,Make a declarative statement.,0
+133,133,366,EI,ST,0.161290322580645,Elicit imitation of word or sentence by modelling or by explicit command,Make a declarative statement.,1
 134,134,367,EI,YY,0.129032258064516,Elicit imitation of word or sentence by modelling or by explicit command,Make a word-like utterance without clear function.,0
-135,135,368,GI,CL,0.2,Give in/ accept other's insistence or refusal.,Call attention to hearer by name or by substitute exclamations,1
+135,135,368,GI,CL,0.2,Give in/ accept other's insistence or refusal.,Call attention to hearer by name or by substitute exclamations,0
 136,136,369,GI,RD,0.2,Give in/ accept other's insistence or refusal.,Refuse to carry out an act requested or proposed by other.,0
 137,137,370,GI,RP,0.1,Give in/ accept other's insistence or refusal.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 138,138,371,GI,ST,0.3,Give in/ accept other's insistence or refusal.,Make a declarative statement.,1
@@ -143,12 +143,12 @@
 141,141,374,GR,OO,0.058823529411765,Give reason/ justify a request for an action refusal or prohibition,Unintelligible vocalization.,0
 142,142,375,GR,PF,0.235294117647059,Give reason/ justify a request for an action refusal or prohibition,Prohibit/forbid/protest hearer's performance of an act,0
 143,143,376,GR,QN,0.058823529411765,Give reason/ justify a request for an action refusal or prohibition,Ask a product-question (wh-question),1
-144,144,377,GR,RD,0.117647058823529,Give reason/ justify a request for an action refusal or prohibition,Refuse to carry out an act requested or proposed by other.,0
+144,144,377,GR,RD,0.117647058823529,Give reason/ justify a request for an action refusal or prohibition,Refuse to carry out an act requested or proposed by other.,1
 145,145,378,GR,RP,0.117647058823529,Give reason/ justify a request for an action refusal or prohibition,Request propose or suggest an action for hearer or for hearer and speaker.,1
 146,146,379,GR,ST,0.058823529411765,Give reason/ justify a request for an action refusal or prohibition,Make a declarative statement.,1
 147,147,380,GR,YY,0.176470588235294,Give reason/ justify a request for an action refusal or prohibition,Make a word-like utterance without clear function.,0
 148,148,387,PF,PF,0.155172413793103,Prohibit/forbid/protest hearer's performance of an act,Prohibit/forbid/protest hearer's performance of an act,0
-149,149,389,PF,RD,0.051724137931035,Prohibit/forbid/protest hearer's performance of an act,Refuse to carry out an act requested or proposed by other.,0
+149,149,389,PF,RD,0.051724137931035,Prohibit/forbid/protest hearer's performance of an act,Refuse to carry out an act requested or proposed by other.,1
 150,150,390,PF,RP,0.120689655172414,Prohibit/forbid/protest hearer's performance of an act,Request propose or suggest an action for hearer or for hearer and speaker.,1
 151,151,391,PF,RT,0.068965517241379,Prohibit/forbid/protest hearer's performance of an act,Repeat or imitate other's utterance.,1
 152,152,393,PF,ST,0.137931034482759,Prohibit/forbid/protest hearer's performance of an act,Make a declarative statement.,1
@@ -169,13 +169,13 @@
 167,167,420,YY,YY,0.545454545454545,Make a word-like utterance without clear function.,Make a word-like utterance without clear function.,0
 168,168,421,CS,CS,0.416666666666667,Counter-suggestion/ an indirect refusal.,Counter-suggestion/ an indirect refusal.,1
 169,169,422,CS,OO,0.083333333333333,Counter-suggestion/ an indirect refusal.,Unintelligible vocalization.,0
-170,170,423,CS,RD,0.25,Counter-suggestion/ an indirect refusal.,Refuse to carry out an act requested or proposed by other.,0
+170,170,423,CS,RD,0.25,Counter-suggestion/ an indirect refusal.,Refuse to carry out an act requested or proposed by other.,1
 171,171,424,CS,RP,0.083333333333333,Counter-suggestion/ an indirect refusal.,Request propose or suggest an action for hearer or for hearer and speaker.,0
 172,172,425,CS,ST,0.083333333333333,Counter-suggestion/ an indirect refusal.,Make a declarative statement.,1
 173,173,426,CS,YY,0.083333333333333,Counter-suggestion/ an indirect refusal.,Make a word-like utterance without clear function.,0
 174,174,430,FP,PA,0.347826086956522,Ask for permission to carry out act.,Permit hearer to perform act.,1
 175,175,431,FP,PF,0.260869565217391,Ask for permission to carry out act.,Prohibit/forbid/protest hearer's performance of an act,1
-176,176,432,FP,RD,0.130434782608696,Ask for permission to carry out act.,Refuse to carry out an act requested or proposed by other.,1
+176,176,432,FP,RD,0.130434782608696,Ask for permission to carry out act.,Refuse to carry out an act requested or proposed by other.,0
 177,177,434,FP,YY,0.086956521739131,Ask for permission to carry out act.,Make a word-like utterance without clear function.,0
 178,178,435,RD,CS,0.166666666666667,Refuse to carry out an act requested or proposed by other.,Counter-suggestion/ an indirect refusal.,0
 179,179,436,RD,PF,0.083333333333333,Refuse to carry out an act requested or proposed by other.,Prohibit/forbid/protest hearer's performance of an act,1
@@ -199,7 +199,7 @@
 197,197,458,DS,DC,0.142857142857143,Disapprove scold protest disruptive behavior.,Create a new state of affairs by declaration,1
 198,198,459,DS,MK,0.142857142857143,Disapprove scold protest disruptive behavior.,Mark occurrence of event (thank greet apologize congratulate etc.).,1
 199,199,460,DS,OO,0.142857142857143,Disapprove scold protest disruptive behavior.,Unintelligible vocalization.,0
-200,200,461,DS,PF,0.142857142857143,Disapprove scold protest disruptive behavior.,Prohibit/forbid/protest hearer's performance of an act,0
+200,200,461,DS,PF,0.142857142857143,Disapprove scold protest disruptive behavior.,Prohibit/forbid/protest hearer's performance of an act,1
 201,201,462,DS,ST,0.142857142857143,Disapprove scold protest disruptive behavior.,Make a declarative statement.,1
 202,202,463,DS,YY,0.285714285714286,Disapprove scold protest disruptive behavior.,Make a word-like utterance without clear function.,0
 203,203,464,ET,DC,0.052631578947369,Express enthusiasm for hearer's performance.,Create a new state of affairs by declaration,1
@@ -226,8 +226,8 @@
 224,224,492,CM,PF,0.333333333333333,Commiserate express sympathy for hearer's distress.,Prohibit/forbid/protest hearer's performance of an act,0
 225,225,493,CM,RT,0.333333333333333,Commiserate express sympathy for hearer's distress.,Repeat or imitate other's utterance.,1
 226,226,494,CM,YY,0.333333333333333,Commiserate express sympathy for hearer's distress.,Make a word-like utterance without clear function.,0
-227,227,495,AL,RP,0.5,Agree to do something for the last time.,Request propose or suggest an action for hearer or for hearer and speaker.,1
-228,228,496,AL,RT,0.5,Agree to do something for the last time.,Repeat or imitate other's utterance.,0
+227,227,495,AL,RP,0.5,Agree to do something for the last time.,Request propose or suggest an action for hearer or for hearer and speaker.,0
+228,228,496,AL,RT,0.5,Agree to do something for the last time.,Repeat or imitate other's utterance.,1
 229,229,497,PA,RP,0.25,Permit hearer to perform act.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 230,230,498,PA,RR,0.125,Permit hearer to perform act.,Request to repeat utterance.,1
 231,231,499,PA,SI,0.125,Permit hearer to perform act.,State intent to carry out act by speaker.,1
@@ -236,7 +236,7 @@
 234,234,502,YD,RP,0.666666666666667,Agree to a declaration.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 235,235,503,YD,SI,0.333333333333333,Agree to a declaration.,State intent to carry out act by speaker.,1
 236,236,504,CR,RR,0.285714285714286,Criticize or point out error in nonverbal act.,Request to repeat utterance.,1
-237,237,505,CR,RT,0.142857142857143,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,0
+237,237,505,CR,RT,0.142857142857143,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,1
 238,238,506,CR,SI,0.142857142857143,Criticize or point out error in nonverbal act.,State intent to carry out act by speaker.,1
 239,239,507,CR,YY,0.428571428571429,Criticize or point out error in nonverbal act.,Make a word-like utterance without clear function.,0
 240,240,508,AN,SI,0.222222222222222,Answer in the negative to yes/no question,State intent to carry out act by speaker.,1
