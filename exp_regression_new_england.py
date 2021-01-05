@@ -34,11 +34,11 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
         contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv")
 
         for speech_act in observed_speech_acts:
-            # Add start: at 10 months children don't produce any speech act
+            # Add start: at 6 months children don't produce any speech act
             fraction_contingent_responses.append(
                 {
                     "speech_act": speech_act,
-                    "month": 10,
+                    "month": 6,
                     "fraction": 0.0,
                 }
             )
@@ -70,11 +70,11 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
     print("Processing speech acts...")
     for speech_act in observed_speech_acts:
 
-        # Add start: at 10 months children don't produce any speech act
+        # Add start: at 6 months children don't produce any speech act
         fraction_acquired_speech_act.append(
             {
                 "speech_act": speech_act,
-                "month": 10,
+                "month": 6,
                 "fraction": 0.0,
             }
         )
@@ -130,7 +130,7 @@ TARGET_COMPREHENSION = "COMPREHENSION"
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("--target", type=str, default=TARGET_COMPREHENSION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
+    argparser.add_argument("--target", type=str, default=TARGET_PRODUCTION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
     argparser.add_argument("--scores", type=str, default="checkpoints/crf/classification_scores_adult.p")
 
     args = argparser.parse_args()
