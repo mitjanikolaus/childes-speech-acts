@@ -1,3 +1,4 @@
+import argparse
 import pickle
 import warnings
 
@@ -124,13 +125,18 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
     return pd.DataFrame(fraction_acquired_speech_act)
 
+TARGET_PRODUCTION = "PRODUCTION"
+TARGET_COMPREHENSION = "COMPREHENSION"
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--target", type=str, default=TARGET_COMPREHENSION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
+    argparser.add_argument("--scores", type=str, default="checkpoints/crf/classification_scores_adult.p")
+
+    args = argparser.parse_args()
+
     print("Loading data...")
-    # TODO use classification scores on other dataset?
-    scores = pickle.load(open("checkpoints/crf/classification_scores.p", "rb"))
-    # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
-    # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
+    scores = pickle.load(open(args.scores, "rb"))
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
@@ -152,18 +158,24 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
-    # Take out outlier
-    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["AL"]]
+    if args.target == TARGET_PRODUCTION:
+        # Take out outlier
+        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["AL"]]
 
-    # Take out speech acts where we have no contingency data
-    observed_speech_acts = [s for s in observed_speech_acts if s not in ["EM", "ED", "RR", "RQ", "NA", "ND"]]
+        fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
 
-    # Take out outliers
-    # observed_speech_acts = [s for s in observed_speech_acts if s not in ["AL", "CN", "CR", "DS"]]
-    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+        fraction_data = fraction_producing_speech_act
 
-    fraction_data = fraction_contingent_responses
+    elif args.target == TARGET_COMPREHENSION:
+        # Take out speech acts where we have no contingency data
+        observed_speech_acts = [s for s in observed_speech_acts if s not in ["EM", "ED", "RR", "RQ", "NA", "ND"]]
+
+        # Take out outliers
+        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["AL", "CN", "CR", "DS"]]
+
+        fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+
+        fraction_data = fraction_contingent_responses
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
