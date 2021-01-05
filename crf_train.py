@@ -599,7 +599,7 @@ if __name__ == "__main__":
     )
 
     # Location for weight save
-    checkpoint_path = "checkpoints/crf/"
+    checkpoint_path = "checkpoints/crf_collapsed/"
     print("Saving model at: {}".format(checkpoint_path))
     os.makedirs(checkpoint_path, exist_ok=True)
 

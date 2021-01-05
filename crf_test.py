@@ -16,7 +16,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 import pycrfsuite
 
-from preprocess import SPEECH_ACT
+from preprocess import SPEECH_ACT, ADULT
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -207,6 +207,7 @@ if __name__ == "__main__":
     report_path = model_dir + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
     plot_path = model_dir + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
     classification_scores_path = model_dir + os.path.sep + "classification_scores.p"
+    classification_scores_adult_path = model_dir + os.path.sep + "classification_scores_adult.p"
 
     # Loading data
     data = pd.read_pickle(args.data)
@@ -293,6 +294,13 @@ if __name__ == "__main__":
     }
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
+
+    data_crf_adult = data_crf[data_crf.speaker == ADULT]
+
+    cr_adult = classification_report(data_crf_adult[SPEECH_ACT].tolist(), data_crf_adult["y_pred"].tolist(),
+                                          digits=3, output_dict=True)
+    pickle.dump(pd.DataFrame(cr_adult).T, open(classification_scores_adult_path, "wb"))
+
 
     # COLLAPSED_FORCE_CODES_TRANSLATIONS = COLLAPSED_FORCE_CODES_TRANSLATIONS.set_index("Group")
     for label in np.unique(data_test[SPEECH_ACT]):

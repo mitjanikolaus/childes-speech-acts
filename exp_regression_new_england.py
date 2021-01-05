@@ -1,3 +1,4 @@
+import argparse
 import pickle
 import warnings
 
@@ -14,7 +15,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from preprocess import SPEECH_ACT
+from preprocess import SPEECH_ACT, ADULT, CHILD
 from utils import COLORS_PLOT_CATEGORICAL, age_bin, COLLAPSED_FORCE_CODES_TRANSLATIONS
 
 MIN_NUM_UTTERANCES = 0
@@ -22,8 +23,7 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
-# TODO justify
-THRESHOLD_SPEECH_ACT_OBSERVED = 2
+THRESHOLD_SPEECH_ACT_OBSERVED = 1
 
 def get_fraction_contingent_responses(ages, observed_speech_acts):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
@@ -125,38 +125,55 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
     return pd.DataFrame(fraction_acquired_speech_act)
 
+TARGET_PRODUCTION = "PRODUCTION"
+TARGET_COMPREHENSION = "COMPREHENSION"
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--target", type=str, default=TARGET_PRODUCTION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
+    argparser.add_argument("--scores", type=str, default="checkpoints/crf_collapsed/classification_scores_adult.p")
+
+    args = argparser.parse_args()
+
     print("Loading data...")
-    # TODO use classification scores on other dataset?
-    scores = pickle.load(open("checkpoints/crf_collapsed/classification_scores.p", "rb"))
-    # scores = pickle.load(open("results/baseline/classification_scores_RF.p", "rb"))
-    # scores = pickle.load(open("results/nn/classification_scores_lstm_baseline.p", "rb"))
+    scores = pickle.load(open(args.scores, "rb"))
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
     data = pd.read_pickle('data/new_england_preprocessed.p')
     data[SPEECH_ACT] = data[SPEECH_ACT].apply(lambda x: COLLAPSED_FORCE_CODES_TRANSLATIONS.loc[x].Group)
 
-    data_adults = data[data["speaker"] != "CHI"]
-    data_children = data[data["speaker"] == "CHI"]
+    data_adults = data[data["speaker"] != CHILD]
+    data_children = data[data["speaker"] == CHILD]
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
 
-    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1 and frequencies_adults[label] > 0]
-    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO", "YYOO"]]
+    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if
+                                count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1 and frequencies_adults[label] > 0]
+
+    observed_speech_acts = [s for s in observed_speech_acts if s not in ["YYOO"]]
 
     ages = [14, 20, 32]
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
-    # fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+    if args.target == TARGET_PRODUCTION:
+        # Take out outlier
+        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["DP"]]
 
-    # Take out speech acts where we have no contingency data
-    observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA", "ND"]]
-    fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+        fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
 
-    fraction_data = fraction_contingent_responses
+        fraction_data = fraction_producing_speech_act
+
+    elif args.target == TARGET_COMPREHENSION:
+        # Take out outlier
+        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["CRDS"]]
+
+        # Take out speech acts where we have no contingency data
+        observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA", "ND"]]
+        fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+
+        fraction_data = fraction_contingent_responses
 
     # Filter data for observed speech acts
     frequencies_adults = [frequencies_adults[s] for s in observed_speech_acts]
