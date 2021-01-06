@@ -23,7 +23,7 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
-THRESHOLD_SPEECH_ACT_OBSERVED = 1
+THRESHOLD_SPEECH_ACT_OBSERVED = 10
 
 def get_fraction_contingent_responses(ages, observed_speech_acts):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
@@ -147,8 +147,7 @@ if __name__ == "__main__":
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
 
-    observed_speech_acts = [label for label, count in data[SPEECH_ACT].value_counts().items() if
-                                count > THRESHOLD_SPEECH_ACT_OBSERVED and label in scores_f1 and frequencies_adults[label] > 0]
+    observed_speech_acts = [label for label in data[SPEECH_ACT].unique() if label in scores_f1 and frequencies_adults[label] > 0]
 
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YYOO"]]
 
@@ -160,6 +159,8 @@ if __name__ == "__main__":
         # Take out outlier
         # observed_speech_acts = [s for s in observed_speech_acts if s not in ["DP"]]
 
+        observed_speech_acts = [s for s in observed_speech_acts if data_children[SPEECH_ACT].value_counts()[s] > THRESHOLD_SPEECH_ACT_OBSERVED]
+
         fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
 
         fraction_data = fraction_producing_speech_act
@@ -167,6 +168,8 @@ if __name__ == "__main__":
     elif args.target == TARGET_COMPREHENSION:
         # Take out outlier
         # observed_speech_acts = [s for s in observed_speech_acts if s not in ["YD"]]
+
+        observed_speech_acts = [s for s in observed_speech_acts if data_adults[SPEECH_ACT].value_counts()[s] > THRESHOLD_SPEECH_ACT_OBSERVED]
 
         # Take out speech acts where we have no contingency data
         observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA"]]
