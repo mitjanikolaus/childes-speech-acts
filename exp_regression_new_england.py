@@ -279,4 +279,14 @@ if __name__ == "__main__":
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
 
+    fig, ax = plt.subplots()
+    x = list(scores_f1)
+    y = list(frequencies_adults)
+    g = sns.regplot(x, y, ci=None, order=1)
+    plt.xlabel("classification score (f1)")
+    plt.ylabel("frequency (%)")
+
+    for i, speech_act in enumerate(observed_speech_acts):
+        ax.annotate(speech_act, (x[i], y[i]))
+
     plt.show()
