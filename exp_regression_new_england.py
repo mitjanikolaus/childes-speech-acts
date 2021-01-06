@@ -230,27 +230,6 @@ if __name__ == "__main__":
 
     frequencies_adults = np.log10(np.array(frequencies_adults))
 
-    fig, ax = plt.subplots()
-    x = list(age_of_acquisition.values())
-    y = list(scores_f1)
-    g = sns.regplot(x, y, ci=None, order=1)
-    plt.xlabel("age of acquisition (months)")
-    plt.ylabel("classification score (F1)")
-
-    for i, speech_act in enumerate(observed_speech_acts):
-        ax.annotate(speech_act, (x[i], y[i]))
-
-    fig, ax = plt.subplots()
-    x = list(age_of_acquisition.values())
-    y = list(frequencies_adults)
-    g = sns.regplot(x, y, ci=None, order=1)
-    plt.xlabel("age of acquisition (months)")
-    plt.ylabel("frequency (%)")
-
-    for i, speech_act in enumerate(observed_speech_acts):
-        ax.annotate(speech_act, (x[i], y[i]))
-
-    plt.show(block=False)
 
     features = frequencies_adults.reshape(-1, 1)
     targets = list(age_of_acquisition.values())
@@ -276,5 +255,27 @@ if __name__ == "__main__":
     print("Regression parameters: ", reg.coef_)
     F, p_val = f_regression(features, targets)
     print("p-values: ", p_val)
+
+    fig, ax = plt.subplots()
+    x = list(age_of_acquisition.values())
+    y = list(scores_f1)
+    g = sns.regplot(x, y, ci=None, order=1)
+    plt.xlabel(f"{args.target}: age of acquisition (months)")
+    plt.ylabel("classification score (F1)")
+    plt.title(f"p-value: {p_val[1]:.3f}")
+
+    for i, speech_act in enumerate(observed_speech_acts):
+        ax.annotate(speech_act, (x[i], y[i]))
+
+    fig, ax = plt.subplots()
+    x = list(age_of_acquisition.values())
+    y = list(frequencies_adults)
+    g = sns.regplot(x, y, ci=None, order=1)
+    plt.xlabel(f"{args.target}: age of acquisition (months)")
+    plt.ylabel("frequency (%)")
+    plt.title(f"p-value: {p_val[0]:.3f}")
+
+    for i, speech_act in enumerate(observed_speech_acts):
+        ax.annotate(speech_act, (x[i], y[i]))
 
     plt.show()
