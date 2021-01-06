@@ -51,7 +51,6 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
             )
 
             fraction = contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == 1)]["fraction"].sum()
-            fraction += .5 * contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == .5)]["fraction"].sum()
 
             fraction_contingent_responses.append(
                 {
@@ -167,10 +166,10 @@ if __name__ == "__main__":
 
     elif args.target == TARGET_COMPREHENSION:
         # Take out outlier
-        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["CRDS"]]
+        # observed_speech_acts = [s for s in observed_speech_acts if s not in ["YD"]]
 
         # Take out speech acts where we have no contingency data
-        observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA", "ND"]]
+        observed_speech_acts = [s for s in observed_speech_acts if s not in ["NA"]]
         fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
 
         fraction_data = fraction_contingent_responses

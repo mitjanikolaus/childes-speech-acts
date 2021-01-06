@@ -1,367 +1,367 @@
-,Unnamed: 0,source,target,fraction,source_description,target_description,contingency
-0,0,AQ,AA,0.142857142857143,Aggravated question expression of disapproval by restating a question,Answer in the affirmative to yes/no question.,1
-1,1,AQ,SA,0.428571428571429,Aggravated question expression of disapproval by restating a question,Answer a wh-question with a statement.,1
-2,2,AQ,STAPDWTXCT,0.142857142857143,Aggravated question expression of disapproval by restating a question,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-3,3,AQ,YYOO,0.285714285714286,Aggravated question expression of disapproval by restating a question,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-4,4,MKTOXA,AA,0.003831417624521,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Answer in the affirmative to yes/no question.,0
-5,5,MKTOXA,ADALGI,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-6,6,MKTOXA,CL,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Call attention to hearer by name or by substitute exclamations,1
-7,7,MKTOXA,DC,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Create a new state of affairs by declaration,1
-8,8,MKTOXA,MKTOXA,0.088122605363985,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-9,9,MKTOXA,PF,0.026819923371648,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Prohibit/forbid/protest hearer's performance of an act,1
-10,10,MKTOXA,PRCN,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Perform verbal move in game. | Count.,1
-11,11,MKTOXA,QN,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Ask a product-question (wh-question),1
-12,12,MKTOXA,RD,0.03448275862069,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Refuse to carry out an act requested or proposed by other.,0
-13,13,MKTOXA,RPCS,0.122605363984674,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-14,14,MKTOXA,RR,0.003831417624521,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Request to repeat utterance.,1
-15,15,MKTOXA,RT,0.042145593869732,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Repeat or imitate other's utterance.,1
-16,16,MKTOXA,SA,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Answer a wh-question with a statement.,0
-17,17,MKTOXA,SI,0.061302681992337,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,State intent to carry out act by speaker.,1
-18,18,MKTOXA,STAPDWTXCT,0.183908045977011,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-19,19,MKTOXA,YQTQ,0.015325670498084,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-20,20,MKTOXA,YYOO,0.360153256704981,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-21,21,QN,AA,0.001121076233184,Ask a product-question (wh-question),Answer in the affirmative to yes/no question.,0
-22,22,QN,AC,0.003363228699552,Ask a product-question (wh-question),Answer calls; show attentiveness to communications.,0
-23,23,QN,AN,0.001121076233184,Ask a product-question (wh-question),Answer in the negative to yes/no question,0
-24,24,QN,CL,0.003363228699552,Ask a product-question (wh-question),Call attention to hearer by name or by substitute exclamations,0
-25,25,QN,CMEMED,0.001121076233184,Ask a product-question (wh-question),Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,0
-26,26,QN,DC,0.003363228699552,Ask a product-question (wh-question),Create a new state of affairs by declaration,0
-27,27,QN,DP,0.002242152466368,Ask a product-question (wh-question),Declare make-believe reality.,0
-28,28,QN,FP,0.002242152466368,Ask a product-question (wh-question),Ask for permission to carry out act.,0
-29,29,QN,MKTOXA,0.017937219730942,Ask a product-question (wh-question),Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-30,30,QN,NA,0.001121076233184,Ask a product-question (wh-question),Intentionally nonsatisfying answer to question,1
-31,31,QN,PF,0.004484304932735,Ask a product-question (wh-question),Prohibit/forbid/protest hearer's performance of an act,0
-32,32,QN,PRCN,0.012331838565023,Ask a product-question (wh-question),Perform verbal move in game. | Count.,0
-33,33,QN,QN,0.008968609865471,Ask a product-question (wh-question),Ask a product-question (wh-question),0
-34,34,QN,RD,0.006726457399103,Ask a product-question (wh-question),Refuse to carry out an act requested or proposed by other.,0
-35,35,QN,RPCS,0.041479820627803,Ask a product-question (wh-question),Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-36,36,QN,RR,0.002242152466368,Ask a product-question (wh-question),Request to repeat utterance.,1
-37,37,QN,RT,0.022421524663677,Ask a product-question (wh-question),Repeat or imitate other's utterance.,1
-38,38,QN,SA,0.561659192825112,Ask a product-question (wh-question),Answer a wh-question with a statement.,1
-39,39,QN,SI,0.01457399103139,Ask a product-question (wh-question),State intent to carry out act by speaker.,0
-40,40,QN,STAPDWTXCT,0.050448430493274,Ask a product-question (wh-question),Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-41,41,QN,WS,0.001121076233184,Ask a product-question (wh-question),Express a wish.,0
-42,42,QN,YA,0.004484304932735,Ask a product-question (wh-question),Answer a question with a yes/no question.,1
-43,43,QN,YQTQ,0.001121076233184,Ask a product-question (wh-question),Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
-44,44,QN,YYOO,0.230941704035874,Ask a product-question (wh-question),Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-45,45,RPCS,AA,0.004746835443038,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer in the affirmative to yes/no question.,0
-46,46,RPCS,ABPMET,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,0
-47,47,RPCS,AC,0.011075949367089,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer calls; show attentiveness to communications.,1
-48,48,RPCS,ADALGI,0.088607594936709,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
-49,49,RPCS,CL,0.012658227848101,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Call attention to hearer by name or by substitute exclamations,0
-50,50,RPCS,DC,0.004746835443038,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Create a new state of affairs by declaration,0
-51,51,RPCS,FP,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask for permission to carry out act.,0
-52,52,RPCS,MKTOXA,0.042721518987342,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-53,53,RPCS,PF,0.02373417721519,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Prohibit/forbid/protest hearer's performance of an act,1
-54,54,RPCS,PRCN,0.009493670886076,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Perform verbal move in game. | Count.,1
-55,55,RPCS,QN,0.018987341772152,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask a product-question (wh-question),0
-56,56,RPCS,RD,0.142405063291139,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Refuse to carry out an act requested or proposed by other.,1
-57,57,RPCS,RPCS,0.115506329113924,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-58,58,RPCS,RR,0.014240506329114,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Request to repeat utterance.,1
-59,59,RPCS,RT,0.044303797468355,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Repeat or imitate other's utterance.,0
-60,60,RPCS,SA,0.003164556962025,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer a wh-question with a statement.,0
-61,61,RPCS,SI,0.017405063291139,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,State intent to carry out act by speaker.,1
-62,62,RPCS,SS,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Signal to start performing an act such as running or rolling a ball,1
-63,63,RPCS,STAPDWTXCT,0.098101265822785,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-64,64,RPCS,YQTQ,0.022151898734177,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
-65,65,RPCS,YYOO,0.32120253164557,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-66,66,RQ,AA,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Answer in the affirmative to yes/no question.,1
-67,67,RQ,AC,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Answer calls; show attentiveness to communications.,0
-68,68,RQ,ADALGI,0.368983957219251,Yes/no question or suggestion about hearer's wishes and intentions,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-69,69,RQ,AN,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Answer in the negative to yes/no question,1
-70,70,RQ,CL,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Call attention to hearer by name or by substitute exclamations,0
-71,71,RQ,DC,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Create a new state of affairs by declaration,0
-72,72,RQ,MKTOXA,0.016042780748663,Yes/no question or suggestion about hearer's wishes and intentions,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-73,73,RQ,PF,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Prohibit/forbid/protest hearer's performance of an act,0
-74,74,RQ,QN,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Ask a product-question (wh-question),0
-75,75,RQ,RD,0.192513368983957,Yes/no question or suggestion about hearer's wishes and intentions,Refuse to carry out an act requested or proposed by other.,1
-76,76,RQ,RPCS,0.061497326203209,Yes/no question or suggestion about hearer's wishes and intentions,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-77,77,RQ,RR,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Request to repeat utterance.,1
-78,78,RQ,RT,0.037433155080214,Yes/no question or suggestion about hearer's wishes and intentions,Repeat or imitate other's utterance.,0
-79,79,RQ,SA,0.005347593582888,Yes/no question or suggestion about hearer's wishes and intentions,Answer a wh-question with a statement.,0
-80,80,RQ,SI,0.013368983957219,Yes/no question or suggestion about hearer's wishes and intentions,State intent to carry out act by speaker.,1
-81,81,RQ,SS,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Signal to start performing an act such as running or rolling a ball,0
-82,82,RQ,STAPDWTXCT,0.050802139037433,Yes/no question or suggestion about hearer's wishes and intentions,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-83,83,RQ,YQTQ,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
-84,84,RQ,YYOO,0.18716577540107,Yes/no question or suggestion about hearer's wishes and intentions,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-85,85,STAPDWTXCT,AA,0.01061320754717,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer in the affirmative to yes/no question.,0
-86,86,STAPDWTXCT,AC,0.024764150943396,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer calls; show attentiveness to communications.,0
-87,87,STAPDWTXCT,CL,0.012971698113208,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Call attention to hearer by name or by substitute exclamations,1
-88,88,STAPDWTXCT,CMEMED,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,1
-89,89,STAPDWTXCT,DC,0.005896226415094,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Create a new state of affairs by declaration,1
-90,90,STAPDWTXCT,EAEIECEX,0.002358490566038,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,1
-91,91,STAPDWTXCT,FP,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask for permission to carry out act.,1
-92,92,STAPDWTXCT,MKTOXA,0.047169811320755,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-93,93,STAPDWTXCT,PF,0.008254716981132,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Prohibit/forbid/protest hearer's performance of an act,0
-94,94,STAPDWTXCT,PRCN,0.029481132075472,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Perform verbal move in game. | Count.,1
-95,95,STAPDWTXCT,QN,0.022405660377359,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask a product-question (wh-question),1
-96,96,STAPDWTXCT,RD,0.005896226415094,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Refuse to carry out an act requested or proposed by other.,0
-97,97,STAPDWTXCT,RPCS,0.063679245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-98,98,STAPDWTXCT,RQ,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Yes/no question or suggestion about hearer's wishes and intentions,1
-99,99,STAPDWTXCT,RR,0.002358490566038,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Request to repeat utterance.,1
-100,100,STAPDWTXCT,RT,0.14622641509434,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Repeat or imitate other's utterance.,1
-101,101,STAPDWTXCT,SA,0.018867924528302,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer a wh-question with a statement.,0
-102,102,STAPDWTXCT,SI,0.033018867924528,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,State intent to carry out act by speaker.,1
-103,103,STAPDWTXCT,STAPDWTXCT,0.246462264150943,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-104,104,STAPDWTXCT,YA,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer a question with a yes/no question.,0
-105,105,STAPDWTXCT,YQTQ,0.022405660377359,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-106,106,STAPDWTXCT,YYOO,0.292452830188679,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-107,107,YA,AA,0.5,Answer a question with a yes/no question.,Answer in the affirmative to yes/no question.,1
-108,108,YA,AN,0.083333333333333,Answer a question with a yes/no question.,Answer in the negative to yes/no question,1
-109,109,YA,DC,0.041666666666667,Answer a question with a yes/no question.,Create a new state of affairs by declaration,0
-110,110,YA,RPCS,0.041666666666667,Answer a question with a yes/no question.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-111,111,YA,RT,0.083333333333333,Answer a question with a yes/no question.,Repeat or imitate other's utterance.,0
-112,112,YA,SA,0.041666666666667,Answer a question with a yes/no question.,Answer a wh-question with a statement.,0
-113,113,YA,STAPDWTXCT,0.041666666666667,Answer a question with a yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-114,114,YA,YD,0.041666666666667,Answer a question with a yes/no question.,Agree to a declaration.,0
-115,115,YA,YYOO,0.125,Answer a question with a yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-116,116,YQTQ,AA,0.391521197007481,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer in the affirmative to yes/no question.,1
-117,117,YQTQ,AC,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer calls; show attentiveness to communications.,0
-118,118,YQTQ,ADALGI,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-119,119,YQTQ,AN,0.067331670822943,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer in the negative to yes/no question,1
-120,120,YQTQ,CL,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Call attention to hearer by name or by substitute exclamations,0
-121,121,YQTQ,DC,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Create a new state of affairs by declaration,0
-122,122,YQTQ,MKTOXA,0.024937655860349,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-123,123,YQTQ,PRCN,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Perform verbal move in game. | Count.,0
-124,124,YQTQ,QN,0.00498753117207,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Ask a product-question (wh-question),0
-125,125,YQTQ,RD,0.01496259351621,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Refuse to carry out an act requested or proposed by other.,0
-126,126,YQTQ,RPCS,0.062344139650873,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-127,127,YQTQ,RR,0.017456359102244,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Request to repeat utterance.,1
-128,128,YQTQ,RT,0.037406483790524,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Repeat or imitate other's utterance.,0
-129,129,YQTQ,SA,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer a wh-question with a statement.,0
-130,130,YQTQ,SI,0.01496259351621,Ask a yes/no question. | Ask a limited-alternative yes/no question.,State intent to carry out act by speaker.,0
-131,131,YQTQ,STAPDWTXCT,0.057356608478803,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-132,132,YQTQ,TA,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer a limited-alternative question.,1
-133,133,YQTQ,YD,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Agree to a declaration.,0
-134,134,YQTQ,YQTQ,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
-135,135,YQTQ,YYOO,0.254364089775561,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-136,136,ABPMET,ABPMET,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
-137,137,ABPMET,CL,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Call attention to hearer by name or by substitute exclamations,1
-138,138,ABPMET,CMEMED,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,1
-139,139,ABPMET,DC,0.037037037037037,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Create a new state of affairs by declaration,1
-140,140,ABPMET,MKTOXA,0.074074074074074,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-141,141,ABPMET,PRCN,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Perform verbal move in game. | Count.,1
-142,142,ABPMET,QN,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Ask a product-question (wh-question),1
-143,143,ABPMET,RPCS,0.123456790123457,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-144,144,ABPMET,RT,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Repeat or imitate other's utterance.,1
-145,145,ABPMET,SI,0.08641975308642,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,State intent to carry out act by speaker.,1
-146,146,ABPMET,STAPDWTXCT,0.111111111111111,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-147,147,ABPMET,YQTQ,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-148,148,ABPMET,YYOO,0.432098765432099,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-149,149,PF,ABPMET,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,0
-150,150,PF,ADALGI,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
-151,151,PF,CL,0.03448275862069,Prohibit/forbid/protest hearer's performance of an act,Call attention to hearer by name or by substitute exclamations,0
-152,152,PF,FP,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Ask for permission to carry out act.,1
-153,153,PF,MKTOXA,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-154,154,PF,PF,0.155172413793103,Prohibit/forbid/protest hearer's performance of an act,Prohibit/forbid/protest hearer's performance of an act,1
-155,155,PF,QN,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Ask a product-question (wh-question),1
-156,156,PF,RD,0.051724137931035,Prohibit/forbid/protest hearer's performance of an act,Refuse to carry out an act requested or proposed by other.,0
-157,157,PF,RPCS,0.120689655172414,Prohibit/forbid/protest hearer's performance of an act,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-158,158,PF,RT,0.068965517241379,Prohibit/forbid/protest hearer's performance of an act,Repeat or imitate other's utterance.,1
-159,159,PF,SI,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,State intent to carry out act by speaker.,1
-160,160,PF,STAPDWTXCT,0.137931034482759,Prohibit/forbid/protest hearer's performance of an act,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-161,161,PF,YYOO,0.327586206896552,Prohibit/forbid/protest hearer's performance of an act,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-162,162,SI,ABPMET,0.013888888888889,State intent to carry out act by speaker.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
-163,163,SI,ADALGI,0.013888888888889,State intent to carry out act by speaker.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
-164,164,SI,CL,0.027777777777778,State intent to carry out act by speaker.,Call attention to hearer by name or by substitute exclamations,1
-165,165,SI,MKTOXA,0.041666666666667,State intent to carry out act by speaker.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-166,166,SI,PF,0.083333333333333,State intent to carry out act by speaker.,Prohibit/forbid/protest hearer's performance of an act,1
-167,167,SI,QN,0.027777777777778,State intent to carry out act by speaker.,Ask a product-question (wh-question),1
-168,168,SI,RD,0.041666666666667,State intent to carry out act by speaker.,Refuse to carry out an act requested or proposed by other.,0
-169,169,SI,RPCS,0.152777777777778,State intent to carry out act by speaker.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-170,170,SI,RT,0.125,State intent to carry out act by speaker.,Repeat or imitate other's utterance.,1
-171,171,SI,SI,0.027777777777778,State intent to carry out act by speaker.,State intent to carry out act by speaker.,1
-172,172,SI,STAPDWTXCT,0.083333333333333,State intent to carry out act by speaker.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-173,173,SI,YYOO,0.361111111111111,State intent to carry out act by speaker.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-174,174,SS,ABPMET,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
-175,175,SS,AC,0.162162162162162,Signal to start performing an act such as running or rolling a ball,Answer calls; show attentiveness to communications.,1
-176,176,SS,MKTOXA,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-177,177,SS,QN,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Ask a product-question (wh-question),1
-178,178,SS,RD,0.135135135135135,Signal to start performing an act such as running or rolling a ball,Refuse to carry out an act requested or proposed by other.,0
-179,179,SS,SI,0.027027027027027,Signal to start performing an act such as running or rolling a ball,State intent to carry out act by speaker.,1
-180,180,SS,STAPDWTXCT,0.108108108108108,Signal to start performing an act such as running or rolling a ball,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-181,181,SS,YQTQ,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-182,182,SS,YYOO,0.45945945945946,Signal to start performing an act such as running or rolling a ball,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-183,183,AA,AC,0.071428571428572,Answer in the affirmative to yes/no question.,Answer calls; show attentiveness to communications.,1
-184,184,AA,CL,0.071428571428572,Answer in the affirmative to yes/no question.,Call attention to hearer by name or by substitute exclamations,0
-185,185,AA,MKTOXA,0.071428571428572,Answer in the affirmative to yes/no question.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-186,186,AA,PF,0.071428571428572,Answer in the affirmative to yes/no question.,Prohibit/forbid/protest hearer's performance of an act,1
-187,187,AA,RR,0.285714285714286,Answer in the affirmative to yes/no question.,Request to repeat utterance.,1
-188,188,AA,STAPDWTXCT,0.071428571428572,Answer in the affirmative to yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-189,189,AA,YQTQ,0.071428571428572,Answer in the affirmative to yes/no question.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-190,190,AA,YYOO,0.285714285714286,Answer in the affirmative to yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-191,191,ADALGI,AC,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Answer calls; show attentiveness to communications.,1
-192,192,ADALGI,ADALGI,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-193,193,ADALGI,CL,0.065573770491803,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Call attention to hearer by name or by substitute exclamations,1
-194,194,ADALGI,DP,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Declare make-believe reality.,1
-195,195,ADALGI,MKTOXA,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-196,196,ADALGI,PF,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Prohibit/forbid/protest hearer's performance of an act,1
-197,197,ADALGI,QN,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Ask a product-question (wh-question),1
-198,198,ADALGI,RD,0.032786885245902,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Refuse to carry out an act requested or proposed by other.,1
-199,199,ADALGI,RPCS,0.19672131147541,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-200,200,ADALGI,RT,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Repeat or imitate other's utterance.,1
-201,201,ADALGI,SI,0.131147540983607,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,State intent to carry out act by speaker.,1
-202,202,ADALGI,STAPDWTXCT,0.131147540983607,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-203,203,ADALGI,YYOO,0.327868852459016,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-204,204,CL,AC,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Answer calls; show attentiveness to communications.,1
-205,205,CL,PF,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Prohibit/forbid/protest hearer's performance of an act,1
-206,206,CL,PRCN,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Perform verbal move in game. | Count.,0
-207,207,CL,RD,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Refuse to carry out an act requested or proposed by other.,1
-208,208,CL,RPCS,0.090909090909091,Call attention to hearer by name or by substitute exclamations,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-209,209,CL,RT,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Repeat or imitate other's utterance.,1
-210,210,CL,SA,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Answer a wh-question with a statement.,0
-211,211,CL,SI,0.03030303030303,Call attention to hearer by name or by substitute exclamations,State intent to carry out act by speaker.,1
-212,212,CL,STAPDWTXCT,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-213,213,CL,TA,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Answer a limited-alternative question.,0
-214,214,CL,YYOO,0.393939393939394,Call attention to hearer by name or by substitute exclamations,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-215,215,SA,AC,0.020408163265306,Answer a wh-question with a statement.,Answer calls; show attentiveness to communications.,1
-216,216,SA,CL,0.020408163265306,Answer a wh-question with a statement.,Call attention to hearer by name or by substitute exclamations,1
-217,217,SA,MKTOXA,0.061224489795918,Answer a wh-question with a statement.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-218,218,SA,PRCN,0.020408163265306,Answer a wh-question with a statement.,Perform verbal move in game. | Count.,1
-219,219,SA,QN,0.142857142857143,Answer a wh-question with a statement.,Ask a product-question (wh-question),1
-220,220,SA,RPCS,0.061224489795918,Answer a wh-question with a statement.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-221,221,SA,RT,0.26530612244898,Answer a wh-question with a statement.,Repeat or imitate other's utterance.,1
-222,222,SA,SA,0.040816326530612,Answer a wh-question with a statement.,Answer a wh-question with a statement.,0
-223,223,SA,SI,0.020408163265306,Answer a wh-question with a statement.,State intent to carry out act by speaker.,1
-224,224,SA,STAPDWTXCT,0.102040816326531,Answer a wh-question with a statement.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-225,225,SA,YQTQ,0.020408163265306,Answer a wh-question with a statement.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-226,226,SA,YYOO,0.224489795918367,Answer a wh-question with a statement.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-227,227,EQ,ADALGI,0.058823529411765,Eliciting question (e.g. hmm?).,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-228,228,EQ,CL,0.058823529411765,Eliciting question (e.g. hmm?).,Call attention to hearer by name or by substitute exclamations,1
-229,229,EQ,MKTOXA,0.058823529411765,Eliciting question (e.g. hmm?).,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-230,230,EQ,PF,0.058823529411765,Eliciting question (e.g. hmm?).,Prohibit/forbid/protest hearer's performance of an act,0
-231,231,EQ,QN,0.058823529411765,Eliciting question (e.g. hmm?).,Ask a product-question (wh-question),1
-232,232,EQ,RD,0.058823529411765,Eliciting question (e.g. hmm?).,Refuse to carry out an act requested or proposed by other.,1
-233,233,EQ,RPCS,0.117647058823529,Eliciting question (e.g. hmm?).,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-234,234,EQ,SA,0.058823529411765,Eliciting question (e.g. hmm?).,Answer a wh-question with a statement.,1
-235,235,EQ,SI,0.058823529411765,Eliciting question (e.g. hmm?).,State intent to carry out act by speaker.,1
-236,236,EQ,STAPDWTXCT,0.117647058823529,Eliciting question (e.g. hmm?).,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-237,237,EQ,YYOO,0.294117647058824,Eliciting question (e.g. hmm?).,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-238,238,RR,ADALGI,0.014492753623188,Request to repeat utterance.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-239,239,RR,AN,0.014492753623188,Request to repeat utterance.,Answer in the negative to yes/no question,0
-240,240,RR,MKTOXA,0.028985507246377,Request to repeat utterance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-241,241,RR,QN,0.043478260869565,Request to repeat utterance.,Ask a product-question (wh-question),0
-242,242,RR,RD,0.014492753623188,Request to repeat utterance.,Refuse to carry out an act requested or proposed by other.,0
-243,243,RR,RPCS,0.072463768115942,Request to repeat utterance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-244,244,RR,RR,0.014492753623188,Request to repeat utterance.,Request to repeat utterance.,0
-245,245,RR,SA,0.072463768115942,Request to repeat utterance.,Answer a wh-question with a statement.,1
-246,246,RR,SI,0.028985507246377,Request to repeat utterance.,State intent to carry out act by speaker.,0
-247,247,RR,STAPDWTXCT,0.188405797101449,Request to repeat utterance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-248,248,RR,YQTQ,0.014492753623188,Request to repeat utterance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
-249,249,RR,YYOO,0.492753623188406,Request to repeat utterance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-250,250,RT,ADALGI,0.037037037037037,Repeat or imitate other's utterance.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-251,251,RT,MKTOXA,0.037037037037037,Repeat or imitate other's utterance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-252,252,RT,PRCN,0.111111111111111,Repeat or imitate other's utterance.,Perform verbal move in game. | Count.,1
-253,253,RT,QN,0.037037037037037,Repeat or imitate other's utterance.,Ask a product-question (wh-question),1
-254,254,RT,RPCS,0.074074074074074,Repeat or imitate other's utterance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-255,255,RT,RT,0.111111111111111,Repeat or imitate other's utterance.,Repeat or imitate other's utterance.,1
-256,256,RT,SI,0.074074074074074,Repeat or imitate other's utterance.,State intent to carry out act by speaker.,1
-257,257,RT,STAPDWTXCT,0.222222222222222,Repeat or imitate other's utterance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-258,258,RT,YQTQ,0.037037037037037,Repeat or imitate other's utterance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-259,259,RT,YYOO,0.259259259259259,Repeat or imitate other's utterance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-260,260,YYOO,ADALGI,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
-261,261,YYOO,CL,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Call attention to hearer by name or by substitute exclamations,0
-262,262,YYOO,MKTOXA,0.072463768115942,Make a word-like utterance without clear function. | Unintelligible vocalization.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-263,263,YYOO,PF,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Prohibit/forbid/protest hearer's performance of an act,0
-264,264,YYOO,PRCN,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Perform verbal move in game. | Count.,0
-265,265,YYOO,QN,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Ask a product-question (wh-question),0
-266,266,YYOO,RD,0.043478260869565,Make a word-like utterance without clear function. | Unintelligible vocalization.,Refuse to carry out an act requested or proposed by other.,0
-267,267,YYOO,RPCS,0.057971014492754,Make a word-like utterance without clear function. | Unintelligible vocalization.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-268,268,YYOO,RT,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Repeat or imitate other's utterance.,0
-269,269,YYOO,SI,0.086956521739131,Make a word-like utterance without clear function. | Unintelligible vocalization.,State intent to carry out act by speaker.,0
-270,270,YYOO,STAPDWTXCT,0.130434782608696,Make a word-like utterance without clear function. | Unintelligible vocalization.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
-271,271,YYOO,YYOO,0.478260869565217,Make a word-like utterance without clear function. | Unintelligible vocalization.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-272,272,AC,CL,0.020408163265306,Answer calls; show attentiveness to communications.,Call attention to hearer by name or by substitute exclamations,0
-273,273,AC,MKTOXA,0.071428571428572,Answer calls; show attentiveness to communications.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-274,274,AC,PRCN,0.030612244897959,Answer calls; show attentiveness to communications.,Perform verbal move in game. | Count.,1
-275,275,AC,QN,0.010204081632653,Answer calls; show attentiveness to communications.,Ask a product-question (wh-question),1
-276,276,AC,RD,0.010204081632653,Answer calls; show attentiveness to communications.,Refuse to carry out an act requested or proposed by other.,0
-277,277,AC,RPCS,0.091836734693878,Answer calls; show attentiveness to communications.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-278,278,AC,RT,0.010204081632653,Answer calls; show attentiveness to communications.,Repeat or imitate other's utterance.,1
-279,279,AC,SI,0.040816326530612,Answer calls; show attentiveness to communications.,State intent to carry out act by speaker.,1
-280,280,AC,STAPDWTXCT,0.295918367346939,Answer calls; show attentiveness to communications.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-281,281,AC,YYOO,0.418367346938775,Answer calls; show attentiveness to communications.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-282,282,DC,CL,0.083333333333333,Create a new state of affairs by declaration,Call attention to hearer by name or by substitute exclamations,0
-283,283,DC,MKTOXA,0.166666666666667,Create a new state of affairs by declaration,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-284,284,DC,ND,0.083333333333333,Create a new state of affairs by declaration,Disagree with a declaration.,1
-285,285,DC,PF,0.083333333333333,Create a new state of affairs by declaration,Prohibit/forbid/protest hearer's performance of an act,1
-286,286,DC,PRCN,0.083333333333333,Create a new state of affairs by declaration,Perform verbal move in game. | Count.,0
-287,287,DC,RPCS,0.166666666666667,Create a new state of affairs by declaration,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-288,288,DC,RT,0.083333333333333,Create a new state of affairs by declaration,Repeat or imitate other's utterance.,1
-289,289,DC,YYOO,0.25,Create a new state of affairs by declaration,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-290,290,EAEIECEX,CL,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Call attention to hearer by name or by substitute exclamations,0
-291,291,EAEIECEX,CXSC,0.050420168067227,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Complete text if so demanded. | Complete statement or other utterance in compliance with request,1
-292,292,EAEIECEX,MKTOXA,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-293,293,EAEIECEX,PRCN,0.478991596638655,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Perform verbal move in game. | Count.,1
-294,294,EAEIECEX,QN,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Ask a product-question (wh-question),0
-295,295,EAEIECEX,RPCS,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-296,296,EAEIECEX,RT,0.168067226890756,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Repeat or imitate other's utterance.,1
-297,297,EAEIECEX,SA,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Answer a wh-question with a statement.,0
-298,298,EAEIECEX,SI,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,State intent to carry out act by speaker.,1
-299,299,EAEIECEX,STAPDWTXCT,0.084033613445378,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-300,300,EAEIECEX,YYOO,0.142857142857143,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-301,301,GR,CL,0.176470588235294,Give reason; justify a request for an action refusal or prohibition,Call attention to hearer by name or by substitute exclamations,0
-302,302,GR,PF,0.235294117647059,Give reason; justify a request for an action refusal or prohibition,Prohibit/forbid/protest hearer's performance of an act,0
-303,303,GR,QN,0.058823529411765,Give reason; justify a request for an action refusal or prohibition,Ask a product-question (wh-question),1
-304,304,GR,RD,0.117647058823529,Give reason; justify a request for an action refusal or prohibition,Refuse to carry out an act requested or proposed by other.,0
-305,305,GR,RPCS,0.117647058823529,Give reason; justify a request for an action refusal or prohibition,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-306,306,GR,STAPDWTXCT,0.058823529411765,Give reason; justify a request for an action refusal or prohibition,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-307,307,GR,YYOO,0.235294117647059,Give reason; justify a request for an action refusal or prohibition,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-308,308,PRCN,CL,0.034013605442177,Perform verbal move in game. | Count.,Call attention to hearer by name or by substitute exclamations,1
-309,309,PRCN,FP,0.006802721088435,Perform verbal move in game. | Count.,Ask for permission to carry out act.,1
-310,310,PRCN,MKTOXA,0.020408163265306,Perform verbal move in game. | Count.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-311,311,PRCN,PF,0.020408163265306,Perform verbal move in game. | Count.,Prohibit/forbid/protest hearer's performance of an act,1
-312,312,PRCN,PRCN,0.149659863945578,Perform verbal move in game. | Count.,Perform verbal move in game. | Count.,1
-313,313,PRCN,QN,0.006802721088435,Perform verbal move in game. | Count.,Ask a product-question (wh-question),1
-314,314,PRCN,RD,0.006802721088435,Perform verbal move in game. | Count.,Refuse to carry out an act requested or proposed by other.,1
-315,315,PRCN,RPCS,0.102040816326531,Perform verbal move in game. | Count.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-316,316,PRCN,RT,0.08843537414966,Perform verbal move in game. | Count.,Repeat or imitate other's utterance.,1
-317,317,PRCN,SI,0.027210884353742,Perform verbal move in game. | Count.,State intent to carry out act by speaker.,1
-318,318,PRCN,STAPDWTXCT,0.054421768707483,Perform verbal move in game. | Count.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-319,319,PRCN,YQTQ,0.006802721088435,Perform verbal move in game. | Count.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-320,320,PRCN,YYOO,0.476190476190476,Perform verbal move in game. | Count.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-321,321,WD,CL,0.285714285714286,Warn of danger.,Call attention to hearer by name or by substitute exclamations,1
-322,322,WD,RPCS,0.142857142857143,Warn of danger.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-323,323,WD,RT,0.142857142857143,Warn of danger.,Repeat or imitate other's utterance.,1
-324,324,WD,YYOO,0.428571428571429,Warn of danger.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-325,325,CRDS,DC,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Create a new state of affairs by declaration,1
-326,326,CRDS,MKTOXA,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-327,327,CRDS,PF,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Prohibit/forbid/protest hearer's performance of an act,0
-328,328,CRDS,RR,0.142857142857143,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Request to repeat utterance.,1
-329,329,CRDS,RT,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Repeat or imitate other's utterance.,0
-330,330,CRDS,SI,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,State intent to carry out act by speaker.,1
-331,331,CRDS,STAPDWTXCT,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-332,332,CRDS,YYOO,0.428571428571429,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-333,333,FP,DC,0.043478260869565,Ask for permission to carry out act.,Create a new state of affairs by declaration,0
-334,334,FP,PA,0.347826086956522,Ask for permission to carry out act.,Permit hearer to perform act.,1
-335,335,FP,PF,0.260869565217391,Ask for permission to carry out act.,Prohibit/forbid/protest hearer's performance of an act,1
-336,336,FP,RD,0.130434782608696,Ask for permission to carry out act.,Refuse to carry out an act requested or proposed by other.,1
-337,337,FP,RPCS,0.043478260869565,Ask for permission to carry out act.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-338,338,FP,RR,0.043478260869565,Ask for permission to carry out act.,Request to repeat utterance.,1
-339,339,FP,YYOO,0.130434782608696,Ask for permission to carry out act.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-340,340,DP,MKTOXA,1,Declare make-believe reality.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
-341,341,PD,MKTOXA,0.181818181818182,Promise.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-342,342,PD,PRCN,0.090909090909091,Promise.,Perform verbal move in game. | Count.,0
-343,343,PD,RPCS,0.454545454545454,Promise.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
-344,344,PD,STAPDWTXCT,0.090909090909091,Promise.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-345,345,PD,YYOO,0.181818181818182,Promise.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-346,346,RD,MKTOXA,0.333333333333333,Refuse to carry out an act requested or proposed by other.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
-347,347,RD,PF,0.083333333333333,Refuse to carry out an act requested or proposed by other.,Prohibit/forbid/protest hearer's performance of an act,1
-348,348,RD,RD,0.083333333333333,Refuse to carry out an act requested or proposed by other.,Refuse to carry out an act requested or proposed by other.,0
-349,349,RD,RPCS,0.416666666666667,Refuse to carry out an act requested or proposed by other.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-350,350,RD,SI,0.083333333333333,Refuse to carry out an act requested or proposed by other.,State intent to carry out act by speaker.,1
-351,351,CMEMED,PF,0.25,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Prohibit/forbid/protest hearer's performance of an act,0
-352,352,CMEMED,RT,0.25,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Repeat or imitate other's utterance.,1
-353,353,CMEMED,YYOO,0.5,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-354,354,PA,RPCS,0.25,Permit hearer to perform act.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-355,355,PA,RR,0.125,Permit hearer to perform act.,Request to repeat utterance.,1
-356,356,PA,SI,0.125,Permit hearer to perform act.,State intent to carry out act by speaker.,1
-357,357,PA,STAPDWTXCT,0.125,Permit hearer to perform act.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-358,358,PA,YYOO,0.375,Permit hearer to perform act.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
-359,359,YD,RPCS,0.666666666666667,Agree to a declaration.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
-360,360,YD,SI,0.333333333333333,Agree to a declaration.,State intent to carry out act by speaker.,1
-361,361,AN,SI,0.222222222222222,Answer in the negative to yes/no question,State intent to carry out act by speaker.,1
-362,362,AN,STAPDWTXCT,0.222222222222222,Answer in the negative to yes/no question,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
-363,363,AN,YA,0.111111111111111,Answer in the negative to yes/no question,Answer a question with a yes/no question.,0
-364,364,AN,YQTQ,0.333333333333333,Answer in the negative to yes/no question,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
-365,365,AN,YYOO,0.111111111111111,Answer in the negative to yes/no question,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+source,target,fraction,source_description,target_description,contingency
+AQ,AA,0.142857142857143,Aggravated question expression of disapproval by restating a question,Answer in the affirmative to yes/no question.,1
+AQ,SA,0.428571428571429,Aggravated question expression of disapproval by restating a question,Answer a wh-question with a statement.,1
+AQ,STAPDWTXCT,0.142857142857143,Aggravated question expression of disapproval by restating a question,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+AQ,YYOO,0.285714285714286,Aggravated question expression of disapproval by restating a question,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+MKTOXA,AA,0.003831417624521,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Answer in the affirmative to yes/no question.,0
+MKTOXA,ADALGI,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+MKTOXA,CL,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Call attention to hearer by name or by substitute exclamations,1
+MKTOXA,DC,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Create a new state of affairs by declaration,1
+MKTOXA,MKTOXA,0.088122605363985,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+MKTOXA,PF,0.026819923371648,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Prohibit/forbid/protest hearer's performance of an act,1
+MKTOXA,PRCN,0.007662835249042,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Perform verbal move in game. | Count.,1
+MKTOXA,QN,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Ask a product-question (wh-question),1
+MKTOXA,RD,0.03448275862069,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Refuse to carry out an act requested or proposed by other.,0
+MKTOXA,RPCS,0.122605363984674,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+MKTOXA,RR,0.003831417624521,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Request to repeat utterance.,1
+MKTOXA,RT,0.042145593869732,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Repeat or imitate other's utterance.,1
+MKTOXA,SA,0.011494252873563,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Answer a wh-question with a statement.,0
+MKTOXA,SI,0.061302681992337,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,State intent to carry out act by speaker.,1
+MKTOXA,STAPDWTXCT,0.183908045977011,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+MKTOXA,YQTQ,0.015325670498084,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+MKTOXA,YYOO,0.360153256704981,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+QN,AA,0.001121076233184,Ask a product-question (wh-question),Answer in the affirmative to yes/no question.,0
+QN,AC,0.003363228699552,Ask a product-question (wh-question),Answer calls; show attentiveness to communications.,0
+QN,AN,0.001121076233184,Ask a product-question (wh-question),Answer in the negative to yes/no question,0
+QN,CL,0.003363228699552,Ask a product-question (wh-question),Call attention to hearer by name or by substitute exclamations,0
+QN,CMEMED,0.001121076233184,Ask a product-question (wh-question),Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,0
+QN,DC,0.003363228699552,Ask a product-question (wh-question),Create a new state of affairs by declaration,0
+QN,DP,0.002242152466368,Ask a product-question (wh-question),Declare make-believe reality.,0
+QN,FP,0.002242152466368,Ask a product-question (wh-question),Ask for permission to carry out act.,0
+QN,MKTOXA,0.017937219730942,Ask a product-question (wh-question),Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+QN,NA,0.001121076233184,Ask a product-question (wh-question),Intentionally nonsatisfying answer to question,1
+QN,PF,0.004484304932735,Ask a product-question (wh-question),Prohibit/forbid/protest hearer's performance of an act,0
+QN,PRCN,0.012331838565023,Ask a product-question (wh-question),Perform verbal move in game. | Count.,0
+QN,QN,0.008968609865471,Ask a product-question (wh-question),Ask a product-question (wh-question),0
+QN,RD,0.006726457399103,Ask a product-question (wh-question),Refuse to carry out an act requested or proposed by other.,0
+QN,RPCS,0.041479820627803,Ask a product-question (wh-question),Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+QN,RR,0.002242152466368,Ask a product-question (wh-question),Request to repeat utterance.,1
+QN,RT,0.022421524663677,Ask a product-question (wh-question),Repeat or imitate other's utterance.,1
+QN,SA,0.561659192825112,Ask a product-question (wh-question),Answer a wh-question with a statement.,1
+QN,SI,0.01457399103139,Ask a product-question (wh-question),State intent to carry out act by speaker.,0
+QN,STAPDWTXCT,0.050448430493274,Ask a product-question (wh-question),Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+QN,WS,0.001121076233184,Ask a product-question (wh-question),Express a wish.,0
+QN,YA,0.004484304932735,Ask a product-question (wh-question),Answer a question with a yes/no question.,1
+QN,YQTQ,0.001121076233184,Ask a product-question (wh-question),Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
+QN,YYOO,0.230941704035874,Ask a product-question (wh-question),Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+RPCS,AA,0.004746835443038,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer in the affirmative to yes/no question.,0
+RPCS,ABPMET,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,0
+RPCS,AC,0.011075949367089,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer calls; show attentiveness to communications.,1
+RPCS,ADALGI,0.088607594936709,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
+RPCS,CL,0.012658227848101,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Call attention to hearer by name or by substitute exclamations,0
+RPCS,DC,0.004746835443038,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Create a new state of affairs by declaration,0
+RPCS,FP,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask for permission to carry out act.,0
+RPCS,MKTOXA,0.042721518987342,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+RPCS,PF,0.02373417721519,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Prohibit/forbid/protest hearer's performance of an act,1
+RPCS,PRCN,0.009493670886076,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Perform verbal move in game. | Count.,1
+RPCS,QN,0.018987341772152,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask a product-question (wh-question),0
+RPCS,RD,0.142405063291139,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Refuse to carry out an act requested or proposed by other.,1
+RPCS,RPCS,0.115506329113924,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+RPCS,RR,0.014240506329114,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Request to repeat utterance.,1
+RPCS,RT,0.044303797468355,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Repeat or imitate other's utterance.,0
+RPCS,SA,0.003164556962025,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Answer a wh-question with a statement.,0
+RPCS,SI,0.017405063291139,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,State intent to carry out act by speaker.,1
+RPCS,SS,0.001582278481013,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Signal to start performing an act such as running or rolling a ball,1
+RPCS,STAPDWTXCT,0.098101265822785,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+RPCS,YQTQ,0.022151898734177,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
+RPCS,YYOO,0.32120253164557,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+RQ,AA,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Answer in the affirmative to yes/no question.,1
+RQ,AC,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Answer calls; show attentiveness to communications.,1
+RQ,ADALGI,0.368983957219251,Yes/no question or suggestion about hearer's wishes and intentions,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
+RQ,AN,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Answer in the negative to yes/no question,1
+RQ,CL,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Call attention to hearer by name or by substitute exclamations,0
+RQ,DC,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Create a new state of affairs by declaration,0
+RQ,MKTOXA,0.016042780748663,Yes/no question or suggestion about hearer's wishes and intentions,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+RQ,PF,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Prohibit/forbid/protest hearer's performance of an act,0
+RQ,QN,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Ask a product-question (wh-question),0
+RQ,RD,0.192513368983957,Yes/no question or suggestion about hearer's wishes and intentions,Refuse to carry out an act requested or proposed by other.,1
+RQ,RPCS,0.061497326203209,Yes/no question or suggestion about hearer's wishes and intentions,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+RQ,RR,0.008021390374332,Yes/no question or suggestion about hearer's wishes and intentions,Request to repeat utterance.,1
+RQ,RT,0.037433155080214,Yes/no question or suggestion about hearer's wishes and intentions,Repeat or imitate other's utterance.,0
+RQ,SA,0.005347593582888,Yes/no question or suggestion about hearer's wishes and intentions,Answer a wh-question with a statement.,0
+RQ,SI,0.013368983957219,Yes/no question or suggestion about hearer's wishes and intentions,State intent to carry out act by speaker.,1
+RQ,SS,0.002673796791444,Yes/no question or suggestion about hearer's wishes and intentions,Signal to start performing an act such as running or rolling a ball,0
+RQ,STAPDWTXCT,0.050802139037433,Yes/no question or suggestion about hearer's wishes and intentions,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+RQ,YQTQ,0.010695187165775,Yes/no question or suggestion about hearer's wishes and intentions,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
+RQ,YYOO,0.18716577540107,Yes/no question or suggestion about hearer's wishes and intentions,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+STAPDWTXCT,AA,0.01061320754717,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer in the affirmative to yes/no question.,0
+STAPDWTXCT,AC,0.024764150943396,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer calls; show attentiveness to communications.,0
+STAPDWTXCT,CL,0.012971698113208,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Call attention to hearer by name or by substitute exclamations,1
+STAPDWTXCT,CMEMED,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,1
+STAPDWTXCT,DC,0.005896226415094,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Create a new state of affairs by declaration,1
+STAPDWTXCT,EAEIECEX,0.002358490566038,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,1
+STAPDWTXCT,FP,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask for permission to carry out act.,1
+STAPDWTXCT,MKTOXA,0.047169811320755,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+STAPDWTXCT,PF,0.008254716981132,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Prohibit/forbid/protest hearer's performance of an act,0
+STAPDWTXCT,PRCN,0.029481132075472,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Perform verbal move in game. | Count.,1
+STAPDWTXCT,QN,0.022405660377359,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask a product-question (wh-question),1
+STAPDWTXCT,RD,0.005896226415094,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Refuse to carry out an act requested or proposed by other.,0
+STAPDWTXCT,RPCS,0.063679245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+STAPDWTXCT,RQ,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Yes/no question or suggestion about hearer's wishes and intentions,1
+STAPDWTXCT,RR,0.002358490566038,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Request to repeat utterance.,1
+STAPDWTXCT,RT,0.14622641509434,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Repeat or imitate other's utterance.,1
+STAPDWTXCT,SA,0.018867924528302,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer a wh-question with a statement.,0
+STAPDWTXCT,SI,0.033018867924528,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,State intent to carry out act by speaker.,1
+STAPDWTXCT,STAPDWTXCT,0.246462264150943,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+STAPDWTXCT,YA,0.001179245283019,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Answer a question with a yes/no question.,0
+STAPDWTXCT,YQTQ,0.022405660377359,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+STAPDWTXCT,YYOO,0.292452830188679,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+YA,AA,0.5,Answer a question with a yes/no question.,Answer in the affirmative to yes/no question.,1
+YA,AN,0.083333333333333,Answer a question with a yes/no question.,Answer in the negative to yes/no question,1
+YA,DC,0.041666666666667,Answer a question with a yes/no question.,Create a new state of affairs by declaration,0
+YA,RPCS,0.041666666666667,Answer a question with a yes/no question.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+YA,RT,0.083333333333333,Answer a question with a yes/no question.,Repeat or imitate other's utterance.,0
+YA,SA,0.041666666666667,Answer a question with a yes/no question.,Answer a wh-question with a statement.,0
+YA,STAPDWTXCT,0.041666666666667,Answer a question with a yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+YA,YD,0.041666666666667,Answer a question with a yes/no question.,Agree to a declaration.,0
+YA,YYOO,0.125,Answer a question with a yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+YQTQ,AA,0.391521197007481,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer in the affirmative to yes/no question.,1
+YQTQ,AC,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer calls; show attentiveness to communications.,0
+YQTQ,ADALGI,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+YQTQ,AN,0.067331670822943,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer in the negative to yes/no question,1
+YQTQ,CL,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Call attention to hearer by name or by substitute exclamations,0
+YQTQ,DC,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Create a new state of affairs by declaration,0
+YQTQ,MKTOXA,0.024937655860349,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+YQTQ,PRCN,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Perform verbal move in game. | Count.,0
+YQTQ,QN,0.00498753117207,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Ask a product-question (wh-question),0
+YQTQ,RD,0.01496259351621,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Refuse to carry out an act requested or proposed by other.,0
+YQTQ,RPCS,0.062344139650873,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+YQTQ,RR,0.017456359102244,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Request to repeat utterance.,1
+YQTQ,RT,0.037406483790524,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Repeat or imitate other's utterance.,0
+YQTQ,SA,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer a wh-question with a statement.,0
+YQTQ,SI,0.01496259351621,Ask a yes/no question. | Ask a limited-alternative yes/no question.,State intent to carry out act by speaker.,0
+YQTQ,STAPDWTXCT,0.057356608478803,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+YQTQ,TA,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Answer a limited-alternative question.,1
+YQTQ,YD,0.002493765586035,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Agree to a declaration.,0
+YQTQ,YQTQ,0.007481296758105,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
+YQTQ,YYOO,0.254364089775561,Ask a yes/no question. | Ask a limited-alternative yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+ABPMET,ABPMET,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
+ABPMET,CL,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Call attention to hearer by name or by substitute exclamations,1
+ABPMET,CMEMED,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,1
+ABPMET,DC,0.037037037037037,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Create a new state of affairs by declaration,1
+ABPMET,MKTOXA,0.074074074074074,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+ABPMET,PRCN,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Perform verbal move in game. | Count.,1
+ABPMET,QN,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Ask a product-question (wh-question),1
+ABPMET,RPCS,0.123456790123457,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+ABPMET,RT,0.024691358024691,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Repeat or imitate other's utterance.,1
+ABPMET,SI,0.08641975308642,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,State intent to carry out act by speaker.,1
+ABPMET,STAPDWTXCT,0.111111111111111,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+ABPMET,YQTQ,0.012345679012346,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+ABPMET,YYOO,0.432098765432099,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+PF,ABPMET,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,0
+PF,ADALGI,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
+PF,CL,0.03448275862069,Prohibit/forbid/protest hearer's performance of an act,Call attention to hearer by name or by substitute exclamations,0
+PF,FP,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Ask for permission to carry out act.,1
+PF,MKTOXA,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+PF,PF,0.155172413793103,Prohibit/forbid/protest hearer's performance of an act,Prohibit/forbid/protest hearer's performance of an act,1
+PF,QN,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,Ask a product-question (wh-question),1
+PF,RD,0.051724137931035,Prohibit/forbid/protest hearer's performance of an act,Refuse to carry out an act requested or proposed by other.,0
+PF,RPCS,0.120689655172414,Prohibit/forbid/protest hearer's performance of an act,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+PF,RT,0.068965517241379,Prohibit/forbid/protest hearer's performance of an act,Repeat or imitate other's utterance.,1
+PF,SI,0.017241379310345,Prohibit/forbid/protest hearer's performance of an act,State intent to carry out act by speaker.,1
+PF,STAPDWTXCT,0.137931034482759,Prohibit/forbid/protest hearer's performance of an act,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+PF,YYOO,0.327586206896552,Prohibit/forbid/protest hearer's performance of an act,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+SI,ABPMET,0.013888888888889,State intent to carry out act by speaker.,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
+SI,ADALGI,0.013888888888889,State intent to carry out act by speaker.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,1
+SI,CL,0.027777777777778,State intent to carry out act by speaker.,Call attention to hearer by name or by substitute exclamations,1
+SI,MKTOXA,0.041666666666667,State intent to carry out act by speaker.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+SI,PF,0.083333333333333,State intent to carry out act by speaker.,Prohibit/forbid/protest hearer's performance of an act,1
+SI,QN,0.027777777777778,State intent to carry out act by speaker.,Ask a product-question (wh-question),1
+SI,RD,0.041666666666667,State intent to carry out act by speaker.,Refuse to carry out an act requested or proposed by other.,0
+SI,RPCS,0.152777777777778,State intent to carry out act by speaker.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+SI,RT,0.125,State intent to carry out act by speaker.,Repeat or imitate other's utterance.,1
+SI,SI,0.027777777777778,State intent to carry out act by speaker.,State intent to carry out act by speaker.,1
+SI,STAPDWTXCT,0.083333333333333,State intent to carry out act by speaker.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+SI,YYOO,0.361111111111111,State intent to carry out act by speaker.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+SS,ABPMET,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance.,1
+SS,AC,0.162162162162162,Signal to start performing an act such as running or rolling a ball,Answer calls; show attentiveness to communications.,1
+SS,MKTOXA,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+SS,QN,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Ask a product-question (wh-question),1
+SS,RD,0.135135135135135,Signal to start performing an act such as running or rolling a ball,Refuse to carry out an act requested or proposed by other.,0
+SS,SI,0.027027027027027,Signal to start performing an act such as running or rolling a ball,State intent to carry out act by speaker.,1
+SS,STAPDWTXCT,0.108108108108108,Signal to start performing an act such as running or rolling a ball,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+SS,YQTQ,0.027027027027027,Signal to start performing an act such as running or rolling a ball,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+SS,YYOO,0.45945945945946,Signal to start performing an act such as running or rolling a ball,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+AA,AC,0.071428571428572,Answer in the affirmative to yes/no question.,Answer calls; show attentiveness to communications.,1
+AA,CL,0.071428571428572,Answer in the affirmative to yes/no question.,Call attention to hearer by name or by substitute exclamations,0
+AA,MKTOXA,0.071428571428572,Answer in the affirmative to yes/no question.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+AA,PF,0.071428571428572,Answer in the affirmative to yes/no question.,Prohibit/forbid/protest hearer's performance of an act,1
+AA,RR,0.285714285714286,Answer in the affirmative to yes/no question.,Request to repeat utterance.,1
+AA,STAPDWTXCT,0.071428571428572,Answer in the affirmative to yes/no question.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+AA,YQTQ,0.071428571428572,Answer in the affirmative to yes/no question.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+AA,YYOO,0.285714285714286,Answer in the affirmative to yes/no question.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+ADALGI,AC,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Answer calls; show attentiveness to communications.,1
+ADALGI,ADALGI,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+ADALGI,CL,0.065573770491803,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Call attention to hearer by name or by substitute exclamations,1
+ADALGI,DP,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Declare make-believe reality.,1
+ADALGI,MKTOXA,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+ADALGI,PF,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Prohibit/forbid/protest hearer's performance of an act,1
+ADALGI,QN,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Ask a product-question (wh-question),1
+ADALGI,RD,0.032786885245902,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Refuse to carry out an act requested or proposed by other.,1
+ADALGI,RPCS,0.19672131147541,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+ADALGI,RT,0.016393442622951,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Repeat or imitate other's utterance.,1
+ADALGI,SI,0.131147540983607,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,State intent to carry out act by speaker.,1
+ADALGI,STAPDWTXCT,0.131147540983607,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+ADALGI,YYOO,0.327868852459016,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+CL,AC,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Answer calls; show attentiveness to communications.,1
+CL,PF,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Prohibit/forbid/protest hearer's performance of an act,1
+CL,PRCN,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Perform verbal move in game. | Count.,0
+CL,RD,0.121212121212121,Call attention to hearer by name or by substitute exclamations,Refuse to carry out an act requested or proposed by other.,1
+CL,RPCS,0.090909090909091,Call attention to hearer by name or by substitute exclamations,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+CL,RT,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Repeat or imitate other's utterance.,1
+CL,SA,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Answer a wh-question with a statement.,0
+CL,SI,0.03030303030303,Call attention to hearer by name or by substitute exclamations,State intent to carry out act by speaker.,1
+CL,STAPDWTXCT,0.060606060606061,Call attention to hearer by name or by substitute exclamations,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+CL,TA,0.03030303030303,Call attention to hearer by name or by substitute exclamations,Answer a limited-alternative question.,0
+CL,YYOO,0.393939393939394,Call attention to hearer by name or by substitute exclamations,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+SA,AC,0.020408163265306,Answer a wh-question with a statement.,Answer calls; show attentiveness to communications.,1
+SA,CL,0.020408163265306,Answer a wh-question with a statement.,Call attention to hearer by name or by substitute exclamations,1
+SA,MKTOXA,0.061224489795918,Answer a wh-question with a statement.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+SA,PRCN,0.020408163265306,Answer a wh-question with a statement.,Perform verbal move in game. | Count.,1
+SA,QN,0.142857142857143,Answer a wh-question with a statement.,Ask a product-question (wh-question),1
+SA,RPCS,0.061224489795918,Answer a wh-question with a statement.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+SA,RT,0.26530612244898,Answer a wh-question with a statement.,Repeat or imitate other's utterance.,1
+SA,SA,0.040816326530612,Answer a wh-question with a statement.,Answer a wh-question with a statement.,0
+SA,SI,0.020408163265306,Answer a wh-question with a statement.,State intent to carry out act by speaker.,1
+SA,STAPDWTXCT,0.102040816326531,Answer a wh-question with a statement.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+SA,YQTQ,0.020408163265306,Answer a wh-question with a statement.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+SA,YYOO,0.224489795918367,Answer a wh-question with a statement.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+EQ,ADALGI,0.058823529411765,Eliciting question (e.g. hmm?).,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+EQ,CL,0.058823529411765,Eliciting question (e.g. hmm?).,Call attention to hearer by name or by substitute exclamations,1
+EQ,MKTOXA,0.058823529411765,Eliciting question (e.g. hmm?).,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+EQ,PF,0.058823529411765,Eliciting question (e.g. hmm?).,Prohibit/forbid/protest hearer's performance of an act,0
+EQ,QN,0.058823529411765,Eliciting question (e.g. hmm?).,Ask a product-question (wh-question),1
+EQ,RD,0.058823529411765,Eliciting question (e.g. hmm?).,Refuse to carry out an act requested or proposed by other.,1
+EQ,RPCS,0.117647058823529,Eliciting question (e.g. hmm?).,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+EQ,SA,0.058823529411765,Eliciting question (e.g. hmm?).,Answer a wh-question with a statement.,1
+EQ,SI,0.058823529411765,Eliciting question (e.g. hmm?).,State intent to carry out act by speaker.,1
+EQ,STAPDWTXCT,0.117647058823529,Eliciting question (e.g. hmm?).,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+EQ,YYOO,0.294117647058824,Eliciting question (e.g. hmm?).,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+RR,ADALGI,0.014492753623188,Request to repeat utterance.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+RR,AN,0.014492753623188,Request to repeat utterance.,Answer in the negative to yes/no question,0
+RR,MKTOXA,0.028985507246377,Request to repeat utterance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+RR,QN,0.043478260869565,Request to repeat utterance.,Ask a product-question (wh-question),0
+RR,RD,0.014492753623188,Request to repeat utterance.,Refuse to carry out an act requested or proposed by other.,0
+RR,RPCS,0.072463768115942,Request to repeat utterance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+RR,RR,0.014492753623188,Request to repeat utterance.,Request to repeat utterance.,0
+RR,SA,0.072463768115942,Request to repeat utterance.,Answer a wh-question with a statement.,1
+RR,SI,0.028985507246377,Request to repeat utterance.,State intent to carry out act by speaker.,0
+RR,STAPDWTXCT,0.188405797101449,Request to repeat utterance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+RR,YQTQ,0.014492753623188,Request to repeat utterance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,0
+RR,YYOO,0.492753623188406,Request to repeat utterance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+RT,ADALGI,0.037037037037037,Repeat or imitate other's utterance.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+RT,MKTOXA,0.037037037037037,Repeat or imitate other's utterance.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+RT,PRCN,0.111111111111111,Repeat or imitate other's utterance.,Perform verbal move in game. | Count.,1
+RT,QN,0.037037037037037,Repeat or imitate other's utterance.,Ask a product-question (wh-question),1
+RT,RPCS,0.074074074074074,Repeat or imitate other's utterance.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+RT,RT,0.111111111111111,Repeat or imitate other's utterance.,Repeat or imitate other's utterance.,1
+RT,SI,0.074074074074074,Repeat or imitate other's utterance.,State intent to carry out act by speaker.,1
+RT,STAPDWTXCT,0.222222222222222,Repeat or imitate other's utterance.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+RT,YQTQ,0.037037037037037,Repeat or imitate other's utterance.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+RT,YYOO,0.259259259259259,Repeat or imitate other's utterance.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+YYOO,ADALGI,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal.,0
+YYOO,CL,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Call attention to hearer by name or by substitute exclamations,0
+YYOO,MKTOXA,0.072463768115942,Make a word-like utterance without clear function. | Unintelligible vocalization.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+YYOO,PF,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Prohibit/forbid/protest hearer's performance of an act,0
+YYOO,PRCN,0.028985507246377,Make a word-like utterance without clear function. | Unintelligible vocalization.,Perform verbal move in game. | Count.,0
+YYOO,QN,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Ask a product-question (wh-question),0
+YYOO,RD,0.043478260869565,Make a word-like utterance without clear function. | Unintelligible vocalization.,Refuse to carry out an act requested or proposed by other.,0
+YYOO,RPCS,0.057971014492754,Make a word-like utterance without clear function. | Unintelligible vocalization.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+YYOO,RT,0.014492753623188,Make a word-like utterance without clear function. | Unintelligible vocalization.,Repeat or imitate other's utterance.,0
+YYOO,SI,0.086956521739131,Make a word-like utterance without clear function. | Unintelligible vocalization.,State intent to carry out act by speaker.,0
+YYOO,STAPDWTXCT,0.130434782608696,Make a word-like utterance without clear function. | Unintelligible vocalization.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,0
+YYOO,YYOO,0.478260869565217,Make a word-like utterance without clear function. | Unintelligible vocalization.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+AC,CL,0.020408163265306,Answer calls; show attentiveness to communications.,Call attention to hearer by name or by substitute exclamations,0
+AC,MKTOXA,0.071428571428572,Answer calls; show attentiveness to communications.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+AC,PRCN,0.030612244897959,Answer calls; show attentiveness to communications.,Perform verbal move in game. | Count.,1
+AC,QN,0.010204081632653,Answer calls; show attentiveness to communications.,Ask a product-question (wh-question),1
+AC,RD,0.010204081632653,Answer calls; show attentiveness to communications.,Refuse to carry out an act requested or proposed by other.,0
+AC,RPCS,0.091836734693878,Answer calls; show attentiveness to communications.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+AC,RT,0.010204081632653,Answer calls; show attentiveness to communications.,Repeat or imitate other's utterance.,1
+AC,SI,0.040816326530612,Answer calls; show attentiveness to communications.,State intent to carry out act by speaker.,1
+AC,STAPDWTXCT,0.295918367346939,Answer calls; show attentiveness to communications.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+AC,YYOO,0.418367346938775,Answer calls; show attentiveness to communications.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+DC,CL,0.083333333333333,Create a new state of affairs by declaration,Call attention to hearer by name or by substitute exclamations,0
+DC,MKTOXA,0.166666666666667,Create a new state of affairs by declaration,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+DC,ND,0.083333333333333,Create a new state of affairs by declaration,Disagree with a declaration.,1
+DC,PF,0.083333333333333,Create a new state of affairs by declaration,Prohibit/forbid/protest hearer's performance of an act,1
+DC,PRCN,0.083333333333333,Create a new state of affairs by declaration,Perform verbal move in game. | Count.,0
+DC,RPCS,0.166666666666667,Create a new state of affairs by declaration,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+DC,RT,0.083333333333333,Create a new state of affairs by declaration,Repeat or imitate other's utterance.,1
+DC,YYOO,0.25,Create a new state of affairs by declaration,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+EAEIECEX,CL,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Call attention to hearer by name or by substitute exclamations,0
+EAEIECEX,CXSC,0.050420168067227,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Complete text if so demanded. | Complete statement or other utterance in compliance with request,1
+EAEIECEX,MKTOXA,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+EAEIECEX,PRCN,0.478991596638655,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Perform verbal move in game. | Count.,1
+EAEIECEX,QN,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Ask a product-question (wh-question),0
+EAEIECEX,RPCS,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+EAEIECEX,RT,0.168067226890756,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Repeat or imitate other's utterance.,1
+EAEIECEX,SA,0.008403361344538,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Answer a wh-question with a statement.,0
+EAEIECEX,SI,0.016806722689076,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,State intent to carry out act by speaker.,1
+EAEIECEX,STAPDWTXCT,0.084033613445378,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+EAEIECEX,YYOO,0.142857142857143,Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+GR,CL,0.176470588235294,Give reason; justify a request for an action refusal or prohibition,Call attention to hearer by name or by substitute exclamations,0
+GR,PF,0.235294117647059,Give reason; justify a request for an action refusal or prohibition,Prohibit/forbid/protest hearer's performance of an act,0
+GR,QN,0.058823529411765,Give reason; justify a request for an action refusal or prohibition,Ask a product-question (wh-question),1
+GR,RD,0.117647058823529,Give reason; justify a request for an action refusal or prohibition,Refuse to carry out an act requested or proposed by other.,0
+GR,RPCS,0.117647058823529,Give reason; justify a request for an action refusal or prohibition,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+GR,STAPDWTXCT,0.058823529411765,Give reason; justify a request for an action refusal or prohibition,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+GR,YYOO,0.235294117647059,Give reason; justify a request for an action refusal or prohibition,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+PRCN,CL,0.034013605442177,Perform verbal move in game. | Count.,Call attention to hearer by name or by substitute exclamations,1
+PRCN,FP,0.006802721088435,Perform verbal move in game. | Count.,Ask for permission to carry out act.,1
+PRCN,MKTOXA,0.020408163265306,Perform verbal move in game. | Count.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+PRCN,PF,0.020408163265306,Perform verbal move in game. | Count.,Prohibit/forbid/protest hearer's performance of an act,1
+PRCN,PRCN,0.149659863945578,Perform verbal move in game. | Count.,Perform verbal move in game. | Count.,1
+PRCN,QN,0.006802721088435,Perform verbal move in game. | Count.,Ask a product-question (wh-question),1
+PRCN,RD,0.006802721088435,Perform verbal move in game. | Count.,Refuse to carry out an act requested or proposed by other.,1
+PRCN,RPCS,0.102040816326531,Perform verbal move in game. | Count.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+PRCN,RT,0.08843537414966,Perform verbal move in game. | Count.,Repeat or imitate other's utterance.,1
+PRCN,SI,0.027210884353742,Perform verbal move in game. | Count.,State intent to carry out act by speaker.,1
+PRCN,STAPDWTXCT,0.054421768707483,Perform verbal move in game. | Count.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+PRCN,YQTQ,0.006802721088435,Perform verbal move in game. | Count.,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+PRCN,YYOO,0.476190476190476,Perform verbal move in game. | Count.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+WD,CL,0.285714285714286,Warn of danger.,Call attention to hearer by name or by substitute exclamations,1
+WD,RPCS,0.142857142857143,Warn of danger.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+WD,RT,0.142857142857143,Warn of danger.,Repeat or imitate other's utterance.,1
+WD,YYOO,0.428571428571429,Warn of danger.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+CRDS,DC,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Create a new state of affairs by declaration,0
+CRDS,MKTOXA,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+CRDS,PF,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Prohibit/forbid/protest hearer's performance of an act,0
+CRDS,RR,0.142857142857143,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Request to repeat utterance.,1
+CRDS,RT,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Repeat or imitate other's utterance.,1
+CRDS,SI,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,State intent to carry out act by speaker.,1
+CRDS,STAPDWTXCT,0.071428571428572,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+CRDS,YYOO,0.428571428571429,Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+FP,DC,0.043478260869565,Ask for permission to carry out act.,Create a new state of affairs by declaration,0
+FP,PA,0.347826086956522,Ask for permission to carry out act.,Permit hearer to perform act.,1
+FP,PF,0.260869565217391,Ask for permission to carry out act.,Prohibit/forbid/protest hearer's performance of an act,1
+FP,RD,0.130434782608696,Ask for permission to carry out act.,Refuse to carry out an act requested or proposed by other.,1
+FP,RPCS,0.043478260869565,Ask for permission to carry out act.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+FP,RR,0.043478260869565,Ask for permission to carry out act.,Request to repeat utterance.,1
+FP,YYOO,0.130434782608696,Ask for permission to carry out act.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+DP,MKTOXA,1,Declare make-believe reality.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,0
+PD,MKTOXA,0.181818181818182,Promise.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+PD,PRCN,0.090909090909091,Promise.,Perform verbal move in game. | Count.,0
+PD,RPCS,0.454545454545454,Promise.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,0
+PD,STAPDWTXCT,0.090909090909091,Promise.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+PD,YYOO,0.181818181818182,Promise.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+RD,MKTOXA,0.333333333333333,Refuse to carry out an act requested or proposed by other.,Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer.,1
+RD,PF,0.083333333333333,Refuse to carry out an act requested or proposed by other.,Prohibit/forbid/protest hearer's performance of an act,1
+RD,RD,0.083333333333333,Refuse to carry out an act requested or proposed by other.,Refuse to carry out an act requested or proposed by other.,0
+RD,RPCS,0.416666666666667,Refuse to carry out an act requested or proposed by other.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+RD,SI,0.083333333333333,Refuse to carry out an act requested or proposed by other.,State intent to carry out act by speaker.,1
+CMEMED,PF,0.25,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Prohibit/forbid/protest hearer's performance of an act,0
+CMEMED,RT,0.25,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Repeat or imitate other's utterance.,1
+CMEMED,YYOO,0.5,Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+PA,RPCS,0.25,Permit hearer to perform act.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+PA,RR,0.125,Permit hearer to perform act.,Request to repeat utterance.,1
+PA,SI,0.125,Permit hearer to perform act.,State intent to carry out act by speaker.,1
+PA,STAPDWTXCT,0.125,Permit hearer to perform act.,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+PA,YYOO,0.375,Permit hearer to perform act.,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
+YD,RPCS,0.666666666666667,Agree to a declaration.,Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal.,1
+YD,SI,0.333333333333333,Agree to a declaration.,State intent to carry out act by speaker.,1
+AN,SI,0.222222222222222,Answer in the negative to yes/no question,State intent to carry out act by speaker.,1
+AN,STAPDWTXCT,0.222222222222222,Answer in the negative to yes/no question,Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one.,1
+AN,YA,0.111111111111111,Answer in the negative to yes/no question,Answer a question with a yes/no question.,0
+AN,YQTQ,0.333333333333333,Answer in the negative to yes/no question,Ask a yes/no question. | Ask a limited-alternative yes/no question.,1
+AN,YYOO,0.111111111111111,Answer in the negative to yes/no question,Make a word-like utterance without clear function. | Unintelligible vocalization.,0
