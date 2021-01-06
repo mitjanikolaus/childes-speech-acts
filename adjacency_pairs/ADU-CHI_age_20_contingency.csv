@@ -236,8 +236,8 @@
 234,234,502,YD,RP,0.666666666666667,Agree to a declaration.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 235,235,503,YD,SI,0.333333333333333,Agree to a declaration.,State intent to carry out act by speaker.,1
 236,236,504,CR,RR,0.285714285714286,Criticize or point out error in nonverbal act.,Request to repeat utterance.,1
-237,237,505,CR,RT,0.142857142857143,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,1
-238,238,506,CR,SI,0.142857142857143,Criticize or point out error in nonverbal act.,State intent to carry out act by speaker.,1
+237,237,505,CR,RT,0.142857142857143,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,0
+238,238,506,CR,SI,0.142857142857143,Criticize or point out error in nonverbal act.,State intent to carry out act by speaker.,0
 239,239,507,CR,YY,0.428571428571429,Criticize or point out error in nonverbal act.,Make a word-like utterance without clear function.,0
 240,240,508,AN,SI,0.222222222222222,Answer in the negative to yes/no question,State intent to carry out act by speaker.,1
 241,241,509,AN,ST,0.222222222222222,Answer in the negative to yes/no question,Make a declarative statement.,1
@@ -246,6 +246,6 @@
 244,244,512,AN,YY,0.111111111111111,Answer in the negative to yes/no question,Make a word-like utterance without clear function.,0
 245,245,513,TQ,TA,0.5,Ask a limited-alternative yes/no question.,Answer a limited-alternative question.,1
 246,246,514,TQ,YY,0.5,Ask a limited-alternative yes/no question.,Make a word-like utterance without clear function.,0
-247,247,515,DP,TO,1,Declare make-believe reality.,Mark transfer of object to hearer,1
+247,247,515,DP,TO,1,Declare make-believe reality.,Mark transfer of object to hearer,0
 248,248,516,CN,YY,1,Count.,Make a word-like utterance without clear function.,0
 249,249,517,ED,YY,1,Exclaim in disapproval.,Make a word-like utterance without clear function.,0

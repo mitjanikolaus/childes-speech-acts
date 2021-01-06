@@ -262,7 +262,7 @@ ET,ST,0.428571428571429,Express enthusiasm for hearer's performance.,Make a decl
 SC,QN,0.333333333333333,Complete statement or other utterance in compliance with request.,Ask a product-question (wh-question),1
 SC,RP,0.333333333333333,Complete statement or other utterance in compliance with request.,Request propose or suggest an action for hearer or for hearer and speaker.,1
 SC,YY,0.333333333333333,Complete statement or other utterance in compliance with request.,Make a word-like utterance without clear function.,0
-CR,RT,1,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,1
+CR,RT,1,Criticize or point out error in nonverbal act.,Repeat or imitate other's utterance.,0
 QA,SI,1,Answer a question with a wh-question.,State intent to carry out act by speaker.,0
 EX,ST,0.5,Elicit completion of rote-learned text.,Make a declarative statement.,1
 EX,YY,0.5,Elicit completion of rote-learned text.,Make a word-like utterance without clear function.,0

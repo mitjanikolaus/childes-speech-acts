@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
         # Take data from logistic regression curve
         else:
-            if np.where(fractions > THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
+            if np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
                 age_of_acquisition[speech_act] = ages[np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))]
             else:
                 age_of_acquisition[speech_act] = max(ages)
