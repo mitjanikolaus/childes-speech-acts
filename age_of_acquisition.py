@@ -2,11 +2,6 @@ import argparse
 import pickle
 import warnings
 
-from sklearn.feature_selection import f_regression
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import explained_variance_score
-
-from crf_annotate import calculate_frequencies
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -26,14 +21,17 @@ THRESHOLD_FRACTION_ACQUIRED = 0.5
 THRESHOLD_SPEECH_ACT_OBSERVED = 0
 
 MIN_AGE = 6
-MAX_AGE = 12*18
+MAX_AGE = 12 * 18
+
 
 def get_fraction_contingent_responses(ages, observed_speech_acts):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
     fraction_contingent_responses = []
 
     for month in ages:
-        contingency_data = pd.read_csv(f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv")
+        contingency_data = pd.read_csv(
+            f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv"
+        )
 
         for speech_act in observed_speech_acts:
             # Add start: at 6 months children don't produce any speech act
@@ -53,7 +51,10 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
                 }
             )
 
-            fraction = contingency_data[(contingency_data["source"] == speech_act) & (contingency_data["contingency"] == 1)]["fraction"].sum()
+            fraction = contingency_data[
+                (contingency_data["source"] == speech_act)
+                & (contingency_data["contingency"] == 1)
+            ]["fraction"].sum()
 
             fraction_contingent_responses.append(
                 {
@@ -91,19 +92,21 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
         prev_fraction = 0.0
         for month in ages:
-            speech_acts_children_month = data_children[data_children["age_months"] == month]
+            speech_acts_children_month = data_children[
+                data_children["age_months"] == month
+            ]
             children_ids = speech_acts_children_month["file_id"].unique()
             n_children = 0
             n_acquired = 0
             for child_id in children_ids:
                 speech_acts_child = speech_acts_children_month[
                     speech_acts_children_month["file_id"] == child_id
-                    ]
+                ]
                 if len(speech_acts_child) > MIN_NUM_UTTERANCES:
                     n_children += 1
                     target_speech_acts_child = speech_acts_child[
                         speech_acts_child[SPEECH_ACT] == speech_act
-                        ]
+                    ]
                     if len(target_speech_acts_child) >= THRESHOLD_ACQUIRED:
                         n_acquired += 1
 
@@ -127,18 +130,24 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
     return pd.DataFrame(fraction_acquired_speech_act)
 
+
 TARGET_PRODUCTION = "production"
 TARGET_COMPREHENSION = "comprehension"
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("--target", type=str, default=TARGET_PRODUCTION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
+    argparser.add_argument(
+        "--target",
+        type=str,
+        default=TARGET_PRODUCTION,
+        choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION],
+    )
 
     args = argparser.parse_args()
 
     print("Loading data...")
     # Calculate overall adult speech act frequencies
-    data = pd.read_pickle('data/new_england_preprocessed.p')
+    data = pd.read_pickle("data/new_england_preprocessed.p")
     data_adults = data[data["speaker"] != "CHI"]
     data_children = data[data["speaker"] == "CHI"]
 
@@ -152,16 +161,32 @@ if __name__ == "__main__":
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
 
     if args.target == TARGET_PRODUCTION:
-        observed_speech_acts = [s for s in observed_speech_acts if s in data_children[SPEECH_ACT].unique() and data_children[SPEECH_ACT].value_counts()[s] > THRESHOLD_SPEECH_ACT_OBSERVED]
+        observed_speech_acts = [
+            s
+            for s in observed_speech_acts
+            if s in data_children[SPEECH_ACT].unique()
+            and data_children[SPEECH_ACT].value_counts()[s]
+            > THRESHOLD_SPEECH_ACT_OBSERVED
+        ]
 
-        fraction_producing_speech_act = get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts)
+        fraction_producing_speech_act = get_fraction_producing_speech_acts(
+            data_children, ages, observed_speech_acts
+        )
 
         fraction_data = fraction_producing_speech_act
 
     elif args.target == TARGET_COMPREHENSION:
-        observed_speech_acts = [s for s in observed_speech_acts if s in data_adults[SPEECH_ACT].unique() and data_adults[SPEECH_ACT].value_counts()[s] > THRESHOLD_SPEECH_ACT_OBSERVED]
+        observed_speech_acts = [
+            s
+            for s in observed_speech_acts
+            if s in data_adults[SPEECH_ACT].unique()
+            and data_adults[SPEECH_ACT].value_counts()[s]
+            > THRESHOLD_SPEECH_ACT_OBSERVED
+        ]
 
-        fraction_contingent_responses = get_fraction_contingent_responses(ages, observed_speech_acts)
+        fraction_contingent_responses = get_fraction_contingent_responses(
+            ages, observed_speech_acts
+        )
 
         fraction_data = fraction_contingent_responses
 
@@ -175,7 +200,7 @@ if __name__ == "__main__":
         ci=None,
         legend=True,
     )
-    g.set(ylim=(0, 1), xlim=(min(ages)-4, max(ages)+12))
+    g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
     plt.setp(g.legend.get_texts(), fontsize="10")
 
     # Read estimated ages of acquisition from the logistic regression plot data
@@ -190,7 +215,7 @@ if __name__ == "__main__":
             fractions_speech_act_acquired = fraction_data[
                 (fraction_data["speech_act"] == speech_act)
                 & (fraction_data["fraction"] >= THRESHOLD_FRACTION_ACQUIRED)
-                ]
+            ]
             if len(fractions_speech_act_acquired) > 0:
                 age_of_acquisition[speech_act] = min(
                     fractions_speech_act_acquired["month"]
@@ -201,7 +226,9 @@ if __name__ == "__main__":
         # Take data from logistic regression curve
         else:
             if np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
-                age_of_acquisition[speech_act] = ages[np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))]
+                age_of_acquisition[speech_act] = ages[
+                    np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))
+                ]
             else:
                 age_of_acquisition[speech_act] = MAX_AGE
         print(

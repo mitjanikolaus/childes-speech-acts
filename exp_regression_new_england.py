@@ -1,6 +1,5 @@
 import argparse
 import pickle
-import warnings
 
 from sklearn.feature_selection import f_regression
 from sklearn.linear_model import LinearRegression
@@ -18,24 +17,33 @@ import seaborn as sns
 
 from preprocess import SPEECH_ACT
 
-#TODO: set to reasonable value
+# TODO: set to reasonable value
 MAX_AGE_OF_ACQUISITION = MAX_AGE
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("--target", type=str, default=TARGET_PRODUCTION, choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION])
-    argparser.add_argument("--scores", type=str, default="checkpoints/crf/classification_scores_adult.p")
+    argparser.add_argument(
+        "--target",
+        type=str,
+        default=TARGET_PRODUCTION,
+        choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION],
+    )
+    argparser.add_argument(
+        "--scores", type=str, default="checkpoints/crf/classification_scores_adult.p"
+    )
 
     args = argparser.parse_args()
 
     print("Loading data...")
-    ages_of_acquisition = pickle.load(open(f"results/age_of_acquisition_{args.target}.p", "rb"))
+    ages_of_acquisition = pickle.load(
+        open(f"results/age_of_acquisition_{args.target}.p", "rb")
+    )
 
     scores = pickle.load(open(args.scores, "rb"))
     scores_f1 = scores["f1-score"].to_dict()
 
     # Calculate overall adult speech act frequencies
-    data = pd.read_pickle('data/new_england_preprocessed.p')
+    data = pd.read_pickle("data/new_england_preprocessed.p")
     data_adults = data[data["speaker"] != "CHI"]
     data_children = data[data["speaker"] == "CHI"]
 
@@ -49,7 +57,11 @@ if __name__ == "__main__":
     observed_speech_acts = [s for s in observed_speech_acts if s in scores_f1]
 
     # Filter out speech acts were acquisition data is insufficient
-    observed_speech_acts = [s for s in observed_speech_acts if ages_of_acquisition[s] < MAX_AGE_OF_ACQUISITION]
+    observed_speech_acts = [
+        s
+        for s in observed_speech_acts
+        if ages_of_acquisition[s] < MAX_AGE_OF_ACQUISITION
+    ]
 
     # Filter data for observed speech acts
     ages_of_acquisition = [ages_of_acquisition[s] for s in observed_speech_acts]
@@ -70,7 +82,10 @@ if __name__ == "__main__":
     targets = ages_of_acquisition
     reg = LinearRegression().fit(features, targets)
     y_pred = reg.predict(features)
-    print("Explained variance (only f1 scores):", explained_variance_score(targets, y_pred))
+    print(
+        "Explained variance (only f1 scores):",
+        explained_variance_score(targets, y_pred),
+    )
     print("Regression parameters: ", reg.coef_)
 
     features = np.array(list(zip(frequencies_adults, scores_f1)))
@@ -100,7 +115,7 @@ if __name__ == "__main__":
     y = list(frequencies_adults)
     g = sns.regplot(x, y, ci=None, order=1)
     plt.xlabel(f"{args.target}: age of acquisition (months)")
-    plt.ylabel("frequency (%)")
+    plt.ylabel("log frequency (%)")
     plt.title(f"p-value: {p_val[0]:.3f}")
 
     for i, speech_act in enumerate(observed_speech_acts):
