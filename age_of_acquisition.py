@@ -203,8 +203,8 @@ if __name__ == "__main__":
     )
     g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
     h, l = g.axes[0][0].get_legend_handles_labels()
-    g.fig.legend(h, l, ncol=3)
-    plt.subplots_adjust(right=0.7, bottom=0.09, left=0.057)
+    g.fig.legend(h, l, loc='upper center', ncol=10)
+    plt.subplots_adjust(top=0.7, bottom=0.09, left=0.057)
     plt.xlabel("age (months)")
     if args.target == TARGET_PRODUCTION:
         plt.ylabel("fraction of children producing the target speech act")
