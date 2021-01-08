@@ -198,10 +198,18 @@ if __name__ == "__main__":
         hue="speech_act",
         logistic=True,
         ci=None,
-        legend=True,
+        legend_out=True,
+        legend=False,
     )
     g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
-    plt.setp(g.legend.get_texts(), fontsize="10")
+    h, l = g.axes[0][0].get_legend_handles_labels()
+    g.fig.legend(h, l, ncol=3)
+    plt.subplots_adjust(right=0.7, bottom=0.09, left=0.057)
+    plt.xlabel("age (months)")
+    if args.target == TARGET_PRODUCTION:
+        plt.ylabel("fraction of children producing the target speech act")
+    elif args.target == TARGET_COMPREHENSION:
+        plt.ylabel("fraction of contingent responses")
 
     # Read estimated ages of acquisition from the logistic regression plot data
     age_of_acquisition = {}
