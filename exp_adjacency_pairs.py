@@ -92,12 +92,12 @@ def plot_sankey(
     return fig
 
 
-def gen_seq_data(data, age: int = None):
+def gen_seq_data(data, age):
     # 0. Choose age
-    if age is not None:
-        data_age = data[data["age_months"] == age]
+    if not age == "all_ages":
+        data = data[data["age_months"] == age]
     # 1. Sequence extraction & columns names
-    spa_shifted = {0: data_age[[SPEECH_ACT, "speaker", "file_id"]]}
+    spa_shifted = {0: data[[SPEECH_ACT, "speaker", "file_id"]]}
     spa_shifted[1] = (
         spa_shifted[0]
         .shift(periods=1, fill_value=None)
@@ -228,7 +228,7 @@ app.layout = html.Div(
                         "child age",
                         dcc.Dropdown(
                             id="age_months",
-                            options=[{"label": i, "value": i} for i in [14, 20, 32]],
+                            options=[{"label": i, "value": i} for i in ["all_ages", 14, 20, 32]],
                             value=32,
                         ),
                         "percentage",
