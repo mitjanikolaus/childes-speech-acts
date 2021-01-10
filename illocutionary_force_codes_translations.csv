@@ -1,13 +1,10 @@
 Group Category Code Description
 
-AC Directives AC "Answer calls; show attentiveness to communications."
-
 CL Directives CL "Call attention to hearer by name or by substitute exclamations"
 
 DR Directives DR "Dare or challenge hearer to perform an action."
 
-RPCS Directives RP "Request propose or suggest an action for hearer or for hearer and speaker."
-RPCS Directives CS "Counter-suggestion; an indirect refusal."
+RP Directives RP "Request propose or suggest an action for hearer or for hearer and speaker."
 
 WS Statements WS "Express a wish."
 
@@ -35,29 +32,30 @@ PD Commitments PD "Promise."
 
 TD Commitments TD "Threaten to do."
 
-MKTOXA Markings MK "Mark occurrence of event (thank greet apologize congratulate etc.)."
-MKTOXA Markings TO "Mark transfer of object to hearer"
-MKTOXA Markings XA "Exhibit attentiveness to hearer."
+MKTO Markings MK "Mark occurrence of event (thank greet apologize congratulate etc.)."
+MKTO Markings TO "Mark transfer of object to hearer"
 
-CMEMED Markings CM "Commiserate express sympathy for hearer's distress."
-CMEMED Markings EM "Exclaim in distress pain."
-CMEMED Evalutions ED "Exclaim in disapproval."
+XAAC Markings XA "Exhibit attentiveness to hearer."
+XAAC Directives AC "Answer calls; show attentiveness to communications."
+
+CMEM Markings CM "Commiserate express sympathy for hearer's distress."
+CMEM Markings EM "Exclaim in distress pain."
 
 EN Markings EN "Express positive emotion."
 
 ES Markings ES "Express surprise."
 
-STAPDWTXCT Statements ST "Make a declarative statement."
-STAPDWTXCT Statements AP "Agree with proposition or proposal expressed by previous speaker"
-STAPDWTXCT Statements DW "Disagree with proposition expressed by previous speaker."
-STAPDWTXCT Performances TX "Read or recite written text aloud."
-STAPDWTXCT "Text editing" CT "Correct provide correct verbal form in place of erroneous one."
+STTX Statements ST "Make a declarative statement."
+STTX Performances TX "Read or recite written text aloud."
+
+
+CT "Text editing" CT "Correct provide correct verbal form in place of erroneous one."
+
+DP Declarations DP "Declare make-believe reality."
 
 GR Directives GR "Give reason; justify a request for an action refusal or prohibition"
 
 DC Declarations DC "Create a new state of affairs by declaration"
-
-DP Declarations DP "Declare make-believe reality."
 
 AQ Questions AQ "Aggravated question expression of disapproval by restating a question"
 
@@ -65,23 +63,30 @@ AA Questions AA "Answer in the affirmative to yes/no question."
 
 YD Declarations YD "Agree to a declaration."
 
-ADALGI Directives AD "Agree to carry out an act requested or proposed by other."
-ADALGI Directives AL "Agree to do something for the last time."
-ADALGI Directives GI "Give in; accept other's insistence or refusal."
+ADAL Directives AD "Agree to carry out an act requested or proposed by other."
+ADAL Directives AL "Agree to do something for the last time."
+
+AP Statements AP "Agree with proposition or proposal expressed by previous speaker"
+
+
+GI Directives GI "Give in; accept other's insistence or refusal."
 
 AN Questions AN "Answer in the negative to yes/no question"
 
 ND Declarations ND "Disagree with a declaration."
 
-RD Directives RD "Refuse to carry out an act requested or proposed by other."
+RDCS Directives RD "Refuse to carry out an act requested or proposed by other."
+RDCS Directives CS "Counter-suggestion; an indirect refusal."
 
-EQ Questions EQ "Eliciting question (e.g. hmm?)."
+DW Statements DW "Disagree with proposition expressed by previous speaker."
+
+
+RREQ "Demands for clarification" RR "Request to repeat utterance."
+RREQ Questions EQ "Eliciting question (e.g. hmm?)."
 
 NA Questions NA "Intentionally nonsatisfying answer to question"
 
 QN Questions QN "Ask a product-question (wh-question)"
-
-RR "Demands for clarification" RR "Request to repeat utterance."
 
 RA Questions RA "Refuse to answer."
 
@@ -107,8 +112,9 @@ ABPMET Evalutions AB "Approve of appropriate behavior."
 ABPMET Evalutions PM "Praise for motor acts i.e for nonverbal behavior."
 ABPMET Evalutions ET "Express enthusiasm for hearer's performance."
 
-CRDS Evalutions CR "Criticize or point out error in nonverbal act."
-CRDS Evalutions DS "Disapprove scold protest disruptive behavior."
+CRDSED Evalutions CR "Criticize or point out error in nonverbal act."
+CRDSED Evalutions DS "Disapprove scold protest disruptive behavior."
+CRDSED Evalutions ED "Exclaim in disapproval."
 
 YYOO Vocalizations YY "Make a word-like utterance without clear function."
 YYOO Vocalizations OO "Unintelligible vocalization."
