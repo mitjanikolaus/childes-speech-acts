@@ -93,6 +93,8 @@ def plot_sankey(
 
 
 def gen_seq_data(data, age):
+    data = data[data.speech_act != 'YYOO']
+
     # 0. Choose age
     if not age == "all_ages":
         data = data[data["age_months"] == age]

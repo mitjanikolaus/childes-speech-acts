@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 import seaborn as sns
+from scipy.stats import entropy
 
 from preprocess import SPEECH_ACT
 from utils import COLORS_PLOT_CATEGORICAL, age_bin, COLLAPSED_FORCE_CODES_TRANSLATIONS
@@ -17,6 +18,7 @@ MIN_NUM_UTTERANCES = 0
 MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 1
 THRESHOLD_FRACTION_ACQUIRED = 0.5
+THRESHOLD_KL_DIVERGENCE_ACQUIRED = 0.5
 
 THRESHOLD_SPEECH_ACT_OBSERVED = 0
 
@@ -30,8 +32,9 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
 
     for month in ages:
         contingency_data = pd.read_csv(
-            f"adjacency_pairs/ADU-CHI_age_{month}_collapsed_contingency.csv"
+            f"adjacency_pairs/ADU-CHI_age_{month}.csv"
         )
+        ref_contingency_data = pd.read_csv("adjacency_pairs/CHI-ADU_age_all_ages.csv")
 
         for speech_act in observed_speech_acts:
             # Add start: at 6 months children don't produce any speech act
@@ -39,7 +42,7 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
                 {
                     "speech_act": speech_act,
                     "month": MIN_AGE,
-                    "fraction": 0.0,
+                    "kl_divergence": 1.0,
                 }
             )
             # Add end: at 18 years children know all speech acts
@@ -47,20 +50,42 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
                 {
                     "speech_act": speech_act,
                     "month": MAX_AGE,
-                    "fraction": 1.0,
+                    "kl_divergence": 0.0,
                 }
             )
 
-            fraction = contingency_data[
-                (contingency_data["source"] == speech_act)
-                & (contingency_data["contingency"] == 1)
-            ]["fraction"].sum()
+            responses_adult = ref_contingency_data[(ref_contingency_data["source"] == speech_act)][
+                ["target", "fraction"]
+            ]
+            responses_adult = dict(zip(responses_adult.target, responses_adult.fraction))
 
+            responses_child = contingency_data[(contingency_data["source"] == speech_act)][
+                ["target", "fraction"]
+            ]
+            responses_child = dict(zip(responses_child.target, responses_child.fraction))
+
+            responses_adult_overlapping = {}
+            for k in responses_child.keys():
+                if k in responses_adult:
+                    responses_adult_overlapping[k] = responses_adult[k]
+                else:
+                    responses_adult_overlapping[k] = 0
+
+            kl_divergence = entropy(list(responses_adult_overlapping.values()), list(responses_child.values()))
+            if len(responses_child) <= 1:
+                kl_divergence = 1
+            if kl_divergence > 1:
+                kl_divergence = 1
+            print({
+                    "speech_act": speech_act,
+                    "month": month,
+                    "kl_divergence": kl_divergence,
+            })
             fraction_contingent_responses.append(
                 {
                     "speech_act": speech_act,
                     "month": month,
-                    "fraction": fraction,
+                    "kl_divergence": kl_divergence,
                 }
             )
 
@@ -159,6 +184,8 @@ if __name__ == "__main__":
     # Filter out unintelligible acts
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YYOO"]]
 
+    # observed_speech_acts = ["STAPDWTXCT", "MKTOXA", "RT", "YQTQ", "RR", "FP"]
+
     ages = [14, 20, 32]
     # map ages to corresponding bins
     data_children["age_months"] = data_children["age_months"].apply(age_bin)
@@ -178,6 +205,60 @@ if __name__ == "__main__":
 
         fraction_data = fraction_producing_speech_act
 
+        sns.set_palette(COLORS_PLOT_CATEGORICAL)
+        g = sns.lmplot(
+            data=fraction_data,
+            x="month",
+            y="fraction",
+            hue="speech_act",
+            logistic=True,
+            ci=None,
+            legend_out=True,
+            legend=False,
+        )
+        g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
+        h, l = g.axes[0][0].get_legend_handles_labels()
+        g.fig.legend(h, l, loc="upper center", ncol=8)
+        plt.subplots_adjust(top=0.71, bottom=0.09, left=0.057)
+        plt.xlabel("age (months)")
+        if args.target == TARGET_PRODUCTION:
+            plt.ylabel("fraction of children producing the target speech act")
+        elif args.target == TARGET_COMPREHENSION:
+            plt.ylabel("fraction of contingent responses")
+
+        # Read estimated ages of acquisition from the logistic regression plot data
+        age_of_acquisition = {}
+        for i, speech_act in enumerate(observed_speech_acts):
+            fractions = g.ax.get_lines()[i].get_ydata()
+            ages = g.ax.get_lines()[i].get_xdata()
+
+            # If the logistic regression has failed: use data from points
+            if np.isnan(fractions).all():
+                warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
+                fractions_speech_act_acquired = fraction_data[
+                    (fraction_data["speech_act"] == speech_act)
+                    & (fraction_data["fraction"] >= THRESHOLD_FRACTION_ACQUIRED)
+                    ]
+                if len(fractions_speech_act_acquired) > 0:
+                    age_of_acquisition[speech_act] = min(
+                        fractions_speech_act_acquired["month"]
+                    )
+                else:
+                    age_of_acquisition[speech_act] = MAX_AGE
+
+            # Take data from logistic regression curve
+            else:
+                if np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
+                    age_of_acquisition[speech_act] = ages[
+                        np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))
+                    ]
+                else:
+                    age_of_acquisition[speech_act] = MAX_AGE
+            print(
+                f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} "
+            )
+
+
     elif args.target == TARGET_COMPREHENSION:
         observed_speech_acts = [
             s
@@ -193,58 +274,58 @@ if __name__ == "__main__":
 
         fraction_data = fraction_contingent_responses
 
-    sns.set_palette(COLORS_PLOT_CATEGORICAL)
-    g = sns.lmplot(
-        data=fraction_data,
-        x="month",
-        y="fraction",
-        hue="speech_act",
-        logistic=True,
-        ci=None,
-        legend_out=True,
-        legend=False,
-    )
-    g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
-    h, l = g.axes[0][0].get_legend_handles_labels()
-    g.fig.legend(h, l, loc='upper center', ncol=8)
-    plt.subplots_adjust(top=0.71, bottom=0.09, left=0.057)
-    plt.xlabel("age (months)")
-    if args.target == TARGET_PRODUCTION:
-        plt.ylabel("fraction of children producing the target speech act")
-    elif args.target == TARGET_COMPREHENSION:
-        plt.ylabel("fraction of contingent responses")
-
-    # Read estimated ages of acquisition from the logistic regression plot data
-    age_of_acquisition = {}
-    for i, speech_act in enumerate(observed_speech_acts):
-        fractions = g.ax.get_lines()[i].get_ydata()
-        ages = g.ax.get_lines()[i].get_xdata()
-
-        # If the logistic regression has failed: use data from points
-        if np.isnan(fractions).all():
-            warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
-            fractions_speech_act_acquired = fraction_data[
-                (fraction_data["speech_act"] == speech_act)
-                & (fraction_data["fraction"] >= THRESHOLD_FRACTION_ACQUIRED)
-            ]
-            if len(fractions_speech_act_acquired) > 0:
-                age_of_acquisition[speech_act] = min(
-                    fractions_speech_act_acquired["month"]
-                )
-            else:
-                age_of_acquisition[speech_act] = MAX_AGE
-
-        # Take data from logistic regression curve
-        else:
-            if np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED)[0].size > 0:
-                age_of_acquisition[speech_act] = ages[
-                    np.min(np.where(fractions >= THRESHOLD_FRACTION_ACQUIRED))
-                ]
-            else:
-                age_of_acquisition[speech_act] = MAX_AGE
-        print(
-            f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} "
+        sns.set_palette(COLORS_PLOT_CATEGORICAL)
+        g = sns.lmplot(
+            data=fraction_data,
+            x="month",
+            y="kl_divergence",
+            hue="speech_act",
+            logistic=True,
+            ci=None,
+            legend_out=True,
+            legend=False,
         )
+        g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
+        h, l = g.axes[0][0].get_legend_handles_labels()
+        g.fig.legend(h, l, loc="upper center", ncol=8)
+        plt.subplots_adjust(top=0.71, bottom=0.09, left=0.057)
+        plt.xlabel("age (months)")
+        if args.target == TARGET_PRODUCTION:
+            plt.ylabel("fraction of children producing the target speech act")
+        elif args.target == TARGET_COMPREHENSION:
+            plt.ylabel("fraction of contingent responses")
+
+        # Read estimated ages of acquisition from the logistic regression plot data
+        age_of_acquisition = {}
+        for i, speech_act in enumerate(observed_speech_acts):
+            kl_divergences = g.ax.get_lines()[i].get_ydata()
+            ages = g.ax.get_lines()[i].get_xdata()
+
+            # If the logistic regression has failed: use data from points
+            if np.isnan(kl_divergences).all():
+                warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
+                fractions_speech_act_acquired = fraction_data[
+                    (fraction_data["speech_act"] == speech_act)
+                    & (fraction_data["kl_divergence"] <= THRESHOLD_KL_DIVERGENCE_ACQUIRED)
+                    ]
+                if len(fractions_speech_act_acquired) > 0:
+                    age_of_acquisition[speech_act] = min(
+                        fractions_speech_act_acquired["month"]
+                    )
+                else:
+                    age_of_acquisition[speech_act] = MAX_AGE
+
+            # Take data from logistic regression curve
+            else:
+                if np.where(kl_divergences <= THRESHOLD_KL_DIVERGENCE_ACQUIRED)[0].size > 0:
+                    age_of_acquisition[speech_act] = ages[
+                        np.min(np.where(kl_divergences <= THRESHOLD_KL_DIVERGENCE_ACQUIRED))
+                    ]
+                else:
+                    age_of_acquisition[speech_act] = MAX_AGE
+            print(
+                f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f} "
+            )
 
     path = f"results/age_of_acquisition_{args.target}_collapsed.p"
     pickle.dump(age_of_acquisition, open(path, "wb"))
