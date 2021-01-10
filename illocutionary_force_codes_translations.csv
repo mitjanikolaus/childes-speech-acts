@@ -2,13 +2,13 @@ Group Category Code Description
 
 CL Directives CL "Call attention to hearer by name or by substitute exclamations"
 
-DR Directives DR "Dare or challenge hearer to perform an action."
-
-RP Directives RP "Request propose or suggest an action for hearer or for hearer and speaker."
+RPDR Directives RP "Request propose or suggest an action for hearer or for hearer and speaker."
+RPDR Directives DR "Dare or challenge hearer to perform an action."
 
 WS Statements WS "Express a wish."
 
-SS Directives SS "Signal to start performing an act such as running or rolling a ball"
+SISS Commitments SI "State intent to carry out act by speaker."
+SISS Directives SS "Signal to start performing an act such as running or rolling a ball"
 
 WD Directives WD "Warn of danger."
 
@@ -26,8 +26,6 @@ PA Commitments PA "Permit hearer to perform act."
 
 PF Commitments PF "Prohibit/forbid/protest hearer's performance of an act"
 
-SI Commitments SI "State intent to carry out act by speaker."
-
 PD Commitments PD "Promise."
 
 TD Commitments TD "Threaten to do."
@@ -38,47 +36,45 @@ MKTO Markings TO "Mark transfer of object to hearer"
 XAAC Markings XA "Exhibit attentiveness to hearer."
 XAAC Directives AC "Answer calls; show attentiveness to communications."
 
-CMEM Markings CM "Commiserate express sympathy for hearer's distress."
-CMEM Markings EM "Exclaim in distress pain."
+CM Markings CM "Commiserate express sympathy for hearer's distress."
+
+EM Markings EM "Exclaim in distress pain."
 
 EN Markings EN "Express positive emotion."
 
 ES Markings ES "Express surprise."
 
-STTX Statements ST "Make a declarative statement."
-STTX Performances TX "Read or recite written text aloud."
-
+STTXDCDP Statements ST "Make a declarative statement."
+STTXDCDP Performances TX "Read or recite written text aloud."
+STTXDCDP Declarations DP "Declare make-believe reality."
+STTXDCDP Declarations DC "Create a new state of affairs by declaration"
 
 CT "Text editing" CT "Correct provide correct verbal form in place of erroneous one."
 
-DP Declarations DP "Declare make-believe reality."
 
 GR Directives GR "Give reason; justify a request for an action refusal or prohibition"
 
-DC Declarations DC "Create a new state of affairs by declaration"
 
 AQ Questions AQ "Aggravated question expression of disapproval by restating a question"
 
 AA Questions AA "Answer in the affirmative to yes/no question."
 
-YD Declarations YD "Agree to a declaration."
-
 ADAL Directives AD "Agree to carry out an act requested or proposed by other."
 ADAL Directives AL "Agree to do something for the last time."
 
-AP Statements AP "Agree with proposition or proposal expressed by previous speaker"
-
+APYD Statements AP "Agree with proposition or proposal expressed by previous speaker"
+APYD Declarations YD "Agree to a declaration."
 
 GI Directives GI "Give in; accept other's insistence or refusal."
 
 AN Questions AN "Answer in the negative to yes/no question"
 
-ND Declarations ND "Disagree with a declaration."
+NDDW Declarations ND "Disagree with a declaration."
+NDDW Statements DW "Disagree with proposition expressed by previous speaker."
 
 RDCS Directives RD "Refuse to carry out an act requested or proposed by other."
 RDCS Directives CS "Counter-suggestion; an indirect refusal."
 
-DW Statements DW "Disagree with proposition expressed by previous speaker."
 
 
 RREQ "Demands for clarification" RR "Request to repeat utterance."

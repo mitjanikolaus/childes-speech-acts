@@ -1,20 +1,16 @@
 Group Category Code Description
 
-AC Directives AC "Answer calls; show attentiveness to communications."
-
 CL Directives CL "Call attention to hearer by name or by substitute exclamations"
 
-DR Directives DR "Dare or challenge hearer to perform an action."
-
-RPCS Directives RPCS "Request propose or suggest an action for hearer or for hearer and speaker. | Counter-suggestion; an indirect refusal."
+RPDR Directives RPDR "Request propose or suggest an action for hearer or for hearer and speaker. | Dare or challenge hearer to perform an action."
 
 WS Statements WS "Express a wish."
 
-SS Directives SS "Signal to start performing an act such as running or rolling a ball"
+SISS Directives SS "State intent to carry out act by speaker. | Signal to start performing an act such as running or rolling a ball."
 
 WD Directives WD "Warn of danger."
 
-CXSC "Speech Elicitations" RPCS "Complete text if so demanded. | Complete statement or other utterance in compliance with request"
+CXSC "Speech Elicitations" CXSC "Complete text if so demanded. | Complete statement or other utterance in compliance with request."
 
 EAEIECEX "Speech Elicitations" EAEIECEX "Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text."
 
@@ -24,49 +20,49 @@ PA Commitments PA "Permit hearer to perform act."
 
 PF Commitments PF "Prohibit/forbid/protest hearer's performance of an act"
 
-SI Commitments SI "State intent to carry out act by speaker."
-
 PD Commitments PD "Promise."
 
 TD Commitments TD "Threaten to do."
 
-MKTOXA Markings MKTOXA "Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer | Exhibit attentiveness to hearer."
+MKTO Markings MKTO "Mark occurrence of event (thank greet apologize congratulate etc.). | Mark transfer of object to hearer"
 
-CMEMED Markings CM "Commiserate express sympathy for hearer's distress. | Exclaim in distress pain. | Exclaim in disapproval."
+XAAC Markings XAAC "Exhibit attentiveness to hearer. | Answer calls; show attentiveness to communications."
+
+CM Markings CM "Commiserate express sympathy for hearer's distress."
+
+EM Markings EM "Exclaim in distress pain."
 
 EN Markings EN "Express positive emotion."
 
 ES Markings ES "Express surprise."
 
-STAPDWTXCT Statements STAPDWTXCT "Make a declarative statement. | Agree with proposition or proposal expressed by previous speaker | Disagree with proposition expressed by previous speaker. | Read or recite written text aloud. | Correct provide correct verbal form in place of erroneous one."
+STTXDCDP Statements STTXDCDP "Make a declarative statement. | Read or recite written text aloud. | Declare make-believe reality. | Create a new state of affairs by declaration."
+
+CT "Text editing" CT "Correct provide correct verbal form in place of erroneous one."
 
 GR Directives GR "Give reason; justify a request for an action refusal or prohibition"
-
-DC Declarations DC "Create a new state of affairs by declaration"
-
-DP Declarations DP "Declare make-believe reality."
 
 AQ Questions AQ "Aggravated question expression of disapproval by restating a question"
 
 AA Questions AA "Answer in the affirmative to yes/no question."
 
-YD Declarations YD "Agree to a declaration."
+ADAL Directives ADAL "Agree to carry out an act requested or proposed by other. | Agree to do something for the last time."
 
-ADALGI Directives ADALGI "Agree to carry out an act requested or proposed by other. | Agree to do something for the last time. | Give in; accept other's insistence or refusal."
+APYD Statements APYD "Agree with proposition or proposal expressed by previous speaker | Agree to a declaration."
+
+GI Directives GI "Give in; accept other's insistence or refusal."
 
 AN Questions AN "Answer in the negative to yes/no question"
 
-ND Declarations ND "Disagree with a declaration."
+NDDW Declarations NDDW "Disagree with a declaration. | Disagree with proposition expressed by previous speaker."
 
-RD Directives RD "Refuse to carry out an act requested or proposed by other."
+RDCS Directives RDCS "Refuse to carry out an act requested or proposed by other. | Counter-suggestion; an indirect refusal."
 
-EQ Questions EQ "Eliciting question (e.g. hmm?)."
+RREQ "Demands for clarification" RREQ "Request to repeat utterance. | Eliciting question (e.g. hmm?)."
 
 NA Questions NA "Intentionally nonsatisfying answer to question"
 
 QN Questions QN "Ask a product-question (wh-question)"
-
-RR "Demands for clarification" RR "Request to repeat utterance."
 
 RA Questions RA "Refuse to answer."
 
@@ -88,6 +84,6 @@ PRCN Performances PRCN "Perform verbal move in game. | Count."
 
 ABPMET Evalutions ABPMET "Approve of appropriate behavior. | Praise for motor acts i.e for nonverbal behavior. | Express enthusiasm for hearer's performance."
 
-CRDS Evalutions CR "Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior."
+CRDSED Evalutions CRDSED "Criticize or point out error in nonverbal act. | Disapprove scold protest disruptive behavior. | Exclaim in disapproval."
 
-YYOO Vocalizations YY "Make a word-like utterance without clear function. | Unintelligible vocalization."
+YYOO Vocalizations YYOO "Make a word-like utterance without clear function. | Unintelligible vocalization."
