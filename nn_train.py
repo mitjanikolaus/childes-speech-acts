@@ -251,7 +251,7 @@ if __name__ == "__main__":
         "--nhid-utterance-lstm", type=int, default=100, help="number of hidden units of the higher-level LSTM"
     )
 
-    parser.add_argument("--nlayers", type=int, default=2, help="number of layers of the lower-level LSTM")
+    parser.add_argument("--nlayers", type=int, default=1, help="number of layers of the lower-level LSTM")
     parser.add_argument("--lr", type=float, default=0.0001, help="initial learning rate")
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")

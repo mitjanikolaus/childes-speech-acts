@@ -290,7 +290,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nlayers",
         type=int,
-        default=2,
+        default=1,
         help="number of layers of the lower-level LSTM",
     )
     parser.add_argument(
