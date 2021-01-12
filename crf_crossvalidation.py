@@ -35,10 +35,6 @@ def argparser():
     )
     # Data files
     argparser.add_argument("--data", type=str, help="file listing all dialogs")
-    # Operations on data
-    argparser.add_argument(
-        "--age", type=int, default=None, help="filter data for children's age"
-    )
     # parameters for training:
     argparser.add_argument(
         "--nb-occurrences",
@@ -126,30 +122,6 @@ if __name__ == "__main__":
     print("Saving model at: {}".format(checkpoint_path))
     if not os.path.exists(checkpoint_path):
         os.makedirs(checkpoint_path)
-
-    logger = {}  # Dictionary containing results
-    freport = {}  # Dictionary containing reports
-    counters = {}
-
-    # Filter data by childen's age
-    if args.age:
-        data_age_filtered = data[data.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
-
-        # Gather ground-truth label distributions:
-        data_children = data_age_filtered[data_age_filtered.speaker == "CHI"]
-        data_children = data_children[~data_children[SPEECH_ACT].isin(["NAT", "NEE"])]
-        counts = Counter(data_children[SPEECH_ACT])
-        observed_labels = [k for k in SPEECH_ACT_DESCRIPTIONS.index if counts[k] > 0]
-        counters["gold"] = dict.fromkeys(observed_labels)
-        counters["gold"].update((k, counts[k]) for k in counts.keys() & observed_labels)
-        for k in counters["gold"].keys():
-            counters["gold"][k] /= len(data_children)
-
-        pickle.dump(
-            counters["gold"], open(f"data/frequencies_gold_age_{str(args.age)}.p", "wb")
-        )
-
-    counts_predicted = Counter()
 
     # Split data
     kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
@@ -280,16 +252,6 @@ if __name__ == "__main__":
         accuracies.append(acc)
         result_dataframes.append(data_crf[["utterance_id", "file_id", "speaker", "age_months", "tokens", SPEECH_ACT, "y_pred"]])
 
-        # Age filter before analysis
-        if args.age:
-            data_crf = data_crf[data_crf.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
-
-        # Filter for children's utterances
-        data_crf_children = data_crf[data_crf.speaker == "CHI"]
-
-        counts = Counter(data_crf_children["y_pred"].tolist())
-        counts_predicted.update(counts)
-
     print("mean accuracy over all splits: ", np.average(accuracies))
     print("std accuracy over all splits: ", np.std(accuracies))
 
@@ -298,31 +260,3 @@ if __name__ == "__main__":
         result_dataframe = result_dataframe.append(df)
     pickle.dump(result_dataframe, open("data/new_england_reproduced_crf.p","wb"))
 
-    if args.age:
-        counters["pred"] = dict.fromkeys(observed_labels)
-        counters["pred"].update(
-            (k, counts_predicted[k]) for k in counts_predicted.keys() & observed_labels
-        )
-
-        for k in counters["pred"].keys():
-            if counters["pred"][k]:
-                counters["pred"][k] /= len(data_children)
-            else:
-                counters["pred"][k] = 0
-
-        labels = observed_labels * 2
-        splits = np.concatenate([[str(i)] * len(observed_labels) for i in counters.keys()])
-        counts = np.concatenate([list(counter.values()) for counter in counters.values()])
-        df = pd.DataFrame(
-            zip(labels, splits, counts), columns=["speech_act", "source", "frequency"]
-        )
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
-
-        kl_divergence = entropy(
-            list(counters["pred"].values()), qk=list(counters["gold"].values())
-        )
-        print(f"KL Divergence: {kl_divergence:.3f}")
-        plt.title(f"Frequencies in Ground-truth vs. Predicted data. | KL Divergence: {kl_divergence:.3f} | Age: {args.age} months")
-
-        plt.show()
