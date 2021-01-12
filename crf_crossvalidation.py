@@ -11,18 +11,17 @@ from scipy.stats import entropy
 import pycrfsuite
 
 import seaborn as sns
+from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
-from utils import SPEECH_ACT_DESCRIPTIONS, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, \
-    TRAIN_TEST_SPLIT_RANDOM_STATE
+from utils import SPEECH_ACT_DESCRIPTIONS, TRAIN_TEST_SPLIT_RANDOM_STATE
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
-    generate_features_vocabs, crf_predict, plot_training,
+    generate_features_vocabs, crf_predict,
 )
-from crf_test import bio_classification_report, report_to_file
 
 AGE_MONTHS_GROUPS = {
     14: [13, 14, 15],
@@ -155,6 +154,8 @@ if __name__ == "__main__":
     # Split data
     kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
 
+    accuracies = []
+
     file_names = data["file_id"].unique().tolist()
     for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):
         train_files = [file_names[i] for i in train_indices]
@@ -273,6 +274,11 @@ if __name__ == "__main__":
         # Remove uninformative tags before doing analysis
         data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE"])]
 
+        acc = accuracy_score(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist())
+
+        accuracies.append(acc)
+
+
         # Age filter before analysis
         if args.age:
             data_crf = data_crf[data_crf.age_months.isin(AGE_MONTHS_GROUPS[args.age])]
@@ -309,8 +315,7 @@ if __name__ == "__main__":
     print(f"KL Divergence: {kl_divergence:.3f}")
     plt.title(f"Frequencies in Ground-truth vs. Predicted data. | KL Divergence: {kl_divergence:.3f} | Age: {args.age} months")
 
-    train_per = pd.Series(logger, name="acc_over_train_percentage")
-
-    print("Average accuracy over all splits: ", np.average(list(logger.values())))
+    print("mean accuracy over all splits: ", np.average(accuracies))
+    print("std accuracy over all splits: ", np.std(accuracies))
 
     plt.show()
