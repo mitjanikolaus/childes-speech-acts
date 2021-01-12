@@ -15,7 +15,7 @@ import pandas as pd
 
 import seaborn as sns
 
-from preprocess import SPEECH_ACT
+from preprocess import SPEECH_ACT, CHILD
 
 # TODO: set to reasonable value
 MAX_AGE_OF_ACQUISITION = MAX_AGE
@@ -44,8 +44,8 @@ if __name__ == "__main__":
 
     # Calculate overall adult speech act frequencies
     data = pd.read_pickle("data/new_england_preprocessed.p")
-    data_adults = data[data["speaker"] != "CHI"]
-    data_children = data[data["speaker"] == "CHI"]
+    data_adults = data[data["speaker"] != CHILD]
+    data_children = data[data["speaker"] == CHILD]
 
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
     frequencies_children = calculate_frequencies(data_children[SPEECH_ACT])
