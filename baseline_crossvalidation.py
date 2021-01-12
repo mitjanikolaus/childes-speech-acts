@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import ensemble, svm
 import pycrfsuite
+from sklearn.model_selection import KFold
 
 from crf_train import (
     add_feature_columns,
@@ -39,6 +40,12 @@ def argparser():
         help="which algorithm to use for baseline: SVM (classifier ou linear classifier), RandomForest(100 trees)",
     )
     argparser.add_argument(
+        "--num-splits",
+        type=int,
+        default=5,
+        help="number of splits to perform crossvalidation over",
+    )
+    argparser.add_argument(
         "--match-age",
         type=int,
         nargs="+",
@@ -52,12 +59,6 @@ def argparser():
         type=int,
         default=5,
         help="number of minimum occurrences for word to appear in features",
-    )
-    argparser.add_argument(
-        "--test-ratio",
-        type=float,
-        default=0.2,
-        help="Ratio of dataset to be used to testing",
     )
     argparser.add_argument(
         "--use-bi-grams",
@@ -212,88 +213,108 @@ if __name__ == "__main__":
         use_pos=args.use_pos,
     )
 
-    data_train, data_test = make_train_test_splits(data, args.test_ratio)
+    accuracies = []
 
-    print("### Creating features:")
-    feature_vocabs = generate_features_vocabs(
-        data_train,
-        args.nb_occurrences,
-        args.use_bi_grams,
-        args.use_action,
-        args.use_repetitions,
-        args.use_pos,
-        bin_cut=number_segments_length_feature,
-    )
+    # Split data
+    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
 
-    # creating features set for train
-    X = data_train.apply(
-        lambda x: get_baseline_features_from_row(
-            feature_vocabs,
-            x.tokens,
-            x["speaker"],
-            x["prev_speaker"],
-            x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
-            repetitions=None
-            if not args.use_repetitions
-            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos,
-        ),
-        axis=1,
-    )
+    file_names = data["file_id"].unique().tolist()
+    for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):
+        train_files = [file_names[i] for i in train_indices]
+        test_files = [file_names[i] for i in test_indices]
 
-    y = data_train[SPEECH_ACT].tolist()
-    weights = dict(Counter(y))
-    # ID from label - bidict
-    labels = dataset_labels(add_empty_labels=True)
-    # transforming
-    X = np.array(X.tolist())
-    y = np.array([labels[lab] for lab in y])  # to ID
-    weights = {
-        labels[lab]: v / len(y) for lab, v in weights.items()
-    }  # update weights as proportion, ID as labels
-    model = baseline_model(args.model, weights, True)  # Taking imbalance into account
-    model.fit(X, y)
-    # dump(mdl, os.path.join(name, 'baseline.joblib'))
+        data_train = data[data["file_id"].isin(train_files)]
+        data_test = data[data["file_id"].isin(test_files)]
 
-    X_test = data_test.apply(
-        lambda x: get_baseline_features_from_row(
-            feature_vocabs,
-            x.tokens,
-            x["speaker"],
-            x["prev_speaker"],
-            x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
-            repetitions=None
-            if not args.use_repetitions
-            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos,
-        ),
-        axis=1,
-    )
+        print(
+            f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
+        )
 
-    # transforming
-    X_test = np.array(X_test.tolist())
+        print("### Creating features:")
+        feature_vocabs = generate_features_vocabs(
+            data_train,
+            args.nb_occurrences,
+            args.use_bi_grams,
+            args.use_action,
+            args.use_repetitions,
+            args.use_pos,
+            bin_cut=number_segments_length_feature,
+        )
 
-    y_pred = [labels.inverse[x] for x in model.predict(X_test)]
+        # creating features set for train
+        X = data_train.apply(
+            lambda x: get_baseline_features_from_row(
+                feature_vocabs,
+                x.tokens,
+                x["speaker"],
+                x["prev_speaker"],
+                x.turn_length,
+                use_bi_grams=args.use_bi_grams,
+                action_tokens=None if not args.use_action else x.action_tokens,
+                repetitions=None
+                if not args.use_repetitions
+                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                past_tokens=None if not args.use_past else x.past,
+                pastact_tokens=None if not args.use_past_actions else x.past_act,
+                pos_tags=None if not args.use_pos else x.pos,
+            ),
+            axis=1,
+        )
 
-    # y_pred = baseline_predict(bs_model, X, labels, mode=args.prediction_mode)
-    data_test["y_pred"] = y_pred
-    data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
-    data_bs = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
+        y = data_train[SPEECH_ACT].tolist()
+        weights = dict(Counter(y))
+        # ID from label - bidict
+        labels = dataset_labels(add_empty_labels=True)
+        # transforming
+        X = np.array(X.tolist())
+        y = np.array([labels[lab] for lab in y])  # to ID
+        weights = {
+            labels[lab]: v / len(y) for lab, v in weights.items()
+        }  # update weights as proportion, ID as labels
+        model = baseline_model(args.model, weights, True)  # Taking imbalance into account
+        model.fit(X, y)
+        # dump(mdl, os.path.join(name, 'baseline.joblib'))
 
-    report, _, _, _ = bio_classification_report(
-        data_bs[SPEECH_ACT].tolist(), data_bs["y_pred"].tolist()
-    )
+        X_test = data_test.apply(
+            lambda x: get_baseline_features_from_row(
+                feature_vocabs,
+                x.tokens,
+                x["speaker"],
+                x["prev_speaker"],
+                x.turn_length,
+                use_bi_grams=args.use_bi_grams,
+                action_tokens=None if not args.use_action else x.action_tokens,
+                repetitions=None
+                if not args.use_repetitions
+                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                past_tokens=None if not args.use_past else x.past,
+                pastact_tokens=None if not args.use_past_actions else x.past_act,
+                pos_tags=None if not args.use_pos else x.pos,
+            ),
+            axis=1,
+        )
 
-    print(report.T)
-    path = os.path.join("results","baseline")
-    os.makedirs(path, exist_ok=True)
-    pickle.dump(report.T, open(os.path.join(path, f"classification_scores_{args.model}.p"), "wb"))
+        # transforming
+        X_test = np.array(X_test.tolist())
+
+        y_pred = [labels.inverse[x] for x in model.predict(X_test)]
+
+        # y_pred = baseline_predict(bs_model, X, labels, mode=args.prediction_mode)
+        data_test["y_pred"] = y_pred
+        data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
+        data_bs = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
+
+        report, _, acc, _ = bio_classification_report(
+            data_bs[SPEECH_ACT].tolist(), data_bs["y_pred"].tolist()
+        )
+
+        accuracies.append(acc)
+
+        path = os.path.join("results", "baseline")
+        os.makedirs(path, exist_ok=True)
+        pickle.dump(report.T, open(os.path.join(path, f"classification_scores_{args.model}.p"), "wb"))
+
+    print("Mean acc: ", np.mean(accuracies))
+    print("std acc: ", np.std(accuracies))
+
 
