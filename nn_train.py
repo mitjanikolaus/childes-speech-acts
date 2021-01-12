@@ -24,15 +24,6 @@ MODEL_LSTM = "lstm"
 
 VAL_SPLIT_SIZE = .1
 
-def detach_hidden(h):
-    """Detach hidden states from their history."""
-
-    if isinstance(h, torch.Tensor):
-        return h.detach()
-    else:
-        return tuple(detach_hidden(v) for v in h)
-
-
 def prepare_data(data, vocab, label_vocab):
     # Prepend speaker tokens
     data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
