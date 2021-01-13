@@ -38,8 +38,6 @@ class SpeechActLSTM(nn.Module):
         self.n_layers_words_lstm = n_layers_words_lstm
 
     def forward(self, input, targets):
-        # TODO use targets to train using teacher forcing?
-
         sequence_lengths = [len(i) for i in input]
         padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 
@@ -111,6 +109,8 @@ class SpeechActLSTM(nn.Module):
 
 class SpeechActDistilBERT(torch.nn.Module):
 
+    criterion = torch.nn.CrossEntropyLoss()
+
     def __init__(self, num_classes, dropout, finetune_bert=True):
         N_UNITS_BERT_OUT = 768
 
@@ -118,7 +118,7 @@ class SpeechActDistilBERT(torch.nn.Module):
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.pre_classifier = torch.nn.Linear(N_UNITS_BERT_OUT, N_UNITS_BERT_OUT)
         self.dropout = torch.nn.Dropout(dropout)
-        # self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT*(1+context_length), num_classes)
+        self.classifier = torch.nn.Linear(N_UNITS_BERT_OUT, num_classes)
 
         if not finetune_bert:
             for param in self.bert.parameters():
@@ -132,34 +132,42 @@ class SpeechActDistilBERT(torch.nn.Module):
             ]
         ).to(device)
 
-    def forward(self, input: Tensor, context: Tensor, sequence_lengths, sequence_lengths_context):
+    def forward(self, input, targets):
         # The input should be padded, so all samples should have the same length
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
 
-        max_len = input[0].size(0)
+        max_len = max(sequence_lengths)
         attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
-        output_1 = self.bert(input_ids=input, attention_mask=attention_masks)
-        hidden_state = output_1[0]
+        output = self.bert(input_ids=padded_inputs, attention_mask=attention_masks)
+        hidden_state = output.last_hidden_state
         pooler = hidden_state[:, 0]
         pooler = self.pre_classifier(pooler)
         pooler = torch.nn.ReLU()(pooler)
 
-        outputs = self.dropout(pooler)
+        out = self.dropout(pooler)
 
-        for context_utt, length in zip(context, sequence_lengths_context):
-            context_utt = context_utt.to(device)
-            length = length.to(device)
-            
-            max_len = context_utt[0].size(0)
-            attention_masks = self.gen_attention_masks(length, max_len)
-            output_1 = self.bert(input_ids=context_utt, attention_mask=attention_masks)
-            hidden_state = output_1[0]
-            pooler = hidden_state[:, 0]
-            pooler = self.pre_classifier(pooler)
-            pooler = torch.nn.ReLU()(pooler)
-            outputs_context = self.dropout(pooler)
+        out = self.classifier(out)
 
-            # Append output
-            outputs = torch.cat([outputs, outputs_context], dim=1)
+        loss = self.criterion(out, targets)
+        return loss
 
-        output = self.classifier(outputs)
-        return output
+    def forward_decode(self,  input):
+        # The input should be padded, so all samples should have the same length
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
+
+        max_len = max(sequence_lengths)
+        attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
+        output = self.bert(input_ids=padded_inputs, attention_mask=attention_masks)
+        hidden_state = output.last_hidden_state
+        pooler = hidden_state[:, 0]
+        pooler = self.pre_classifier(pooler)
+        pooler = torch.nn.ReLU()(pooler)
+
+        out = self.dropout(pooler)
+
+        out = self.classifier(out)
+
+        predicted_labels = torch.argmax(out, dim=1)
+        return predicted_labels

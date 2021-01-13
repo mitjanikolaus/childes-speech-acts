@@ -135,7 +135,6 @@ def train(args):
                 loss = model(input_samples, targets)
 
                 # Calculate loss
-                # loss = criterion(output, targets)
                 total_loss += loss.item()
                 loss.backward()
 
@@ -181,12 +180,8 @@ def train(args):
                     # Perform forward pass of the model
                     predicted_labels = model.forward_decode(input_samples)
                     predicted_labels = torch.tensor(predicted_labels).to(device)
-                    # Calculate loss
-                    # loss = criterion(output, targets)
-                    # total_loss += loss.item()
 
                     # Compare predicted labels to ground truth
-                    # predicted_labels = torch.argmax(output, dim=1)
                     num_correct += int(torch.sum(predicted_labels == targets))
                     num_samples += len(input_samples)
 
@@ -298,7 +293,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
-    # TODO fix: works only with batch size one at the moment
+
+    # TODO fix: works only with batch size one at the moment (equalling 1 transcript)
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
