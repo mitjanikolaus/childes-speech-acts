@@ -9,11 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import (
     classification_report,
-    confusion_matrix,
     cohen_kappa_score,
     accuracy_score,
 )
-from sklearn.model_selection import train_test_split
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
@@ -23,8 +21,12 @@ from crf_train import (
     crf_predict,
     bio_classification_report,
 )
-from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits, SPEECH_ACT_DESCRIPTIONS
+from utils import (
+    SPEECH_ACT_UNINTELLIGIBLE,
+    SPEECH_ACT_NO_FUNCTION,
+    make_train_test_splits,
+    SPEECH_ACT_DESCRIPTIONS,
+)
 
 
 def load_training_args(args):
@@ -207,7 +209,9 @@ if __name__ == "__main__":
     report_path = model_dir + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
     plot_path = model_dir + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
     classification_scores_path = model_dir + os.path.sep + "classification_scores.p"
-    classification_scores_adult_path = model_dir + os.path.sep + "classification_scores_adult.p"
+    classification_scores_adult_path = (
+        model_dir + os.path.sep + "classification_scores_adult.p"
+    )
 
     # Loading data
     data = pd.read_pickle(args.data)
@@ -266,7 +270,11 @@ if __name__ == "__main__":
         lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
     )
     # Remove uninformative tags before doing analysis
-    data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION])]
+    data_crf = data_test[
+        ~data_test[SPEECH_ACT].isin(
+            ["NAT", "NEE", SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION]
+        )
+    ]
     # reports
     report, confusion_matrix, acc, cks = bio_classification_report(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
@@ -293,35 +301,42 @@ if __name__ == "__main__":
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
 
-
     data_crf_adult = data_crf[data_crf.speaker == ADULT]
 
-    cr_adult = classification_report(data_crf_adult[SPEECH_ACT].tolist(), data_crf_adult["y_pred"].tolist(), digits=3, output_dict=True)
+    cr_adult = classification_report(
+        data_crf_adult[SPEECH_ACT].tolist(),
+        data_crf_adult["y_pred"].tolist(),
+        digits=3,
+        output_dict=True,
+    )
     pickle.dump(pd.DataFrame(cr_adult).T, open(classification_scores_adult_path, "wb"))
-
 
     confusion_matrix = confusion_matrix.T
     for label in np.unique(data_test[SPEECH_ACT]):
-        confusions = confusion_matrix[confusion_matrix[label] > .1].index.values
+        confusions = confusion_matrix[confusion_matrix[label] > 0.05].index.values
         confusions = np.delete(confusions, np.where(confusions == label))
 
-        label_category = SPEECH_ACT_DESCRIPTIONS.loc[label]["Category"]
-        genuine_confusions = []
-        for confusion in confusions:
-            confused_label_category = SPEECH_ACT_DESCRIPTIONS.loc[confusion]["Category"]
-            if label_category == confused_label_category:
-                genuine_confusions.append(confusion)
+        # label_category = SPEECH_ACT_DESCRIPTIONS.loc[label]["Category"]
+        # genuine_confusions = []
+        # for confusion in confusions:
+        #     confused_label_category = SPEECH_ACT_DESCRIPTIONS.loc[confusion]["Category"]
+        #     if label_category == confused_label_category:
+        #         genuine_confusions.append(confusion)
 
-        if len(genuine_confusions) > 0:
-            print(f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:")
-            for confusion in genuine_confusions:
+        if len(confusions) > 0:
+            print(
+                f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:"
+            )
+            for confusion in confusions:
                 print(confusion, SPEECH_ACT_DESCRIPTIONS.Description[confusion])
             print("")
 
     if args.col_ages is not None:
         plot_testing(data_test, plot_path, args.col_ages)
 
-    report = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3)
+    report = classification_report(
+        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3
+    )
     print(report)
 
     # Write excel with all reports
