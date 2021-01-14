@@ -113,6 +113,8 @@ def reproduce_speech_act_distribution(data):
         results_crf = calculate_freq_distributions(data, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data")
 
         results = pd.DataFrame(results_snow + results_crf)
+        results.sort_values(by=['speech_act'], inplace=True)
+
         sns.barplot(ax=axes[i], x="speech_act", hue="source", y="frequency", data=results)
 
         # Move title into figure
@@ -123,7 +125,10 @@ def reproduce_speech_act_distribution(data):
 
         axes[i].set_xlabel("")
         axes[i].set_ylabel("Frequency")
-        axes[i].legend_.remove()
+        if i == 0:
+            axes[i].legend(bbox_to_anchor=(0.6, 0.3))
+        else:
+            axes[i].legend_.remove()
 
         if age > 14:
             axes[i].set_ylim(0, 0.3)
