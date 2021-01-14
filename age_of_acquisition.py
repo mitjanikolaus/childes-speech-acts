@@ -67,28 +67,30 @@ def get_fraction_contingent_responses(ages, observed_speech_acts):
     return pd.DataFrame(fraction_contingent_responses)
 
 
-def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts):
+def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts, column_name_speech_act=SPEECH_ACT,
+                                       add_extra_datapoints=True):
     fraction_acquired_speech_act = []
 
     print("Processing speech acts...")
     for speech_act in observed_speech_acts:
 
-        # Add start: at 6 months children don't produce any speech act
-        fraction_acquired_speech_act.append(
-            {
-                "speech_act": speech_act,
-                "month": MIN_AGE,
-                "fraction": 0.0,
-            }
-        )
-        # Add end: at 18 years children know all speech acts
-        fraction_acquired_speech_act.append(
-            {
-                "speech_act": speech_act,
-                "month": MAX_AGE,
-                "fraction": 1.0,
-            }
-        )
+        if add_extra_datapoints:
+            # Add start: at 6 months children don't produce any speech act
+            fraction_acquired_speech_act.append(
+                {
+                    "speech_act": speech_act,
+                    "month": MIN_AGE,
+                    "fraction": 0.0,
+                }
+            )
+            # Add end: at 18 years children know all speech acts
+            fraction_acquired_speech_act.append(
+                {
+                    "speech_act": speech_act,
+                    "month": MAX_AGE,
+                    "fraction": 1.0,
+                }
+            )
 
         prev_fraction = 0.0
         for month in ages:
@@ -105,7 +107,7 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
                 if len(speech_acts_child) > MIN_NUM_UTTERANCES:
                     n_children += 1
                     target_speech_acts_child = speech_acts_child[
-                        speech_acts_child[SPEECH_ACT] == speech_act
+                        speech_acts_child[column_name_speech_act] == speech_act
                     ]
                     if len(target_speech_acts_child) >= THRESHOLD_ACQUIRED:
                         n_acquired += 1

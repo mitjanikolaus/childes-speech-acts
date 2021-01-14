@@ -8,6 +8,7 @@ import pandas as pd
 
 import seaborn as sns
 
+from age_of_acquisition import get_fraction_producing_speech_acts
 from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
@@ -106,7 +107,7 @@ def calculate_freq_distributions(data, column_name_speech_act, speech_acts_analy
 def reproduce_speech_act_distribution(data):
     speech_acts_analyzed = ["YY", "ST", "PR", "MK", "SA", "RT", "RP", "RD", "AA", "AD", "AC", "QN", "YQ", "CL", "SI"]
 
-    fig, axes = plt.subplots(3, 1, sharex="all") # sharey="all"
+    fig, axes = plt.subplots(3, 1, sharex="all")
 
     for i, age in enumerate(AGES):
         results_snow = calculate_freq_distributions(data, SPEECH_ACT, speech_acts_analyzed, age, "Data from Snow et. al. (1996)")
@@ -143,6 +144,51 @@ def reproduce_speech_act_distribution(data):
     plt.show()
 
 
+def reproduce_speech_act_age_of_acquisition(data):
+    # observed_speech_acts = data[SPEECH_ACT].unique()
+    # observed_speech_acts = ["ST", "MK", "SA", "RT"]
+    observed_speech_acts = ["ST", "PR", "MK", "SA", "RT", "RP", "RD", "AA", "AD", "AC", "QN", "YQ", "CL", "SI"]
+
+    data_children = data[data.speaker == CHILD]
+
+    fraction_producing_speech_act_snow = get_fraction_producing_speech_acts(
+        data_children, AGES, observed_speech_acts, SPEECH_ACT, add_extra_datapoints=False
+    )
+    fraction_producing_speech_act_snow["source"] = "Data from Snow et. al. (1996)"
+
+    fraction_producing_speech_act_crf = get_fraction_producing_speech_acts(
+        data_children, AGES, observed_speech_acts, "y_pred", add_extra_datapoints=False
+    )
+    fraction_producing_speech_act_crf["source"] = "Automatically Annotated Data"
+
+    fraction_data = fraction_producing_speech_act_snow.append(fraction_producing_speech_act_crf)
+
+    # sns.set(rc={'figure.figsize': (10, 50)})
+
+    g = sns.lmplot(
+        data=fraction_data,
+        x="month",
+        y="fraction",
+        hue="source",
+        row="speech_act",
+        logistic=True,
+        ci=None,
+        legend=False,
+    )
+    for speech_act, ax in zip(observed_speech_acts, g.axes):
+        ax[0].set_title(label=speech_act, x=-.08, y=.2)
+        ax[0].set_ylabel("")
+        ax[0].set_yticks([])
+
+
+    middle_graph = g.axes[round(len(observed_speech_acts)/2)][0]
+    middle_graph.set_ylabel("Fraction of children producing speech_act at least twice")
+    middle_graph.yaxis.set_label_coords(-0.12, 0)
+
+    plt.subplots_adjust(left=0.135)
+    plt.show()
+
+
 if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
@@ -150,6 +196,8 @@ if __name__ == "__main__":
 
     # map ages to corresponding bins
     data["age_months"] = data["age_months"].apply(age_bin)
+
+    reproduce_speech_act_age_of_acquisition(data)
 
     reproduce_speech_act_distribution(data)
 
