@@ -17,7 +17,6 @@ SOURCE_SNOW = "Data from Snow et. al. (1996)"
 SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
 SOURCE_AUTOMATIC_CHILDES = "Automatically Annotated Data (English CHILDES)"
 ORDER = [SOURCE_SNOW, SOURCE_AUTOMATIC_NEW_ENGLAND, SOURCE_AUTOMATIC_CHILDES]
-# PALETTE = {SOURCE_SNOW: "C0", SOURCE_AUTOMATIC_NEW_ENGLAND: "C1", SOURCE_AUTOMATIC_CHILDES: "C2"}
 
 MAX_NUM_SPEECH_ACT_TYPES = 25
 
@@ -92,7 +91,7 @@ def reproduce_num_speech_acts(data, data_whole_childes):
     for i, age in enumerate(AGES):
         results_age = results[results.age == age]
 
-        sns.barplot(ax=axes[i], x="num_types", hue="source", y="frac_children", data=results_age)
+        sns.barplot(ax=axes[i], x="num_types", hue="source", y="frac_children", data=results_age, hue_order=ORDER)
 
         if i == 0:
             axes[i].legend(loc="upper right", bbox_to_anchor=(1, 0.8))
@@ -292,6 +291,6 @@ if __name__ == "__main__":
 
     # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    reproduce_speech_act_distribution(data, data_whole_childes)
+    # reproduce_speech_act_distribution(data, data_whole_childes)
 
-    # reproduce_num_speech_acts(data, data_whole_childes)
+    reproduce_num_speech_acts(data, data_whole_childes)
