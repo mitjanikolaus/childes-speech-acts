@@ -14,12 +14,11 @@ from sklearn.metrics import (
     confusion_matrix,
     cohen_kappa_score,
 )
-from sklearn.model_selection import train_test_split
+import numpy as np
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
-from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits
+from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, make_train_test_splits
 
 
 def argparser():
@@ -28,14 +27,6 @@ def argparser():
     )
     # Data files
     argparser.add_argument("data", type=str, help="file listing train dialogs")
-    # Operations on data
-    argparser.add_argument(
-        "--match-age",
-        type=int,
-        nargs="+",
-        default=None,
-        help="ages to match data to - for split analysis",
-    )
     # parameters for training:
     argparser.add_argument(
         "--nb-occurrences",
@@ -49,6 +40,12 @@ def argparser():
         type=float,
         default=0.2,
         help="Ratio of dataset to be used to testing",
+    )
+    argparser.add_argument(
+        "--cut-train-set",
+        type=float,
+        default=1.0,
+        help="Reduce number of examples in the training set to the given fraction",
     )
     argparser.add_argument(
         "--use-bi-grams",
@@ -100,7 +97,6 @@ def argparser():
 #### Features functions
 def add_feature_columns(
     p: pd.DataFrame,
-    match_age: Union[str, list] = None,
     use_action: bool = False,
     use_past: bool = False,
     use_pastact: bool = False,
@@ -126,13 +122,6 @@ def add_feature_columns(
     if use_action:
         p["action"].fillna("", inplace=True)
         p["action_tokens"] = p.action.apply(lambda x: x.lower().split())
-
-    # matching age with theoretical age from the study
-    if "age_months" in p.columns and match_age is not None:
-        match_age = match_age if isinstance(match_age, list) else [match_age]
-        p["age_months"] = p.age_months.apply(
-            lambda age: min(match_age, key=lambda x: abs(x - age))
-        )
 
     # repetition features
     if check_repetition or use_past or use_pastact:
@@ -512,39 +501,41 @@ def bio_classification_report(y_true, y_pred):
         cks,
     )
 
-
-#### MAIN
-if __name__ == "__main__":
-    args = argparser()
-    print(args)
-
+def train(data_file, use_bi_grams=False, use_action=False, use_repetitions=False, use_past=False, use_past_actions=False, use_pos=False, test_ratio=0.2, cut_train_set=1.0, nb_occurrences=5, verbose=False):
     # Definitions
     number_segments_length_feature = 10
 
     print("### Loading data:".upper())
 
-    data = pd.read_pickle(args.data)
+    data = pd.read_pickle(data_file)
 
     data = add_feature_columns(
         data,
-        use_action=args.use_action,
-        match_age=args.match_age,
-        check_repetition=args.use_repetitions,
-        use_past=args.use_past,
-        use_pastact=args.use_past_actions,
-        use_pos=args.use_pos,
+        use_action=use_action,
+        use_pastact=use_past_actions,
+        check_repetition=use_repetitions,
+        use_past=use_past,
+        use_pos=use_pos,
     )
 
-    data_train, data_test = make_train_test_splits(data, args.test_ratio)
+    data_train, data_test = make_train_test_splits(data, test_ratio)
+
+    if cut_train_set < 1.0:
+        train_files = data_train['file_id'].unique().tolist()
+        train_subset = np.random.choice(
+            len(train_files), size=int(len(train_files) * cut_train_set), replace=False
+        )
+        train_files = [train_files[x] for x in train_subset]
+        data_train = data_train[data_train['file_id'].isin(train_files)]
 
     print("### Creating features:")
     feature_vocabs = generate_features_vocabs(
         data_train,
-        args.nb_occurrences,
-        args.use_bi_grams,
-        args.use_action,
-        args.use_repetitions,
-        args.use_pos,
+        nb_occurrences,
+        use_bi_grams,
+        use_action,
+        use_repetitions,
+        use_pos,
         bin_cut=number_segments_length_feature,
     )
 
@@ -556,14 +547,14 @@ if __name__ == "__main__":
             x["speaker"],
             x["prev_speaker"],
             x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
+            use_bi_grams=use_bi_grams,
+            action_tokens=None if not use_action else x.action_tokens,
             repetitions=None
-            if not args.use_repetitions
+            if not use_repetitions
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos,
+            past_tokens=None if not use_past else x.past,
+            pastact_tokens=None if not use_past_actions else x.past_act,
+            pos_tags=None if not use_pos else x.pos,
         ),
         axis=1,
     )
@@ -581,7 +572,7 @@ if __name__ == "__main__":
     grouped_train = sklearn.utils.shuffle(grouped_train)
 
     print("\n### Training starts.".upper())
-    trainer = pycrfsuite.Trainer(verbose=args.verbose)
+    trainer = pycrfsuite.Trainer(verbose=verbose)
     # Add data
     for idx, file_data in grouped_train.iterrows():
         trainer.append(file_data["features"], file_data[SPEECH_ACT])  # X_train, y_train
@@ -605,17 +596,12 @@ if __name__ == "__main__":
     trainer.train(os.path.join(checkpoint_path, "model.pycrfsuite"))
 
     # plotting training curves
-    if args.verbose:
+    if verbose:
         plot_training(trainer, checkpoint_path)
 
     # dumping features
     with open(os.path.join(checkpoint_path, "feature_vocabs.p"), "wb") as pickle_file:
         pickle.dump(feature_vocabs, pickle_file)
-
-    # dumping metadata
-    with open(os.path.join(checkpoint_path, "metadata.txt"), "w") as meta_file:
-        for arg in vars(args):
-            meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
 
     # Calculate test accuracy
     tagger = pycrfsuite.Tagger()
@@ -628,14 +614,14 @@ if __name__ == "__main__":
             x["speaker"],
             x["prev_speaker"],
             x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
+            use_bi_grams=use_bi_grams,
+            action_tokens=None if not use_action else x.action_tokens,
             repetitions=None
-            if not args.use_repetitions
+            if not use_repetitions
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos,
+            past_tokens=None if not use_past else x.past,
+            pastact_tokens=None if not use_past_actions else x.past_act,
+            pos_tags=None if not use_pos else x.pos,
         ),
         axis=1,
     )
@@ -663,6 +649,15 @@ if __name__ == "__main__":
         )
     ]
 
-    report, mat, acc, cks = bio_classification_report(
+    _, _, acc, _ = bio_classification_report(
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
     )
+
+    return acc, len(data_train)
+
+#### MAIN
+if __name__ == "__main__":
+    args = argparser()
+    print(args)
+    train(args.data, args.use_bi_grams, args.use_action, args.use_repetitions, args.use_past,
+          args.use_past_actions, args.use_pos, args.test_ratio, args.cut_train_set, args.nb_occurrences, args.verbose)
