@@ -89,7 +89,7 @@ def load_utts():
                                 {
                                     "file_id": transcript["transcript_id"],
                                     "child_id": utt["target_child_id"],
-                                    "child_age": round(transcript["target_child_age"]),
+                                    "age_months": round(transcript["target_child_age"]),
                                     "tokens": tokenized_utterance,
                                     "pos": utt["part_of_speech"],
                                     "speaker": utt["speaker_role"],

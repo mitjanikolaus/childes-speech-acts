@@ -2,8 +2,6 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-import numpy as np
-
 import pandas as pd
 
 import seaborn as sns
@@ -13,6 +11,7 @@ from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
 AGES = [14, 20, 32]
+
 
 def calculate_num_speech_act_types(data, column_name_speech_act):
     # number of speech act types at different ages
@@ -50,6 +49,7 @@ def calculate_num_speech_act_types(data, column_name_speech_act):
 
     return pd.DataFrame(results)
 
+
 def reproduce_num_speech_acts(data):
     results_snow = calculate_num_speech_act_types(data, SPEECH_ACT)
     results_crf = calculate_num_speech_act_types(data, "y_pred")
@@ -58,8 +58,8 @@ def reproduce_num_speech_acts(data):
     sns.barplot(ax=ax1, x="num_types", hue="age", y="num_children", data=results_snow)
 
     # Move title into figure
-    plt.rcParams['axes.titley'] = 1.0
-    plt.rcParams['axes.titlepad'] = -14
+    plt.rcParams["axes.titley"] = 1.0
+    plt.rcParams["axes.titlepad"] = -14
 
     ax1.set_title("Data from Snow et. al. (1996)")
 
@@ -69,8 +69,8 @@ def reproduce_num_speech_acts(data):
     sns.barplot(ax=ax2, x="num_types", hue="age", y="num_children", data=results_crf)
 
     # Move title into figure
-    plt.rcParams['axes.titley'] = 1.0
-    plt.rcParams['axes.titlepad'] = -14
+    plt.rcParams["axes.titley"] = 1.0
+    plt.rcParams["axes.titlepad"] = -14
 
     ax2.set_title("Automatically Annotated Data")
     ax2.legend_.remove()
@@ -79,10 +79,10 @@ def reproduce_num_speech_acts(data):
     plt.tight_layout()
     plt.show()
 
-def calculate_freq_distributions(data, column_name_speech_act, speech_acts_analyzed, age, source):
-    # map ages to corresponding bins
-    data["age_months"] = data["age_months"].apply(age_bin)
 
+def calculate_freq_distributions(
+    data, column_name_speech_act, speech_acts_analyzed, age, source
+):
     # number of speech act types at different ages
     data_age = data[data["age_months"] == age]
 
@@ -95,39 +95,66 @@ def calculate_freq_distributions(data, column_name_speech_act, speech_acts_analy
 
     results = []
     for s, f in frequencies.items():
-        results.append({
-            "source": source,
-            "speech_act": s,
-            "frequency": f,
-        })
+        results.append(
+            {
+                "source": source,
+                "speech_act": s,
+                "frequency": f,
+            }
+        )
 
     return results
 
 
-def reproduce_speech_act_distribution(data):
-    speech_acts_analyzed = ["YY", "ST", "PR", "MK", "SA", "RT", "RP", "RD", "AA", "AD", "AC", "QN", "YQ", "CL", "SI"]
+def reproduce_speech_act_distribution(data, data_whole_childes):
+    speech_acts_analyzed = [
+        "YY",
+        "ST",
+        "PR",
+        "MK",
+        "SA",
+        "RT",
+        "RP",
+        "RD",
+        "AA",
+        "AD",
+        "AC",
+        "QN",
+        "YQ",
+        "CL",
+        "SI",
+    ]
 
     fig, axes = plt.subplots(3, 1, sharex="all")
 
     for i, age in enumerate(AGES):
-        results_snow = calculate_freq_distributions(data, SPEECH_ACT, speech_acts_analyzed, age, "Data from Snow et. al. (1996)")
-        results_crf = calculate_freq_distributions(data, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data")
+        results_snow = calculate_freq_distributions(
+            data, SPEECH_ACT, speech_acts_analyzed, age, "Data from Snow et. al. (1996)"
+        )
+        results_crf = calculate_freq_distributions(
+            data, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data (New England)"
+        )
+        results_childes = calculate_freq_distributions(
+            data_whole_childes, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data (English CHILDES)"
+        )
 
-        results = pd.DataFrame(results_snow + results_crf)
-        results.sort_values(by=['speech_act'], inplace=True)
+        results = pd.DataFrame(results_snow + results_crf + results_childes)
+        results.sort_values(by=["speech_act"], inplace=True)
 
-        sns.barplot(ax=axes[i], x="speech_act", hue="source", y="frequency", data=results)
+        sns.barplot(
+            ax=axes[i], x="speech_act", hue="source", y="frequency", data=results
+        )
 
         # Move title into figure
-        plt.rcParams['axes.titley'] = 1.0
-        plt.rcParams['axes.titlepad'] = -14
+        plt.rcParams["axes.titley"] = 1.0
+        plt.rcParams["axes.titlepad"] = -14
 
         axes[i].set_title(f"Age: {age} months")
 
         axes[i].set_xlabel("")
         axes[i].set_ylabel("Frequency")
         if i == 0:
-            axes[i].legend(bbox_to_anchor=(0.6, 0.3))
+            axes[i].legend(bbox_to_anchor=(0.7, 0.2))
         else:
             axes[i].legend_.remove()
 
@@ -144,24 +171,55 @@ def reproduce_speech_act_distribution(data):
     plt.show()
 
 
-def reproduce_speech_act_age_of_acquisition(data):
+def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     # observed_speech_acts = data[SPEECH_ACT].unique()
     # observed_speech_acts = ["ST", "MK", "SA", "RT"]
-    observed_speech_acts = ["ST", "PR", "MK", "SA", "RT", "RP", "RD", "AA", "AD", "AC", "QN", "YQ", "CL", "SI"]
+    observed_speech_acts = [
+        "ST",
+        "PR",
+        "MK",
+        "SA",
+        "RT",
+        "RP",
+        "RD",
+        "AA",
+        "AD",
+        "AC",
+        "QN",
+        "YQ",
+        "CL",
+        "SI",
+    ]
 
     data_children = data[data.speaker == CHILD]
+    data_children_childes = data_whole_childes[data_whole_childes.speaker == CHILD]
 
     fraction_producing_speech_act_snow = get_fraction_producing_speech_acts(
-        data_children, AGES, observed_speech_acts, SPEECH_ACT, add_extra_datapoints=False
+        data_children,
+        AGES,
+        observed_speech_acts,
+        SPEECH_ACT,
+        add_extra_datapoints=False,
     )
     fraction_producing_speech_act_snow["source"] = "Data from Snow et. al. (1996)"
 
     fraction_producing_speech_act_crf = get_fraction_producing_speech_acts(
         data_children, AGES, observed_speech_acts, "y_pred", add_extra_datapoints=False
     )
-    fraction_producing_speech_act_crf["source"] = "Automatically Annotated Data"
+    fraction_producing_speech_act_crf["source"] = "Automatically Annotated Data (New England Corpus)"
 
-    fraction_data = fraction_producing_speech_act_snow.append(fraction_producing_speech_act_crf)
+    fraction_producing_speech_act_childes = get_fraction_producing_speech_acts(
+        data_children_childes,
+        AGES,
+        observed_speech_acts,
+        "y_pred",
+        add_extra_datapoints=False,
+    )
+    fraction_producing_speech_act_childes["source"] = "Automatically Annotated Data (CHILDES)"
+
+    fraction_data = fraction_producing_speech_act_snow.append(
+        fraction_producing_speech_act_crf
+    ).append(fraction_producing_speech_act_childes)
 
     # sns.set(rc={'figure.figsize': (10, 50)})
 
@@ -176,12 +234,11 @@ def reproduce_speech_act_age_of_acquisition(data):
         legend=False,
     )
     for speech_act, ax in zip(observed_speech_acts, g.axes):
-        ax[0].set_title(label=speech_act, x=-.08, y=.2)
+        ax[0].set_title(label=speech_act, x=-0.08, y=0.2)
         ax[0].set_ylabel("")
         ax[0].set_yticks([])
 
-
-    middle_graph = g.axes[round(len(observed_speech_acts)/2)][0]
+    middle_graph = g.axes[round(len(observed_speech_acts) / 2)][0]
     middle_graph.set_ylabel("Fraction of children producing speech_act at least twice")
     middle_graph.yaxis.set_label_coords(-0.12, 0)
 
@@ -197,9 +254,11 @@ if __name__ == "__main__":
     # map ages to corresponding bins
     data["age_months"] = data["age_months"].apply(age_bin)
 
-    reproduce_speech_act_age_of_acquisition(data)
+    # Load annotated data for whole CHILDES
+    data_whole_childes = pd.read_hdf("~/Data/speech_acts/data/speech_acts_chi.h5")
 
-    reproduce_speech_act_distribution(data)
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+
+    reproduce_speech_act_distribution(data, data_whole_childes)
 
     reproduce_num_speech_acts(data)
-
