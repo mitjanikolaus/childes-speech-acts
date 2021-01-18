@@ -6,13 +6,18 @@ import pandas as pd
 
 import seaborn as sns
 
-import numpy as np
 
 from age_of_acquisition import get_fraction_producing_speech_acts
-from preprocess import SPEECH_ACT, CHILD, ADULT
+from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
 AGES = [14, 20, 32]
+
+SOURCE_SNOW = "Data from Snow et. al. (1996)"
+SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
+SOURCE_AUTOMATIC_CHILDES = "Automatically Annotated Data (English CHILDES)"
+ORDER = [SOURCE_SNOW, SOURCE_AUTOMATIC_NEW_ENGLAND, SOURCE_AUTOMATIC_CHILDES]
+# PALETTE = {SOURCE_SNOW: "C0", SOURCE_AUTOMATIC_NEW_ENGLAND: "C1", SOURCE_AUTOMATIC_CHILDES: "C2"}
 
 MAX_NUM_SPEECH_ACT_TYPES = 25
 
@@ -66,15 +71,15 @@ def calculate_num_speech_act_types(data, column_name_speech_act):
 
 def reproduce_num_speech_acts(data, data_whole_childes):
     results_snow = calculate_num_speech_act_types(data, SPEECH_ACT)
-    results_snow["source"] = "Data from Snow et. al. (1996)"
+    results_snow["source"] = SOURCE_SNOW
 
     results_crf = calculate_num_speech_act_types(data, "y_pred")
-    results_crf["source"] = "Automatically Annotated Data (New England)"
+    results_crf["source"] = SOURCE_AUTOMATIC_NEW_ENGLAND
 
     results_childes = calculate_num_speech_act_types(
         data_whole_childes, "y_pred"
     )
-    results_childes["source"] = "Automatically Annotated Data (English CHILDES)"
+    results_childes["source"] = SOURCE_AUTOMATIC_CHILDES
 
     results = results_snow.append(results_crf).append(results_childes)
 
@@ -157,20 +162,20 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
 
     for i, age in enumerate(AGES):
         results_snow = calculate_freq_distributions(
-            data, SPEECH_ACT, speech_acts_analyzed, age, "Data from Snow et. al. (1996)"
+            data, SPEECH_ACT, speech_acts_analyzed, age, SOURCE_SNOW
         )
         results_crf = calculate_freq_distributions(
-            data, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data (New England)"
+            data, "y_pred", speech_acts_analyzed, age, SOURCE_AUTOMATIC_NEW_ENGLAND
         )
         results_childes = calculate_freq_distributions(
-            data_whole_childes, "y_pred", speech_acts_analyzed, age, "Automatically Annotated Data (English CHILDES)"
+            data_whole_childes, "y_pred", speech_acts_analyzed, age, SOURCE_AUTOMATIC_CHILDES
         )
 
         results = pd.DataFrame(results_snow + results_crf + results_childes)
         results.sort_values(by=["speech_act"], inplace=True)
 
         sns.barplot(
-            ax=axes[i], x="speech_act", hue="source", y="frequency", data=results
+            ax=axes[i], x="speech_act", hue="source", y="frequency", data=results, hue_order=ORDER
         )
 
         # Move title into figure
@@ -180,21 +185,18 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         axes[i].set_title(f"Age: {age} months")
 
         axes[i].set_xlabel("")
-        axes[i].set_ylabel("Frequency")
+        axes[i].set_ylabel("")
+
         if i == 0:
-            axes[i].legend(bbox_to_anchor=(0.7, 0.2))
+            axes[i].legend(loc="upper left", bbox_to_anchor=(0, 0.8))
         else:
             axes[i].legend_.remove()
 
         if age > 14:
             axes[i].set_ylim(0, 0.3)
 
-        # kl_divergence = entropy(
-        #     list(counters["pred"].values()), qk=list(counters["gold"].values())
-        # )
-        # print(f"KL Divergence: {kl_divergence:.3f}")
-
-    axes[-1].set_xlabel("Speech Act")
+    axes[1].set_ylabel("frequency")
+    axes[-1].set_xlabel("speech act")
     plt.tight_layout()
     plt.show()
 
@@ -229,12 +231,12 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         SPEECH_ACT,
         add_extra_datapoints=False,
     )
-    fraction_producing_speech_act_snow["source"] = "Data from Snow et. al. (1996)"
+    fraction_producing_speech_act_snow["source"] = SOURCE_SNOW
 
     fraction_producing_speech_act_crf = get_fraction_producing_speech_acts(
         data_children, AGES, observed_speech_acts, "y_pred", add_extra_datapoints=False
     )
-    fraction_producing_speech_act_crf["source"] = "Automatically Annotated Data (New England Corpus)"
+    fraction_producing_speech_act_crf["source"] = SOURCE_AUTOMATIC_NEW_ENGLAND
 
     fraction_producing_speech_act_childes = get_fraction_producing_speech_acts(
         data_children_childes,
@@ -243,7 +245,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         "y_pred",
         add_extra_datapoints=False,
     )
-    fraction_producing_speech_act_childes["source"] = "Automatically Annotated Data (CHILDES)"
+    fraction_producing_speech_act_childes["source"] = SOURCE_AUTOMATIC_CHILDES
 
     fraction_data = fraction_producing_speech_act_snow.append(
         fraction_producing_speech_act_crf
@@ -288,8 +290,8 @@ if __name__ == "__main__":
     # Filter out too short and too long transcripts
     data_whole_childes = data_whole_childes[data_whole_childes.file_id.isin(TRANSCRIPTS_CHILDES)]
 
-    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
     reproduce_speech_act_distribution(data, data_whole_childes)
 
-    reproduce_num_speech_acts(data, data_whole_childes)
+    # reproduce_num_speech_acts(data, data_whole_childes)
