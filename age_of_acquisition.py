@@ -194,17 +194,10 @@ if __name__ == "__main__":
         fraction_data = fraction_contingent_responses
 
     sns.set_palette(COLORS_PLOT_CATEGORICAL)
-    g = sns.lmplot(
-        data=fraction_data,
-        x="month",
-        y="fraction",
-        hue="speech_act",
-        logistic=True,
-        ci=None,
-        legend_out=True,
-        legend=False,
-    )
-    g.set(ylim=(0, 1), xlim=(min(ages) - 4, max(ages) + 12))
+
+    g = sns.FacetGrid(data=fraction_data, hue="speech_act")
+    g.set(ylim=(0, 1), xlim=(min(ages) - 4, max_age))
+    g.map(sns.regplot, "month", "fraction", truncate=False, logistic=True, ci=None)
     h, l = g.axes[0][0].get_legend_handles_labels()
     g.fig.legend(h, l, loc='upper center', ncol=8)
     plt.subplots_adjust(top=0.71, bottom=0.09, left=0.057)
