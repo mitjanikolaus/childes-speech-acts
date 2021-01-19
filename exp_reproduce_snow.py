@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import seaborn as sns
-
+from scipy.stats import spearmanr
 
 from age_of_acquisition import TARGET_PRODUCTION, calc_ages_of_acquisition
 from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
 AGES = [14, 20, 32]
-AGES_LONG = [12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42]
+AGES_LONG = [14, 18, 21, 24, 27, 30, 33, 36, 39, 42]
 
 SOURCE_SNOW = "Data from Snow et. al. (1996)"
 SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
@@ -262,6 +262,23 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     print(aoa_data)
     print(aoa_data.to_latex(float_format="%.1f", index=False))
 
+    # Calculate Spearman rank-order correlation
+    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    print("Spearman snow vs. crf: ", corr)
+    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    print("Spearman snow vs. childes: ", corr)
+    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
+    print("Spearman snow vs. childes (dense): ", corr)
+
+
+def convert_to_ranks(ages_of_acquisition):
+    indices = sorted(ages_of_acquisition.values())
+    ages_of_acquisition_rank = {}
+    for speech_act, aoa in ages_of_acquisition.items():
+        ages_of_acquisition_rank[speech_act] = indices.index(aoa)
+    return ages_of_acquisition_rank
+
+
 if __name__ == "__main__":
     # Model prediction accuracies
     print("Loading data...")
@@ -281,6 +298,6 @@ if __name__ == "__main__":
 
     reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    reproduce_speech_act_distribution(data, data_whole_childes)
-
-    reproduce_num_speech_acts(data, data_whole_childes)
+    # reproduce_speech_act_distribution(data, data_whole_childes)
+    #
+    # reproduce_num_speech_acts(data, data_whole_childes)
