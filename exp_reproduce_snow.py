@@ -12,6 +12,7 @@ from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
 AGES = [14, 20, 32]
+AGES_LONG = [12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42]
 
 SOURCE_SNOW = "Data from Snow et. al. (1996)"
 SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
@@ -27,7 +28,8 @@ TRANSCRIPTS_NEW_ENGLAND = [3580, 3581, 3582, 3583, 3584, 3585, 3586, 3587, 3588,
 
 AGE_OF_ACQUISITION_MIN_DATAPOINTS = 2
 AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA = ['RP', 'QN', 'TO', 'ST', 'RR', 'SA', 'AP', 'AC', 'YQ', 'MK', 'CL', 'PF', 'SI', 'RT', 'PR', 'RD', 'FP', 'AD', 'SS', 'CS', 'DC', 'AN', 'PA', 'DW', 'ED', 'AA', 'SC']
-AGE_OF_ACQUISITION_MAX_AGE = 999
+AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA_NO_DECLINE = ['RP', 'QN', 'ST', 'RR', 'SA', 'AP', 'AC', 'YQ', 'MK', 'CL', 'SI', 'RT', 'PR', 'RD', 'FP', 'AD', 'SS', 'CS', 'DC', 'AN', 'PA', 'DW', 'ED', 'AA', 'SC']
+AGE_OF_ACQUISITION_MAX_AGE = 12 * 18
 
 def calculate_num_speech_act_types(data, column_name_speech_act):
     # number of speech act types at different ages
@@ -237,6 +239,16 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         max_age=AGE_OF_ACQUISITION_MAX_AGE,
     )
 
+    ages_of_acquisition_childes_dense = calc_ages_of_acquisition(
+        TARGET_PRODUCTION,
+        data_whole_childes,
+        observed_speech_acts,
+        AGES_LONG,
+        "y_pred",
+        add_extra_datapoints=False,
+        max_age=AGE_OF_ACQUISITION_MAX_AGE,
+    )
+
     aoa_data = []
     for speech_act in observed_speech_acts:
         aoa_data.append({
@@ -244,6 +256,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
             "snow": ages_of_acquisition_snow[speech_act],
             "crf": ages_of_acquisition_crf[speech_act],
             "childes": ages_of_acquisition_childes[speech_act],
+            "childes (dense)": ages_of_acquisition_childes_dense[speech_act],
         })
     aoa_data = pd.DataFrame(aoa_data)
     print(aoa_data)
@@ -266,8 +279,8 @@ if __name__ == "__main__":
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[~data_whole_childes.file_id.isin(TRANSCRIPTS_NEW_ENGLAND)]
 
-    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    # reproduce_speech_act_distribution(data, data_whole_childes)
+    reproduce_speech_act_distribution(data, data_whole_childes)
 
     reproduce_num_speech_acts(data, data_whole_childes)
