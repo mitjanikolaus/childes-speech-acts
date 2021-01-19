@@ -23,6 +23,8 @@ THRESHOLD_SPEECH_ACT_OBSERVED = 0
 MIN_AGE = 6
 MAX_AGE = 12 * 18
 
+ADD_EXTRA_DATAPOINTS=True
+
 
 def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=True):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
@@ -191,17 +193,8 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
 
         # If the logistic regression has failed: use data from points
         if np.isnan(fractions).all():
-            warnings.warn(f"Couldn't calculate logistic regression for {speech_act}")
-            fractions_speech_act_acquired = fraction_data[
-                (fraction_data["speech_act"] == speech_act)
-                & (fraction_data["fraction"] >= THRESHOLD_FRACTION_ACQUIRED)
-                ]
-            if len(fractions_speech_act_acquired) > 0:
-                age_of_acquisition[speech_act] = min(
-                    fractions_speech_act_acquired["month"]
-                )
-            else:
-                age_of_acquisition[speech_act] = max_age
+            warnings.warn(f"Couldn't calculate logistic regression for {speech_act}. Setting AoA to max_age.")
+            age_of_acquisition[speech_act] = max_age
 
         # Take data from logistic regression curve
         else:
@@ -246,7 +239,7 @@ if __name__ == "__main__":
 
     ages = [14, 20, 32]
 
-    ages_of_acquisition = calc_ages_of_acquisition(args.target, data, observed_speech_acts, ages)
+    ages_of_acquisition = calc_ages_of_acquisition(args.target, data, observed_speech_acts, ages, add_extra_datapoints=ADD_EXTRA_DATAPOINTS)
 
     path = f"results/age_of_acquisition_{args.target}.p"
     pickle.dump(ages_of_acquisition, open(path, "wb"))
