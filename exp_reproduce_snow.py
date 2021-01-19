@@ -246,9 +246,8 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
             "childes": ages_of_acquisition_childes[speech_act],
         })
     aoa_data = pd.DataFrame(aoa_data)
-
     print(aoa_data)
-    print(aoa_data.to_latex(float_format="%.1f"))
+    print(aoa_data.to_latex(float_format="%.1f", index=False))
 
 if __name__ == "__main__":
     # Model prediction accuracies
@@ -267,8 +266,8 @@ if __name__ == "__main__":
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[~data_whole_childes.file_id.isin(TRANSCRIPTS_NEW_ENGLAND)]
 
-    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
     # reproduce_speech_act_distribution(data, data_whole_childes)
-    #
-    # reproduce_num_speech_acts(data, data_whole_childes)
+
+    reproduce_num_speech_acts(data, data_whole_childes)
