@@ -18,12 +18,13 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 2
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
-THRESHOLD_SPEECH_ACT_OBSERVED = 0
+THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION = 10
+THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION = 100
 
 MIN_AGE = 6
 MAX_AGE = 12 * 18
 
-ADD_EXTRA_DATAPOINTS=True
+ADD_EXTRA_DATAPOINTS=False
 
 
 def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=True):
@@ -145,7 +146,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
             for s in observed_speech_acts
             if s in data_children[column_name_speech_act].unique()
                and data_children[column_name_speech_act].value_counts()[s]
-               > THRESHOLD_SPEECH_ACT_OBSERVED
+               > THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION
         ]
 
         fraction_producing_speech_act = get_fraction_producing_speech_acts(
@@ -162,7 +163,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
             for s in observed_speech_acts
             if s in data_adults[column_name_speech_act].unique()
                and data_adults[column_name_speech_act].value_counts()[s]
-               > THRESHOLD_SPEECH_ACT_OBSERVED
+               > THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION
         ]
 
         fraction_contingent_responses = get_fraction_contingent_responses(
