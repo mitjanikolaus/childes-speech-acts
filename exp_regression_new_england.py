@@ -1,6 +1,7 @@
 import argparse
 import pickle
 
+from scipy.stats import pearsonr
 from sklearn.feature_selection import f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score
@@ -65,6 +66,8 @@ if __name__ == "__main__":
         for s in observed_speech_acts
         if ages_of_acquisition[s] < MAX_AGE_OF_ACQUISITION
     ]
+
+    print("Number of speech acts analyzed: ", len(observed_speech_acts))
 
     # Filter data for observed speech acts
     ages_of_acquisition = [ages_of_acquisition[s] for s in observed_speech_acts]
@@ -133,5 +136,8 @@ if __name__ == "__main__":
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
+
+    pearson_r = pearsonr(x, y)
+    print("Pearson r for score vs. log frequency: ", pearson_r)
 
     plt.show()
