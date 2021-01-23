@@ -136,7 +136,10 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
     return pd.DataFrame(fraction_acquired_speech_act)
 
-def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_name_speech_act=SPEECH_ACT, add_extra_datapoints=True, max_age=MAX_AGE):
+def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_name_speech_act=SPEECH_ACT,
+                             add_extra_datapoints=True, max_age=MAX_AGE,
+                             threshold_speech_act_observed_production=THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION,
+                             threshold_speech_act_observed_comprehension=THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION):
 
     if target == TARGET_PRODUCTION:
         data_children = data[data["speaker"] == CHILD]
@@ -146,7 +149,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
             for s in observed_speech_acts
             if s in data_children[column_name_speech_act].unique()
                and data_children[column_name_speech_act].value_counts()[s]
-               > THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION
+               > threshold_speech_act_observed_production
         ]
 
         fraction_producing_speech_act = get_fraction_producing_speech_acts(
@@ -163,7 +166,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
             for s in observed_speech_acts
             if s in data_adults[column_name_speech_act].unique()
                and data_adults[column_name_speech_act].value_counts()[s]
-               > THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION
+               > threshold_speech_act_observed_comprehension
         ]
 
         fraction_contingent_responses = get_fraction_contingent_responses(

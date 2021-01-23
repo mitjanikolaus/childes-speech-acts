@@ -217,6 +217,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         SPEECH_ACT,
         add_extra_datapoints=False,
         max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        threshold_speech_act_observed_production=0,
     )
 
     ages_of_acquisition_crf = calc_ages_of_acquisition(
@@ -227,6 +228,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         "y_pred",
         add_extra_datapoints=False,
         max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        threshold_speech_act_observed_production=0,
     )
 
     ages_of_acquisition_childes = calc_ages_of_acquisition(
@@ -237,6 +239,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         "y_pred",
         add_extra_datapoints=False,
         max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        threshold_speech_act_observed_production=0,
     )
 
     ages_of_acquisition_childes_dense = calc_ages_of_acquisition(
@@ -247,6 +250,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         "y_pred",
         add_extra_datapoints=False,
         max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        threshold_speech_act_observed_production=0,
     )
 
     aoa_data = []
@@ -307,7 +311,6 @@ def convert_to_ranks(ages_of_acquisition):
 
 
 if __name__ == "__main__":
-    # Model prediction accuracies
     print("Loading data...")
     data = pickle.load(open("data/new_england_reproduced_crf.p", "rb"))
 
