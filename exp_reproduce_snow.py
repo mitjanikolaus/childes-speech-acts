@@ -263,12 +263,39 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     print(aoa_data.to_latex(float_format="%.1f", index=False))
 
     # Calculate Spearman rank-order correlation
-    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
-    print("Spearman snow vs. crf: ", corr)
-    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
-    print("Spearman snow vs. childes: ", corr)
-    corr = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
-    print("Spearman snow vs. childes (dense): ", corr)
+    corr_new_england = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    print("Spearman snow vs. crf: ", corr_new_england)
+    corr_childes = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    print("Spearman snow vs. childes: ", corr_childes)
+    corr_childes_dense = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
+    print("Spearman snow vs. childes (dense): ", corr_childes_dense)
+
+    # Plot correlations
+    fig, (axes) = plt.subplots(1, 3, sharex="all", sharey="all", figsize=(9, 3))
+
+    axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    axes[0].set_ylabel("CRF (New England)")
+    axes[0].set_title(f"r={corr_new_england.correlation:.2f}")
+
+    axes[1].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    axes[1].set_ylabel("CRF (CHILDES)")
+    axes[1].set_title(f"r={corr_childes.correlation:.2f}")
+
+    axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
+    axes[2].set_ylabel("CRF (CHILDES, dense)")
+    axes[2].set_title(f"r={corr_childes_dense.correlation:.2f}")
+
+    for i, ax in enumerate(axes):
+        ax.set_xlabel("")
+
+        axes[i].set_ylim(14, 60)
+        axes[i].set_xlim(14, 60)
+
+    axes[1].set_xlabel("Data from Snow et. al. (1996)")
+    plt.subplots_adjust(bottom=0.15)
+
+    plt.show()
+
 
 
 def convert_to_ranks(ages_of_acquisition):
@@ -288,7 +315,7 @@ if __name__ == "__main__":
     data["age_months"] = data["age_months"].apply(age_bin)
 
     # Load annotated data for whole CHILDES
-    data_whole_childes = pd.read_hdf("~/Data/speech_acts/data/speech_acts_chi.h5")
+    data_whole_childes = pd.read_hdf("~/data/speech_acts/data/speech_acts_chi.h5")
 
     # Filter out too short and too long transcripts
     data_whole_childes = data_whole_childes[data_whole_childes.file_id.isin(TRANSCRIPTS_CHILDES)]
