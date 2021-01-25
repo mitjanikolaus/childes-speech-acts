@@ -110,8 +110,8 @@ if __name__ == "__main__":
     y = scores_f1
     g = sns.regplot(x, y, ci=None, order=1)
     plt.xlabel(f"{args.target}: age of acquisition (months)")
-    plt.ylabel("classification score (F1)")
-    plt.title(f"p-value: {p_val[1]:.3f}")
+    plt.ylabel("quality of linguistic cues (f1 score)")
+    plt.title(f"p<{round(p_val[1], 2)+0.01}")
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     y = frequencies_adults
     g = sns.regplot(x, y, ci=None, order=1)
     plt.xlabel(f"{args.target}: age of acquisition (months)")
-    plt.ylabel("log frequency (%)")
-    plt.title(f"p-value: {p_val[0]:.3f}")
+    plt.ylabel("log frequency")
+    plt.title(f"p<{round(p_val[0], 2)+0.01}")
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
@@ -131,8 +131,8 @@ if __name__ == "__main__":
     x = scores_f1
     y = frequencies_adults
     g = sns.regplot(x, y, ci=None, order=1)
-    plt.xlabel("classification score (f1)")
-    plt.ylabel("log frequency (%)")
+    plt.xlabel("quality of linguistic cues (f1 score)")
+    plt.ylabel("log frequency")
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))

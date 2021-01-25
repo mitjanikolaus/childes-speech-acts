@@ -18,13 +18,13 @@ MIN_CHILDREN_REQUIRED = 0
 THRESHOLD_ACQUIRED = 2
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
-THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION = 10
+THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION = 0
 THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION = 100
 
 MIN_AGE = 6
 MAX_AGE = 12 * 18
 
-ADD_EXTRA_DATAPOINTS=False
+ADD_EXTRA_DATAPOINTS = False
 
 def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=True):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
