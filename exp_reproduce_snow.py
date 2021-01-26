@@ -12,7 +12,7 @@ from preprocess import SPEECH_ACT, CHILD
 from utils import age_bin, calculate_frequencies
 
 AGES = [14, 20, 32]
-AGES_LONG = range(14, 32)  #[14, 18, 21, 24, 27, 30, 33, 36, 39, 42]
+AGES_LONG = [14, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54] # range(14, 32)  #
 
 SOURCE_SNOW = "Data from Snow et. al. (1996)"
 SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
@@ -207,7 +207,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
 
 
 def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
-    observed_speech_acts = AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA
+    observed_speech_acts = list(data.speech_act.unique()) #AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA
 
     ages_of_acquisition_snow = calc_ages_of_acquisition(
         TARGET_PRODUCTION,
@@ -220,27 +220,29 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         threshold_speech_act_observed_production=0,
     )
 
-    ages_of_acquisition_crf = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
-        data,
-        observed_speech_acts,
-        AGES,
-        "y_pred",
-        add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
-        threshold_speech_act_observed_production=0,
-    )
+    observed_speech_acts = list(ages_of_acquisition_snow.keys())
 
-    ages_of_acquisition_childes = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
-        data_whole_childes,
-        observed_speech_acts,
-        AGES,
-        "y_pred",
-        add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
-        threshold_speech_act_observed_production=0,
-    )
+    # ages_of_acquisition_crf = calc_ages_of_acquisition(
+    #     TARGET_PRODUCTION,
+    #     data,
+    #     observed_speech_acts,
+    #     AGES,
+    #     "y_pred",
+    #     add_extra_datapoints=False,
+    #     max_age=AGE_OF_ACQUISITION_MAX_AGE,
+    #     threshold_speech_act_observed_production=0,
+    # )
+
+    # ages_of_acquisition_childes = calc_ages_of_acquisition(
+    #     TARGET_PRODUCTION,
+    #     data_whole_childes,
+    #     observed_speech_acts,
+    #     AGES,
+    #     "y_pred",
+    #     add_extra_datapoints=False,
+    #     max_age=AGE_OF_ACQUISITION_MAX_AGE,
+    #     threshold_speech_act_observed_production=0,
+    # )
 
     ages_of_acquisition_childes_dense = calc_ages_of_acquisition(
         TARGET_PRODUCTION,
@@ -254,12 +256,13 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     )
 
     aoa_data = []
+    observed_speech_acts = [s for s in observed_speech_acts if s in ages_of_acquisition_childes_dense.keys()]
     for speech_act in observed_speech_acts:
         aoa_data.append({
             "speech_act": speech_act,
-            "snow": ages_of_acquisition_snow[speech_act],
-            "crf": ages_of_acquisition_crf[speech_act],
-            "childes": ages_of_acquisition_childes[speech_act],
+            # "snow": ages_of_acquisition_snow[speech_act],
+            # "crf": ages_of_acquisition_crf[speech_act],
+            # "childes": ages_of_acquisition_childes[speech_act],
             "childes (dense)": ages_of_acquisition_childes_dense[speech_act],
         })
     aoa_data = pd.DataFrame(aoa_data)
@@ -267,23 +270,23 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     print(aoa_data.to_latex(float_format="%.1f", index=False))
 
     # Calculate Spearman rank-order correlation
-    corr_new_england = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
-    print("Spearman snow vs. crf: ", corr_new_england)
-    corr_childes = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
-    print("Spearman snow vs. childes: ", corr_childes)
+    # corr_new_england = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    # print("Spearman snow vs. crf: ", corr_new_england)
+    # corr_childes = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    # print("Spearman snow vs. childes: ", corr_childes)
     corr_childes_dense = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
     print("Spearman snow vs. childes (dense): ", corr_childes_dense)
 
     # Plot correlations
     fig, (axes) = plt.subplots(1, 3, sharex="all", sharey="all", figsize=(9, 3))
 
-    axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
-    axes[0].set_ylabel("CRF (New England)")
-    axes[0].set_title(f"r={corr_new_england.correlation:.2f}")
+    # axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    # axes[0].set_ylabel("CRF (New England)")
+    # axes[0].set_title(f"r={corr_new_england.correlation:.2f}")
 
-    axes[1].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
-    axes[1].set_ylabel("CRF (CHILDES)")
-    axes[1].set_title(f"r={corr_childes.correlation:.2f}")
+    # axes[1].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    # axes[1].set_ylabel("CRF (CHILDES)")
+    # axes[1].set_title(f"r={corr_childes.correlation:.2f}")
 
     axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
     axes[2].set_ylabel("CRF (CHILDES, dense)")
