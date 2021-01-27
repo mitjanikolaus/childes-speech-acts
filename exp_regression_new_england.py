@@ -111,7 +111,10 @@ if __name__ == "__main__":
     g = sns.regplot(x, y, ci=None, order=1)
     plt.xlabel(f"{args.target}: age of acquisition (months)")
     plt.ylabel("quality of linguistic cues (f1 score)")
-    plt.title(f"p≈{round(p_val[1], 2)}")
+
+    pearson = pearsonr(x, y)
+    print("Pearson r for AoA vs. linguistic cues: ",  pearson)
+    plt.title(f"r≈{round(pearson[0], 2)} p≈{round(pearson[1], 2)}")
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
@@ -122,7 +125,10 @@ if __name__ == "__main__":
     g = sns.regplot(x, y, ci=None, order=1)
     plt.xlabel(f"{args.target}: age of acquisition (months)")
     plt.ylabel("log frequency")
-    plt.title(f"p≈{round(p_val[0], 2)}")
+
+    pearson = pearsonr(x, y)
+    print("Pearson r for AoA vs. log frequency: ",  pearson)
+    plt.title(f"r≈{round(pearson[0], 2)} p≈{round(pearson[1], 2)}")
 
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
