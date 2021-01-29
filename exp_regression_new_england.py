@@ -6,7 +6,7 @@ from sklearn.feature_selection import f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score
 
-from age_of_acquisition import MAX_AGE, TARGET_PRODUCTION, TARGET_COMPREHENSION
+from age_of_acquisition import MAX_AGE, TARGET_PRODUCTION, TARGET_COMPREHENSION, COMPREHENSION_SPEECH_ACTS
 from crf_annotate import calculate_frequencies
 import matplotlib.pyplot as plt
 
@@ -56,6 +56,9 @@ if __name__ == "__main__":
     frequencies_adults = calculate_frequencies(data_adults[SPEECH_ACT])
 
     observed_speech_acts = list(ages_of_acquisition.keys())
+
+    if args.target == TARGET_COMPREHENSION:
+        observed_speech_acts = COMPREHENSION_SPEECH_ACTS
 
     # Filter out speech acts that do not have an F1 score
     observed_speech_acts = [s for s in observed_speech_acts if s in scores_f1]
@@ -145,5 +148,10 @@ if __name__ == "__main__":
 
     pearson_r = pearsonr(x, y)
     print("Pearson r for score vs. log frequency: ", pearson_r)
+
+    path = f"results/age_of_acquisition_{args.target}_correlations_collapsed.csv"
+    df = pd.DataFrame(zip(observed_speech_acts, ages_of_acquisition, frequencies_adults, scores_f1),
+                      columns=["speech_act", "age_of_acquisition", "log_frequency", "score_f1"])
+    df.to_csv(path)
 
     plt.show()

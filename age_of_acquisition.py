@@ -19,14 +19,19 @@ THRESHOLD_ACQUIRED = 2
 THRESHOLD_FRACTION_ACQUIRED = 0.5
 
 THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION = 0
-THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION = 100
 
 MIN_AGE = 6
 MAX_AGE = 12 * 18
 
 ADD_EXTRA_DATAPOINTS = False
 
-def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=True):
+COMPREHENSION_DATA_POINTS_2_OCCURRENCES = {14: ['STAPDWTXCT', 'MKTOXA', 'SA', 'AC', 'RPCS', 'CRDS', 'YQTQ', 'RQ', 'CMEMED', 'YYOO', 'QN', 'PRCN', 'RR', 'EAEIECEX', 'YA', 'SS', 'DC', 'PF', 'CL', 'ABPMET', 'SI', 'EQ', 'AA', 'RT', 'GR', 'PA', 'FP', 'ADALGI', 'WD', 'RD', 'PD'], 20: ['QN', 'RPCS', 'PD', 'ABPMET', 'SS', 'MKTOXA', 'YYOO', 'STAPDWTXCT', 'AC', 'AA', 'RQ', 'RT', 'SI', 'PRCN', 'PF', 'CL', 'ADALGI', 'YQTQ', 'RD', 'YA', 'EAEIECEX', 'DC', 'WD', 'SA', 'GR', 'EQ', 'RR', 'YD', 'CRDS', 'AN', 'CMEMED', 'FP', 'AQ', 'PA'], 32: ['QN', 'YQTQ', 'MKTOXA', 'STAPDWTXCT', 'SA', 'AC', 'RR', 'FP', 'RPCS', 'RQ', 'ADALGI', 'PRCN', 'ABPMET', 'SI', 'PA', 'YYOO', 'YA', 'AQ', 'CMEMED', 'CL', 'RT', 'GR', 'PF', 'EAEIECEX', 'AA', 'SS', 'EQ', 'DC', 'RD', 'AN', 'WD', 'CXSC', 'PD']}
+COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES =['STAPDWTXCT', 'MKTOXA', 'SA', 'AC', 'RPCS', 'CRDS', 'YQTQ', 'RQ', 'CMEMED', 'QN', 'PRCN', 'RR', 'EAEIECEX', 'YA', 'SS', 'DC', 'PF', 'CL', 'ABPMET', 'SI', 'EQ', 'AA', 'RT', 'GR', 'PA', 'FP', 'ADALGI', 'WD', 'RD', 'PD', 'AN', 'AQ']
+
+COMPREHENSION_DATA_POINTS = COMPREHENSION_DATA_POINTS_2_OCCURRENCES
+COMPREHENSION_SPEECH_ACTS = COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES
+
+def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=False):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
     fraction_contingent_responses = []
 
@@ -54,18 +59,19 @@ def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_data
                     }
                 )
 
-            fraction = contingency_data[
-                (contingency_data["source"] == speech_act)
-                & (contingency_data["contingency"] == 1)
-            ]["fraction"].sum()
+            if speech_act in COMPREHENSION_DATA_POINTS[month]:
+                fraction = contingency_data[
+                    (contingency_data["source"] == speech_act)
+                    & (contingency_data["contingency"] == 1)
+                ]["fraction"].sum()
 
-            fraction_contingent_responses.append(
-                {
-                    "speech_act": speech_act,
-                    "month": month,
-                    "fraction": fraction,
-                }
-            )
+                fraction_contingent_responses.append(
+                    {
+                        "speech_act": speech_act,
+                        "month": month,
+                        "fraction": fraction,
+                    }
+                )
 
     return pd.DataFrame(fraction_contingent_responses)
 
@@ -155,15 +161,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
         fraction_data = fraction_producing_speech_act
 
     elif target == TARGET_COMPREHENSION:
-        data_adults = data[data["speaker"] != CHILD]
-
-        observed_speech_acts = [
-            s
-            for s in observed_speech_acts
-            if s in data_adults[column_name_speech_act].unique()
-               and data_adults[column_name_speech_act].value_counts()[s]
-               > THRESHOLD_SPEECH_ACT_OBSERVED_COMPREHENSION
-        ]
+        observed_speech_acts = COMPREHENSION_SPEECH_ACTS
 
         fraction_contingent_responses = get_fraction_contingent_responses(
             ages, observed_speech_acts, add_extra_datapoints
@@ -248,5 +246,7 @@ if __name__ == "__main__":
 
     path = f"results/age_of_acquisition_{args.target}_collapsed.p"
     pickle.dump(ages_of_acquisition, open(path, "wb"))
+    ages_of_acquisition = pd.DataFrame(ages_of_acquisition, index=[0])
+    ages_of_acquisition.to_csv(path.replace(".p", ".csv"))
 
     plt.show()
