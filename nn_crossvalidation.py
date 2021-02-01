@@ -14,7 +14,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from nn_dataset import SpeechActsDataset
-from nn_models import SpeechActLSTM, SpeechActDistilBERT
+from nn_models import SpeechActLSTM, SpeechActDistilBERT, SpeechActBERTLSTM
 from nn_train import prepare_data
 from preprocess import SPEECH_ACT
 from utils import (
@@ -110,7 +110,8 @@ def train(args):
                 len(label_vocab),
             )
         elif args.model == MODEL_TRANSFORMER:
-            model = SpeechActDistilBERT(len(label_vocab), args.dropout)
+            model = SpeechActBERTLSTM(len(label_vocab), args.emsize, args.nhid_utterance_lstm, args.dropout,
+                                      len(label_vocab), finetune_bert=True)
         else:
             raise RuntimeError("Unknown model type: ", args.model)
 
