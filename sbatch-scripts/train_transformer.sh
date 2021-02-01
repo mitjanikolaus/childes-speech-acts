@@ -11,4 +11,5 @@
 #SBATCH --error=out/train_transformer.out
 
 source activate questions-analysis
-python -u train.py --epochs 20 --model transformer --lr 0.00001 --save model_transformer.pt --context 3
+python -u nn_train.py --data data/new-england_preprocessed.p --epochs 20 --model transformer --lr 0.00001 --out bert/
+
