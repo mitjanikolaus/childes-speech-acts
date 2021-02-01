@@ -9,7 +9,6 @@ from transformers import DistilBertModel
 device = "cuda" if cuda.is_available() else "cpu"
 
 class SpeechActLSTM(nn.Module):
-    """LSTM Language Model."""
 
     def __init__(
         self,
@@ -171,3 +170,94 @@ class SpeechActDistilBERT(torch.nn.Module):
 
         predicted_labels = torch.argmax(out, dim=1)
         return predicted_labels
+
+
+class SpeechActBERTLSTM(nn.Module):
+    N_UNITS_BERT_OUT = 768
+
+    def __init__(
+        self,
+        vocab_size,
+        n_input_layer_units,
+        n_hidden_units_utterance_lstm,
+        dropout,
+        label_size,
+        finetune_bert=True
+    ):
+        super(SpeechActBERTLSTM, self).__init__()
+        self.ntoken = vocab_size
+        self.dropout = nn.Dropout(dropout)
+
+        self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+        self.utterance_embedding = torch.nn.Linear(self.N_UNITS_BERT_OUT, n_input_layer_units)
+
+        self.lstm_utterance = LSTM(n_input_layer_units, n_hidden_units_utterance_lstm, 1)
+
+        self.decoder = nn.Linear(n_hidden_units_utterance_lstm, label_size)
+
+        self.crf = CRF(label_size)
+
+        self.n_hidden_units_utterance_lstm = n_hidden_units_utterance_lstm
+
+        if not finetune_bert:
+            for param in self.bert.parameters():
+                param.requires_grad = False
+
+    def gen_attention_masks(self, sequence_lengths, max_len):
+        return torch.tensor(
+            [
+                int(s) * [1] + (max_len - int(s)) * [0]
+                for s in sequence_lengths
+            ]
+        ).to(device)
+
+    def forward_nn(self, input):
+        sequence_lengths = [len(i) for i in input]
+        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
+
+        max_len = max(sequence_lengths)
+        attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
+        out_bert = self.bert(input_ids=padded_inputs, attention_mask=attention_masks)
+        out_bert = out_bert.last_hidden_state
+        out_bert = out_bert[:, 0]
+
+        utterance_embedding = self.utterance_embedding(out_bert)
+        utterance_embedding = self.dropout(utterance_embedding)
+
+        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+
+        utterance_representations = utterance_embedding.unsqueeze(1)  # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations,
+                                                                            hidden_utterance_lstm)
+
+        outputs = self.decoder(output_utterance_level.squeeze(1))
+
+        outputs = outputs.unsqueeze(1)
+        return outputs
+
+    def forward(self, inputs, targets):
+        outputs = self.forward_nn(inputs)
+
+        targets = targets.unsqueeze(1)
+
+        log_likelihood = self.crf.forward(outputs, targets, reduction="token_mean")
+
+        loss = -log_likelihood
+
+        return loss
+
+
+    def forward_decode(self,  input):
+        outputs = self.forward_nn(input)
+
+        labels = self.crf.decode(outputs)
+
+        return labels[0]
+
+    def init_hidden(self, n_layers, batch_size, n_hidden_units):
+        parameters_input = next(self.parameters())
+        return (
+            parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
+            parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
+        )
+
