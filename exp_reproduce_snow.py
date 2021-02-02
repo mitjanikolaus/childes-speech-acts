@@ -242,16 +242,16 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         threshold_speech_act_observed_production=0,
     )
 
-    ages_of_acquisition_childes_dense = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
-        data_whole_childes,
-        observed_speech_acts,
-        AGES_LONG,
-        "y_pred",
-        add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
-        threshold_speech_act_observed_production=0,
-    )
+    # ages_of_acquisition_childes_dense = calc_ages_of_acquisition(
+    #     TARGET_PRODUCTION,
+    #     data_whole_childes,
+    #     observed_speech_acts,
+    #     AGES_LONG,
+    #     "y_pred",
+    #     add_extra_datapoints=False,
+    #     max_age=AGE_OF_ACQUISITION_MAX_AGE,
+    #     threshold_speech_act_observed_production=0,
+    # )
 
     aoa_data = []
     for speech_act in observed_speech_acts:
@@ -260,7 +260,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
             "snow": ages_of_acquisition_snow[speech_act],
             "crf": ages_of_acquisition_crf[speech_act],
             "childes": ages_of_acquisition_childes[speech_act],
-            "childes (dense)": ages_of_acquisition_childes_dense[speech_act],
+            # "childes (dense)": ages_of_acquisition_childes_dense[speech_act],
         })
     aoa_data = pd.DataFrame(aoa_data)
     print(aoa_data)
@@ -271,11 +271,11 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     print("Spearman snow vs. crf: ", corr_new_england)
     corr_childes = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
     print("Spearman snow vs. childes: ", corr_childes)
-    corr_childes_dense = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
-    print("Spearman snow vs. childes (dense): ", corr_childes_dense)
+    # corr_childes_dense = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
+    # print("Spearman snow vs. childes (dense): ", corr_childes_dense)
 
     # Plot correlations
-    fig, (axes) = plt.subplots(1, 3, sharex="all", sharey="all", figsize=(9, 3))
+    fig, (axes) = plt.subplots(1, 2, sharex="all", sharey="all", figsize=(6, 3))
 
     axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
     axes[0].set_ylabel("CRF (New England)")
@@ -285,9 +285,9 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     axes[1].set_ylabel("CRF (CHILDES)")
     axes[1].set_title(f"r={corr_childes.correlation:.2f}")
 
-    axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
-    axes[2].set_ylabel("CRF (CHILDES, dense)")
-    axes[2].set_title(f"r={corr_childes_dense.correlation:.2f}")
+    # axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
+    # axes[2].set_ylabel("CRF (CHILDES, dense)")
+    # axes[2].set_title(f"r={corr_childes_dense.correlation:.2f}")
 
     for i, ax in enumerate(axes):
         ax.set_xlabel("")
@@ -295,7 +295,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
         axes[i].set_ylim(14, 60)
         axes[i].set_xlim(14, 60)
 
-    axes[1].set_xlabel("Data from Snow et. al. (1996)")
+    fig.text(0.5, 0.04, "Data from Snow et. al. (1996)", ha='center')
     plt.subplots_adjust(bottom=0.15)
 
     plt.show()
@@ -320,14 +320,11 @@ if __name__ == "__main__":
     # Load annotated data for whole CHILDES
     data_whole_childes = pd.read_hdf("~/data/speech_acts/data/speech_acts_chi.h5")
 
-    # Filter out too short and too long transcripts
-    data_whole_childes = data_whole_childes[data_whole_childes.file_id.isin(TRANSCRIPTS_CHILDES)]
-
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[~data_whole_childes.file_id.isin(TRANSCRIPTS_NEW_ENGLAND)]
 
     reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    # reproduce_speech_act_distribution(data, data_whole_childes)
-    #
-    # reproduce_num_speech_acts(data, data_whole_childes)
+    reproduce_speech_act_distribution(data, data_whole_childes)
+
+    reproduce_num_speech_acts(data, data_whole_childes)
