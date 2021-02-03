@@ -161,7 +161,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         "SI",
     ]
 
-    fig, axes = plt.subplots(3, 1, sharex="all")
+    fig, axes = plt.subplots(3, 1, sharex="all", sharey="all")
 
     for i, age in enumerate(AGES):
         results_snow = calculate_freq_distributions(
@@ -178,7 +178,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         results.sort_values(by=["speech_act"], inplace=True)
 
         sns.barplot(
-            ax=axes[i], x="speech_act", hue="source", y="frequency", data=results, hue_order=ORDER
+            ax=axes[i], x="speech_act", hue="source", y="frequency", data=results, hue_order=ORDER, clip_on=True
         )
 
         # Move title into figure
@@ -190,13 +190,10 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")
 
-        if i == 0:
-            axes[i].legend(loc="upper left", bbox_to_anchor=(0, 0.8))
-        else:
-            axes[i].legend_.remove()
+        # axes[i].legend(loc="upper left", bbox_to_anchor=(0, 0.8))
+        axes[i].legend_.remove()
 
-        if age > 14:
-            axes[i].set_ylim(0, 0.3)
+        axes[i].set_ylim(0, 0.3)
 
     axes[1].set_ylabel("frequency")
     axes[-1].set_xlabel("speech act")
@@ -345,6 +342,6 @@ if __name__ == "__main__":
 
     # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    # reproduce_speech_act_distribution(data, data_whole_childes)
+    reproduce_speech_act_distribution(data, data_whole_childes)
 
-    reproduce_num_speech_acts(data, data_whole_childes)
+    # reproduce_num_speech_acts(data, data_whole_childes)
