@@ -275,13 +275,19 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
     # Plot correlations
     fig, (axes) = plt.subplots(1, 2, sharex="all", sharey="all", figsize=(6, 3))
 
-    axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()))
+    axes[0].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_crf.values()), marker="")
     axes[0].set_ylabel("CRF (New England)")
     axes[0].set_title(f"r={corr_new_england.correlation:.2f}")
 
-    axes[1].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()))
+    for speech_act in observed_speech_acts:
+        axes[0].annotate(speech_act, (ages_of_acquisition_snow[speech_act], ages_of_acquisition_crf[speech_act]))
+
+    axes[1].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes.values()), marker="")
     axes[1].set_ylabel("CRF (CHILDES)")
     axes[1].set_title(f"r={corr_childes.correlation:.2f}")
+
+    for speech_act in observed_speech_acts:
+        axes[1].annotate(speech_act, (ages_of_acquisition_snow[speech_act], ages_of_acquisition_childes[speech_act]))
 
     # axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
     # axes[2].set_ylabel("CRF (CHILDES, dense)")
@@ -340,8 +346,8 @@ if __name__ == "__main__":
     print("Number of analyzed transcripts in CHILDES: ", len(data_whole_childes[(data_whole_childes.age_months >= min(AGES)) & (data_whole_childes.age_months <= max(AGES))].file_id.unique()))
     print("Number of analyzed children in CHILDES: ", len(data_whole_childes[(data_whole_childes.age_months >= min(AGES)) & (data_whole_childes.age_months <= max(AGES))].child_id.unique()))
 
-    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
 
-    reproduce_speech_act_distribution(data, data_whole_childes)
+    # reproduce_speech_act_distribution(data, data_whole_childes)
 
     # reproduce_num_speech_acts(data, data_whole_childes)
