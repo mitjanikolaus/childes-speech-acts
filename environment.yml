@@ -118,4 +118,3 @@ dependencies:
     - sacremoses==0.0.43
     - tokenizers==0.9.4
     - transformers==4.0.1
-prefix: /storage/raid1/homedirs/mitja.nikolaus/anaconda3/envs/speech-acts

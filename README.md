@@ -4,8 +4,12 @@ Repository for classification of speech acts in child-caregiver conversations us
 As recommended by the [CHAT transcription format](https://talkbank.org/manuals/CHAT.pdf), we use INCA-A as speech acts
 annotation scheme.
 
-# Requirements
-Listed in `environment.yml`
+# Environment
+An anaconda environment can be setup by using the `environment.yml` file:
+```
+conda env create -f environment.yml
+conda activate speech-acts
+```
 
 # Preprocessing data for supervised training of classifiers
 
