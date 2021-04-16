@@ -6,7 +6,12 @@ from sklearn.feature_selection import f_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score
 
-from age_of_acquisition import TARGET_PRODUCTION, TARGET_COMPREHENSION, MAX_AGE, COMPREHENSION_SPEECH_ACTS
+from age_of_acquisition import (
+    TARGET_PRODUCTION,
+    TARGET_COMPREHENSION,
+    MAX_AGE,
+    COMPREHENSION_SPEECH_ACTS,
+)
 from crf_annotate import calculate_frequencies
 import matplotlib.pyplot as plt
 
@@ -140,10 +145,11 @@ if __name__ == "__main__":
     for i, speech_act in enumerate(observed_speech_acts):
         ax.annotate(speech_act, (x[i], y[i]))
 
-
     path = f"results/age_of_acquisition_{args.target}_correlations.csv"
-    df = pd.DataFrame(zip(observed_speech_acts, ages_of_acquisition, frequencies_adults, scores_f1),
-                      columns = ["speech_act", "age_of_acquisition", "log_frequency", "score_f1"])
+    df = pd.DataFrame(
+        zip(observed_speech_acts, ages_of_acquisition, frequencies_adults, scores_f1),
+        columns=["speech_act", "age_of_acquisition", "log_frequency", "score_f1"],
+    )
     df.to_csv(path)
 
     plt.show()

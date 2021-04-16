@@ -1,18 +1,9 @@
-import os
 from collections import Counter
 
 import pandas as pd
-import matplotlib
-from sklearn.preprocessing import OrdinalEncoder
-import random
-
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.graph_objects as go
 
 from preprocess import SPEECH_ACT, CHILD, ADULT
+
 
 def find_speech_acts(source=ADULT, target=CHILD, min_occurrences=0):
     # Load data
@@ -33,8 +24,8 @@ def find_speech_acts(source=ADULT, target=CHILD, min_occurrences=0):
         spa_shifted = {0: data_age[[SPEECH_ACT, "speaker", "file_id"]]}
         spa_shifted[1] = (
             spa_shifted[0]
-                .shift(periods=1, fill_value=None)
-                .rename(columns={col: col + "_1" for col in spa_shifted[0].columns})
+            .shift(periods=1, fill_value=None)
+            .rename(columns={col: col + "_1" for col in spa_shifted[0].columns})
         )
         spa_shifted[0] = spa_shifted[0].rename(
             columns={col: col + "_0" for col in spa_shifted[0].columns}
@@ -46,10 +37,14 @@ def find_speech_acts(source=ADULT, target=CHILD, min_occurrences=0):
             (spa_compare["file_id_0"] != spa_compare["file_id_1"]), [f"{SPEECH_ACT}_1"]
         ] = None
 
-        spa_sequences = spa_compare[[col for col in spa_compare.columns if "file_id" not in col]]
+        spa_sequences = spa_compare[
+            [col for col in spa_compare.columns if "file_id" not in col]
+        ]
 
         # for now source = 1 and target = 0
-        spa_sequences.rename({"speaker_1": "source", "speaker_0": "target"}, axis='columns', inplace=True)
+        spa_sequences.rename(
+            {"speaker_1": "source", "speaker_0": "target"}, axis="columns", inplace=True
+        )
         speaker_source = "source"
         speaker_target = "target"
         spa_source = "speech_act_1"
@@ -79,7 +74,9 @@ def find_speech_acts(source=ADULT, target=CHILD, min_occurrences=0):
     for age in match_age:
         counter.update(speech_acts_datapoints[age])
 
-    print("Enough datapoints: ", [s for s, o in counter.items() if o >= min_occurrences])
+    print(
+        "Enough datapoints: ", [s for s, o in counter.items() if o >= min_occurrences]
+    )
 
 
 if __name__ == "__main__":

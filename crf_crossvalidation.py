@@ -1,26 +1,23 @@
 import os
 import pickle
 import argparse
-from collections import Counter
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import sklearn
-from scipy.stats import entropy
 import pycrfsuite
 
-import seaborn as sns
 from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import KFold
 
 from preprocess import SPEECH_ACT
-from utils import SPEECH_ACT_DESCRIPTIONS, TRAIN_TEST_SPLIT_RANDOM_STATE
+from utils import TRAIN_TEST_SPLIT_RANDOM_STATE
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
-    generate_features_vocabs, crf_predict,
+    generate_features_vocabs,
+    crf_predict,
 )
 
 AGE_MONTHS_GROUPS = {
@@ -28,6 +25,7 @@ AGE_MONTHS_GROUPS = {
     20: [18, 19, 20, 21],
     32: [27, 28, 29, 30, 31, 32, 33],
 }
+
 
 def argparser():
     argparser = argparse.ArgumentParser(
@@ -55,7 +53,12 @@ def argparser():
         action="store_true",
         help="whether to use bi-gram features to train the algorithm",
     )
-    argparser.add_argument('--use-pos', '-pos', action='store_true', help="whether to add POS tags to features")
+    argparser.add_argument(
+        "--use-pos",
+        "-pos",
+        action="store_true",
+        help="whether to add POS tags to features",
+    )
     argparser.add_argument(
         "--use-action",
         "-act",
@@ -174,16 +177,12 @@ if __name__ == "__main__":
         )
 
         # Once the features are done, groupby name and extract a list of lists
-        grouped_train = (
-            data_train
-            .groupby(by=["file_id"])
-            .agg(
-                {
-                    "features": lambda x: [y for y in x],
-                    SPEECH_ACT: lambda x: [y for y in x],
-                    "index": min,
-                }
-            )
+        grouped_train = data_train.groupby(by=["file_id"]).agg(
+            {
+                "features": lambda x: [y for y in x],
+                SPEECH_ACT: lambda x: [y for y in x],
+                "index": min,
+            }
         )  # listed by apparition order
         grouped_train = sklearn.utils.shuffle(grouped_train)
 
@@ -242,7 +241,9 @@ if __name__ == "__main__":
             mode=args.prediction_mode,
         )
         data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
-        data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
+        data_test["pred_OK"] = data_test.apply(
+            lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
+        )
 
         # Remove uninformative tags before doing analysis
         data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE"])]
@@ -250,7 +251,19 @@ if __name__ == "__main__":
         acc = accuracy_score(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist())
 
         accuracies.append(acc)
-        result_dataframes.append(data_crf[["utterance_id", "file_id", "speaker", "age_months", "tokens", SPEECH_ACT, "y_pred"]])
+        result_dataframes.append(
+            data_crf[
+                [
+                    "utterance_id",
+                    "file_id",
+                    "speaker",
+                    "age_months",
+                    "tokens",
+                    SPEECH_ACT,
+                    "y_pred",
+                ]
+            ]
+        )
 
     print("mean accuracy over all splits: ", np.average(accuracies))
     print("std accuracy over all splits: ", np.std(accuracies))
@@ -258,5 +271,4 @@ if __name__ == "__main__":
     result_dataframe = result_dataframes[0]
     for df in result_dataframes[1:]:
         result_dataframe = result_dataframe.append(df)
-    pickle.dump(result_dataframe, open("data/new_england_reproduced_crf.p","wb"))
-
+    pickle.dump(result_dataframe, open("data/new_england_reproduced_crf.p", "wb"))

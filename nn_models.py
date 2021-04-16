@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch import Tensor, cuda
+from torch import cuda
 from torch.nn.modules.rnn import LSTM
 from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 from torchcrf import CRF
@@ -8,8 +8,8 @@ from transformers import DistilBertModel
 
 device = "cuda" if cuda.is_available() else "cpu"
 
-class SpeechActLSTM(nn.Module):
 
+class SpeechActLSTM(nn.Module):
     def __init__(
         self,
         vocab_size,
@@ -24,9 +24,16 @@ class SpeechActLSTM(nn.Module):
         self.ntoken = vocab_size
         self.drop = nn.Dropout(dropout)
         self.embeddings = nn.Embedding(vocab_size, n_input_layer_units)
-        self.lstm_words = LSTM(n_input_layer_units, n_hidden_units_words_lstm, n_layers_words_lstm, dropout=dropout)
+        self.lstm_words = LSTM(
+            n_input_layer_units,
+            n_hidden_units_words_lstm,
+            n_layers_words_lstm,
+            dropout=dropout,
+        )
 
-        self.lstm_utterance = LSTM(n_hidden_units_words_lstm, n_hidden_units_utterance_lstm, 1)
+        self.lstm_utterance = LSTM(
+            n_hidden_units_words_lstm, n_hidden_units_utterance_lstm, 1
+        )
 
         self.decoder = nn.Linear(n_hidden_units_utterance_lstm, label_size)
 
@@ -42,7 +49,9 @@ class SpeechActLSTM(nn.Module):
 
         emb = self.embeddings(padded_inputs)
         batch_size = emb.size(1)
-        hidden = self.init_hidden(self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm)
+        hidden = self.init_hidden(
+            self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm
+        )
 
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
         output, hidden = self.lstm_words(packed_emb, hidden)
@@ -52,10 +61,16 @@ class SpeechActLSTM(nn.Module):
         indices = [s - 1 for s in sequence_lengths]
         utterance_representations = output[indices, range(batch_size)]
 
-        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+        hidden_utterance_lstm = self.init_hidden(
+            1, 1, self.n_hidden_units_utterance_lstm
+        )
 
-        utterance_representations = utterance_representations.unsqueeze(1) # add batch size dimension
-        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations, hidden_utterance_lstm)
+        utterance_representations = utterance_representations.unsqueeze(
+            1
+        )  # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(
+            utterance_representations, hidden_utterance_lstm
+        )
 
         outputs = self.decoder(output_utterance_level.squeeze(1))
 
@@ -68,13 +83,15 @@ class SpeechActLSTM(nn.Module):
 
         return loss
 
-    def forward_decode(self,  input):
+    def forward_decode(self, input):
         sequence_lengths = [len(i) for i in input]
         padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input])
 
         emb = self.embeddings(padded_inputs)
         batch_size = emb.size(1)
-        hidden = self.init_hidden(self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm)
+        hidden = self.init_hidden(
+            self.n_layers_words_lstm, batch_size, self.n_hidden_units_words_lstm
+        )
 
         packed_emb = pack_padded_sequence(emb, sequence_lengths, enforce_sorted=False)
         output, hidden = self.lstm_words(packed_emb, hidden)
@@ -84,11 +101,16 @@ class SpeechActLSTM(nn.Module):
         indices = [s - 1 for s in sequence_lengths]
         utterance_representations = output[indices, range(batch_size)]
 
-        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+        hidden_utterance_lstm = self.init_hidden(
+            1, 1, self.n_hidden_units_utterance_lstm
+        )
 
-        utterance_representations = utterance_representations.unsqueeze(1)  # add batch size dimension
-        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations,
-                                                                            hidden_utterance_lstm)
+        utterance_representations = utterance_representations.unsqueeze(
+            1
+        )  # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(
+            utterance_representations, hidden_utterance_lstm
+        )
 
         outputs = self.decoder(output_utterance_level.squeeze(1))
 
@@ -125,16 +147,15 @@ class SpeechActDistilBERT(torch.nn.Module):
 
     def gen_attention_masks(self, sequence_lengths, max_len):
         return torch.tensor(
-            [
-                int(s) * [1] + (max_len - int(s)) * [0]
-                for s in sequence_lengths
-            ]
+            [int(s) * [1] + (max_len - int(s)) * [0] for s in sequence_lengths]
         ).to(device)
 
     def forward(self, input, targets):
         # The input should be padded, so all samples should have the same length
         sequence_lengths = [len(i) for i in input]
-        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
+        padded_inputs = pad_sequence(
+            [torch.LongTensor(i).to(device) for i in input], batch_first=True
+        )
 
         max_len = max(sequence_lengths)
         attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
@@ -151,10 +172,12 @@ class SpeechActDistilBERT(torch.nn.Module):
         loss = self.criterion(out, targets)
         return loss
 
-    def forward_decode(self,  input):
+    def forward_decode(self, input):
         # The input should be padded, so all samples should have the same length
         sequence_lengths = [len(i) for i in input]
-        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
+        padded_inputs = pad_sequence(
+            [torch.LongTensor(i).to(device) for i in input], batch_first=True
+        )
 
         max_len = max(sequence_lengths)
         attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
@@ -182,16 +205,20 @@ class SpeechActBERTLSTM(nn.Module):
         n_hidden_units_utterance_lstm,
         dropout,
         label_size,
-        finetune_bert=True
+        finetune_bert=True,
     ):
         super(SpeechActBERTLSTM, self).__init__()
         self.ntoken = vocab_size
         self.dropout = nn.Dropout(dropout)
 
         self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
-        self.utterance_embedding = torch.nn.Linear(self.N_UNITS_BERT_OUT, n_input_layer_units)
+        self.utterance_embedding = torch.nn.Linear(
+            self.N_UNITS_BERT_OUT, n_input_layer_units
+        )
 
-        self.lstm_utterance = LSTM(n_input_layer_units, n_hidden_units_utterance_lstm, 1)
+        self.lstm_utterance = LSTM(
+            n_input_layer_units, n_hidden_units_utterance_lstm, 1
+        )
 
         self.decoder = nn.Linear(n_hidden_units_utterance_lstm, label_size)
 
@@ -205,15 +232,14 @@ class SpeechActBERTLSTM(nn.Module):
 
     def gen_attention_masks(self, sequence_lengths, max_len):
         return torch.tensor(
-            [
-                int(s) * [1] + (max_len - int(s)) * [0]
-                for s in sequence_lengths
-            ]
+            [int(s) * [1] + (max_len - int(s)) * [0] for s in sequence_lengths]
         ).to(device)
 
     def forward_nn(self, input):
         sequence_lengths = [len(i) for i in input]
-        padded_inputs = pad_sequence([torch.LongTensor(i).to(device) for i in input], batch_first=True)
+        padded_inputs = pad_sequence(
+            [torch.LongTensor(i).to(device) for i in input], batch_first=True
+        )
 
         max_len = max(sequence_lengths)
         attention_masks = self.gen_attention_masks(sequence_lengths, max_len)
@@ -224,11 +250,16 @@ class SpeechActBERTLSTM(nn.Module):
         utterance_embedding = self.utterance_embedding(out_bert)
         utterance_embedding = self.dropout(utterance_embedding)
 
-        hidden_utterance_lstm = self.init_hidden(1, 1, self.n_hidden_units_utterance_lstm)
+        hidden_utterance_lstm = self.init_hidden(
+            1, 1, self.n_hidden_units_utterance_lstm
+        )
 
-        utterance_representations = utterance_embedding.unsqueeze(1)  # add batch size dimension
-        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(utterance_representations,
-                                                                            hidden_utterance_lstm)
+        utterance_representations = utterance_embedding.unsqueeze(
+            1
+        )  # add batch size dimension
+        output_utterance_level, hidden_utterance_lstm = self.lstm_utterance(
+            utterance_representations, hidden_utterance_lstm
+        )
 
         outputs = self.decoder(output_utterance_level.squeeze(1))
 
@@ -246,8 +277,7 @@ class SpeechActBERTLSTM(nn.Module):
 
         return loss
 
-
-    def forward_decode(self,  input):
+    def forward_decode(self, input):
         outputs = self.forward_nn(input)
 
         labels = self.crf.decode(outputs)
@@ -260,4 +290,3 @@ class SpeechActBERTLSTM(nn.Module):
             parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
             parameters_input.new_zeros(n_layers, batch_size, n_hidden_units),
         )
-

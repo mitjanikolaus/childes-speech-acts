@@ -1,9 +1,3 @@
-"""
-Collection of functions to parse XML files
-==> Avoid code duplication & others
-"""
-import pickle
-
 import xmltodict
 from collections import Counter, OrderedDict
 import pandas as pd
@@ -12,7 +6,7 @@ from torchtext import vocab
 import re
 from bidict import (
     bidict,
-)  # bidirectional dictionary - allows for looking up key from value
+)
 
 SPEECH_ACT_DESCRIPTIONS = pd.read_csv(
     "illocutionary_force_codes.csv", sep=" ", header=0, keep_default_na=False
@@ -36,7 +30,25 @@ PUNCTUATION = {
 SPEECH_ACT_UNINTELLIGIBLE = "OO"
 SPEECH_ACT_NO_FUNCTION = "YY"
 
-SPEECH_ACTS_MIN_PERCENT_CHILDREN = ['YY', 'OO', 'RD', 'RT', 'TO', 'PF', 'SA', 'RP', 'MK', 'AA', 'ST', 'PR', 'AC', 'AD', 'SI', 'QN', 'YQ']
+SPEECH_ACTS_MIN_PERCENT_CHILDREN = [
+    "YY",
+    "OO",
+    "RD",
+    "RT",
+    "TO",
+    "PF",
+    "SA",
+    "RP",
+    "MK",
+    "AA",
+    "ST",
+    "PR",
+    "AC",
+    "AD",
+    "SI",
+    "QN",
+    "YQ",
+]
 
 PADDING = "<pad>"
 UNKNOWN = "<unk>"
@@ -45,9 +57,13 @@ SPEAKER_ADULT = "<adu>"
 
 TRAIN_TEST_SPLIT_RANDOM_STATE = 1
 
+
 def make_train_test_splits(data, test_split_ratio):
     data_train_ids, data_test_ids = train_test_split(
-        data["file_id"].unique(), test_size=test_split_ratio, shuffle=True, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE
+        data["file_id"].unique(),
+        test_size=test_split_ratio,
+        shuffle=True,
+        random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
     )
     data_train = data[data["file_id"].isin(data_train_ids.tolist())]
     data_test = data[data["file_id"].isin(data_test_ids.tolist())]
@@ -69,8 +85,10 @@ def build_vocabulary(data, max_vocab_size):
 
     return vocabulary
 
+
 def get_words(indices, vocab):
     return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
+
 
 def preprend_speaker_token(tokens, speaker):
     """Prepend speaker special token"""
@@ -84,7 +102,6 @@ def preprend_speaker_token(tokens, speaker):
     return tokens
 
 
-### Read/Write JSON
 def get_xml_as_dict(filepath: str):
     with open(filepath) as in_file:
         xml = in_file.read()
@@ -92,7 +109,6 @@ def get_xml_as_dict(filepath: str):
     return d
 
 
-### Parse XML
 def parse_w(d: dict, replace_name=False):
     """
     Input:
@@ -191,6 +207,7 @@ def age_months(s: str) -> int:
         age = int(age) * 12  # only 1 argument
     return age
 
+
 def calculate_frequencies(data: list):
     frequencies = Counter(data)
     for k in frequencies.keys():
@@ -200,6 +217,7 @@ def calculate_frequencies(data: list):
             frequencies[k] = 0
 
     return frequencies
+
 
 def age_bin(age):
     """Return the corresponding age bin (14, 20 or 32) for a given age"""
@@ -634,7 +652,6 @@ def replace_pnoun(word):
     return word
 
 
-
 COLORS_PLOT_CATEGORICAL = [
     "#000000",
     "#FFFF00",
@@ -710,4 +727,3 @@ COLORS_PLOT_CATEGORICAL = [
     "#938A81",
     "#575329",
 ]
-

@@ -1,6 +1,6 @@
-### Load and store transcripts of children from childes-db."""
+"""Load and store transcripts of children from childes-db."""
+
 import math
-import pickle
 
 from childespy.childespy import get_transcripts, get_corpora, get_utterances
 
@@ -74,7 +74,9 @@ def load_utts():
                 ]
 
                 if len(utts_transcript) > 0:
-                    utts_transcript = utts_transcript.sort_values(by=["utterance_order"])
+                    utts_transcript = utts_transcript.sort_values(
+                        by=["utterance_order"]
+                    )
                     for _, utt in utts_transcript.iterrows():
 
                         # Make sure we have an utterance

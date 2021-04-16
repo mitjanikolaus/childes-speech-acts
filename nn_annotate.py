@@ -12,22 +12,22 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from nn_dataset import SpeechActsDataset, SpeechActsTestDataset
+from nn_dataset import SpeechActsTestDataset
 from utils import PADDING, preprend_speaker_token, SPEAKER_CHILD
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-
 def get_words(indices, vocab):
     return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
+
 
 def annotate(args):
     print("Start annotation with args: ", args)
     print("Device: ", device)
 
     # Load data
-    vocab = pickle.load(open(os.path.join(args.model,"vocab.p"), "rb"))
+    vocab = pickle.load(open(os.path.join(args.model, "vocab.p"), "rb"))
     label_vocab = pickle.load(open(os.path.join(args.model, "vocab_labels.p"), "rb"))
 
     print("Loading data..")
@@ -39,8 +39,12 @@ def annotate(args):
     )
 
     # Preprend speaker tokens
-    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
-    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
+    data.tokens = data.apply(
+        lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1
+    )
+    data["utterances"] = data.tokens.apply(
+        lambda tokens: [vocab.stoi[t] for t in tokens]
+    )
 
     data = data.groupby(by=["file_id"]).agg({"utterances": lambda x: [y for y in x]})
 
@@ -61,23 +65,33 @@ def annotate(args):
         all_predicted_labels = []
         speaker_is_child = []
         with torch.no_grad():
-            for batch_id, (input_samples, sequence_lengths) in tqdm(enumerate(data_loader), total=len(data_loader)):
+            for batch_id, (input_samples, sequence_lengths) in tqdm(
+                enumerate(data_loader), total=len(data_loader)
+            ):
 
                 # Perform forward pass of the model
                 predicted_labels = model.forward_decode(input_samples)
                 predicted_labels = torch.tensor(predicted_labels).to(device)
 
-                speaker_is_child += [True if x[0] == vocab.stoi[SPEAKER_CHILD] else False for x in input_samples]
+                speaker_is_child += [
+                    True if x[0] == vocab.stoi[SPEAKER_CHILD] else False
+                    for x in input_samples
+                ]
                 all_predicted_labels += predicted_labels.tolist()
 
                 if args.verbose:
-                    for i, (sample, predicted) in enumerate(zip(input_samples, predicted_labels)):
+                    for i, (sample, predicted) in enumerate(
+                        zip(input_samples, predicted_labels)
+                    ):
                         print(
                             f"{get_words(sample, vocab)} Predicted: {label_vocab.inverse[int(predicted)]}"
                         )
 
-
-        predicted_labels_child = [label_vocab.inverse[label] for label, is_child in zip(all_predicted_labels, speaker_is_child) if is_child]
+        predicted_labels_child = [
+            label_vocab.inverse[label]
+            for label, is_child in zip(all_predicted_labels, speaker_is_child)
+            if is_child
+        ]
 
         print("=" * 89)
 
@@ -97,12 +111,18 @@ def annotate(args):
         print(f"KL Divergence: {kl_divergence:.3f}")
 
         labels = list(gold_frequencies.keys()) * 2
-        source = ["Gold"] * len(gold_frequencies) + ["Predicted"] * len(gold_frequencies)
+        source = ["Gold"] * len(gold_frequencies) + ["Predicted"] * len(
+            gold_frequencies
+        )
         counts = list(gold_frequencies.values()) + list(counts.values())
-        df = pd.DataFrame(zip(labels, source, counts), columns=["speech_act", "source", "frequency"])
+        df = pd.DataFrame(
+            zip(labels, source, counts), columns=["speech_act", "source", "frequency"]
+        )
         plt.figure(figsize=(10, 6))
         sns.barplot(x="speech_act", hue="source", y="frequency", data=df)
-        plt.title(f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}")
+        plt.title(
+            f"{args.data} compared to {args.compare} | KL Divergence: {kl_divergence:.3f}"
+        )
         plt.show()
 
     # Load the saved model checkpoint.
@@ -131,14 +151,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--compare", type=str, required=True, help="Path to frequencies to compare to"
     )
-    # TODO fix: works only with batch size one at the moment
+    # TODO fix: works only with batch size 1 at the moment
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )
     parser.add_argument("--seed", type=int, default=1111, help="random seed")
 
-    parser.add_argument('--verbose', '-v', action="store_true",
-                           help="Increase verbosity")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Increase verbosity"
+    )
 
     args = parser.parse_args()
     annotate(args)

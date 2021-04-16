@@ -14,31 +14,45 @@ from torch.utils.data import DataLoader
 from nn_dataset import SpeechActsDataset
 from nn_models import SpeechActLSTM, SpeechActDistilBERT, SpeechActBERTLSTM
 from preprocess import SPEECH_ACT
-from utils import build_vocabulary, dataset_labels, preprend_speaker_token, get_words, TRAIN_TEST_SPLIT_RANDOM_STATE, \
-    make_train_test_splits
+from utils import (
+    build_vocabulary,
+    dataset_labels,
+    preprend_speaker_token,
+    get_words,
+    TRAIN_TEST_SPLIT_RANDOM_STATE,
+    make_train_test_splits,
+)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MODEL_TRANSFORMER = "transformer"
 MODEL_LSTM = "lstm"
 
-VAL_SPLIT_SIZE = .1
+VAL_SPLIT_SIZE = 0.1
+
 
 def prepare_data(data, vocab, label_vocab):
     # Prepend speaker tokens
-    data.tokens = data.apply(lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1)
+    data.tokens = data.apply(
+        lambda row: preprend_speaker_token(row.tokens, row.speaker), axis=1
+    )
 
     # Convert words and labels to indices using the respective vocabs
-    data["utterances"] = data.tokens.apply(lambda tokens: [vocab.stoi[t] for t in tokens])
+    data["utterances"] = data.tokens.apply(
+        lambda tokens: [vocab.stoi[t] for t in tokens]
+    )
     data["labels"] = data[SPEECH_ACT].apply(lambda l: label_vocab[l])
 
     # Group by transcript (file name), each transcript is treated as one long input sequence
-    data_grouped = data.groupby(by=['file_id']).agg({
-        'utterances': lambda x: [y for y in x],
-        'labels': lambda x: [y for y in x],
-        'age_months': min,
-    })
+    data_grouped = data.groupby(by=["file_id"]).agg(
+        {
+            "utterances": lambda x: [y for y in x],
+            "labels": lambda x: [y for y in x],
+            "age_months": min,
+        }
+    )
     return data_grouped
+
 
 def train(args):
     print("Start training with args: ", args)
@@ -62,7 +76,10 @@ def train(args):
     data_test = prepare_data(data_test, vocab, label_vocab)
 
     data_train, data_val = train_test_split(
-        data_train, test_size=VAL_SPLIT_SIZE, shuffle=True, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE
+        data_train,
+        test_size=VAL_SPLIT_SIZE,
+        shuffle=True,
+        random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
     )
 
     dataset_train = SpeechActsDataset(data_train)
@@ -91,10 +108,23 @@ def train(args):
 
     if args.model == MODEL_LSTM:
         model = SpeechActLSTM(
-            len(vocab), args.emsize, args.nhid_words_lstm, args.nhid_utterance_lstm, args.nlayers, args.dropout, len(label_vocab)
+            len(vocab),
+            args.emsize,
+            args.nhid_words_lstm,
+            args.nhid_utterance_lstm,
+            args.nlayers,
+            args.dropout,
+            len(label_vocab),
         )
     elif args.model == MODEL_TRANSFORMER:
-        model = SpeechActBERTLSTM(len(label_vocab), args.emsize, args.nhid_utterance_lstm, args.dropout, len(label_vocab), finetune_bert=True)
+        model = SpeechActBERTLSTM(
+            len(label_vocab),
+            args.emsize,
+            args.nhid_utterance_lstm,
+            args.dropout,
+            len(label_vocab),
+            finetune_bert=True,
+        )
     else:
         raise RuntimeError("Unknown model type: ", args.model)
 
@@ -106,7 +136,9 @@ def train(args):
         model.train()
         total_loss = 0.0
 
-        for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
+        for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(
+            data_loader
+        ):
             # Move data to GPU
             targets = torch.tensor(targets).to(device)
 
@@ -150,7 +182,9 @@ def train(args):
         num_samples = 0
         num_correct = 0
         with torch.no_grad():
-            for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(data_loader):
+            for batch_id, (input_samples, targets, sequence_lengths, ages) in enumerate(
+                data_loader
+            ):
                 # Move data to GPU
                 targets = torch.tensor(targets).to(device)
 
@@ -240,17 +274,30 @@ if __name__ == "__main__":
         "--emsize", type=int, default=200, help="size of word embeddings"
     )
     parser.add_argument(
-        "--nhid-words-lstm", type=int, default=200, help="number of hidden units of the lower-level LSTM"
+        "--nhid-words-lstm",
+        type=int,
+        default=200,
+        help="number of hidden units of the lower-level LSTM",
     )
     parser.add_argument(
-        "--nhid-utterance-lstm", type=int, default=100, help="number of hidden units of the higher-level LSTM"
+        "--nhid-utterance-lstm",
+        type=int,
+        default=100,
+        help="number of hidden units of the higher-level LSTM",
     )
 
-    parser.add_argument("--nlayers", type=int, default=1, help="number of layers of the lower-level LSTM")
-    parser.add_argument("--lr", type=float, default=0.0001, help="initial learning rate")
+    parser.add_argument(
+        "--nlayers",
+        type=int,
+        default=1,
+        help="number of layers of the lower-level LSTM",
+    )
+    parser.add_argument(
+        "--lr", type=float, default=0.0001, help="initial learning rate"
+    )
     parser.add_argument("--clip", type=float, default=0.25, help="gradient clipping")
     parser.add_argument("--epochs", type=int, default=50, help="upper epoch limit")
-    # TODO fix: works only with batch size one at the moment (equalling 1 transcript)
+    # TODO fix: works only with batch size 1 at the moment (equalling 1 transcript)
     parser.add_argument(
         "--batch-size", type=int, default=1, metavar="N", help="batch size"
     )

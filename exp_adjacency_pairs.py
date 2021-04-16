@@ -116,10 +116,16 @@ def gen_seq_data(data, age: int = None):
 
 
 def create_2_sankey(
-    spa_sequences, age, source: str = ADULT, target: str = CHILD, min_percent: float = 0.1
+    spa_sequences,
+    age,
+    source: str = ADULT,
+    target: str = CHILD,
+    min_percent: float = 0.1,
 ):
     # for now source = 1 and target = 0
-    spa_sequences.rename({"speaker_1": "source", "speaker_0": "target"}, axis='columns', inplace=True)
+    spa_sequences.rename(
+        {"speaker_1": "source", "speaker_0": "target"}, axis="columns", inplace=True
+    )
     speaker_source = "source"
     speaker_target = "target"
     spa_source = "speech_act_1"
@@ -147,16 +153,24 @@ def create_2_sankey(
     for speech_act_source in spa_gp[spa_source].unique():
         speech_acts_target = spa_gp[spa_gp[spa_source] == speech_act_source]
         for speech_act_target in speech_acts_target[spa_target]:
-            count = speech_acts_target[speech_acts_target[spa_target] == speech_act_target][speaker_target].values[0]
+            count = speech_acts_target[
+                speech_acts_target[spa_target] == speech_act_target
+            ][speaker_target].values[0]
             fraction = count / speech_acts_target[speaker_target].sum()
-            percentages.append({
-                speaker_source: speech_act_source,
-                speaker_target: speech_act_target,
-                "fraction": fraction,
-            })
+            percentages.append(
+                {
+                    speaker_source: speech_act_source,
+                    speaker_target: speech_act_target,
+                    "fraction": fraction,
+                }
+            )
     percentages = pd.DataFrame(percentages)
-    percentages["source_description"] = percentages["source"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
-    percentages["target_description"] = percentages["target"].apply(lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description)
+    percentages["source_description"] = percentages["source"].apply(
+        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
+    )
+    percentages["target_description"] = percentages["target"].apply(
+        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
+    )
 
     out_dir = "adjacency_pairs"
     os.makedirs(out_dir, exist_ok=True)
@@ -166,9 +180,12 @@ def create_2_sankey(
     # 5.1 Apply encoder to get labels as numbers => idx in sankey (source, target)
     enc = OrdinalEncoder()
     trf_spa = pd.DataFrame(
-        enc.fit_transform(spa_gp[[spa_target, spa_source]]), columns=["target", "source"]
+        enc.fit_transform(spa_gp[[spa_target, spa_source]]),
+        columns=["target", "source"],
     )
-    enc_cat = {col: list(ar) for col, ar in zip([spa_target, spa_source], enc.categories_)}
+    enc_cat = {
+        col: list(ar) for col, ar in zip([spa_target, spa_source], enc.categories_)
+    }
 
     trf_spa[["value", "v_percent"]] = spa_gp[[speaker_target, "v_percent"]]
     # 5.2 Add link colors
@@ -179,15 +196,13 @@ def create_2_sankey(
     fig = plot_sankey(
         node_labels=(enc_cat[spa_target] + enc_cat[spa_source]),
         node_colors=[
-            node_colors_2[x]
-            for x in (enc_cat[spa_target] + enc_cat[spa_source])
+            node_colors_2[x] for x in (enc_cat[spa_target] + enc_cat[spa_source])
         ],
         link_source=trf_spa["source"],
         link_target=trf_spa["target"],
         link_value=trf_spa["value"],
         node_customdata=[
-            node_descr[x]
-            for x in (enc_cat[spa_target] + enc_cat[spa_source])
+            node_descr[x] for x in (enc_cat[spa_target] + enc_cat[spa_source])
         ],
         sk_title=f"{source} to {target} adjacency pairs | Child age: {age} months",
     )
@@ -237,7 +252,16 @@ app.layout = html.Div(
                             id="percentage",
                             options=[
                                 {"label": i, "value": i}
-                                for i in [0, 0.001, 0.005, 0.01, 0.012, 0.015, 0.02, 0.025]
+                                for i in [
+                                    0,
+                                    0.001,
+                                    0.005,
+                                    0.01,
+                                    0.012,
+                                    0.015,
+                                    0.02,
+                                    0.025,
+                                ]
                             ],
                             value=0.01,
                         ),
@@ -270,7 +294,9 @@ def update_graph(dataset, source, target, age_months, percentage):
     )
     # Filter data
     spa_seq = gen_seq_data(data, age=age_months)
-    fig = create_2_sankey(spa_seq, age=age_months, min_percent=percentage, source=source, target=target)
+    fig = create_2_sankey(
+        spa_seq, age=age_months, min_percent=percentage, source=source, target=target
+    )
 
     return fig
 

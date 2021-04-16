@@ -1,11 +1,7 @@
-import torch
-from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
 
-
 class SpeechActsDataset(Dataset):
-
     def __init__(self, dataframe):
         self.len = len(dataframe)
         self.data = dataframe
@@ -23,7 +19,6 @@ class SpeechActsDataset(Dataset):
 
 
 class SpeechActsTestDataset(SpeechActsDataset):
-
     def __getitem__(self, index):
         utterances = self.data.utterances.iloc[index]
         sequence_length = len(utterances)

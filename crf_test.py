@@ -219,7 +219,6 @@ if __name__ == "__main__":
     data = add_feature_columns(
         data,
         use_action=args.use_action,
-        match_age=args.match_age,
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
         use_pastact=args.use_past_actions,

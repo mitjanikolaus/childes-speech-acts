@@ -59,6 +59,7 @@ def compare_frequencies(frequencies, args):
     )
     plt.show()
 
+
 if __name__ == "__main__":
     args = parse_args()
     args = load_training_args(args)
@@ -133,7 +134,6 @@ if __name__ == "__main__":
 
     data_children.to_hdf("data/speech_acts_chi.h5", key="speech_acts")
     data_adults.to_hdf("data/speech_acts_adu.h5", key="speech_acts")
-
 
     if args.compare:
         frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())

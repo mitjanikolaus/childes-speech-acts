@@ -13,7 +13,8 @@ from crf_train import (
     add_feature_columns,
     generate_features_vocabs,
     get_features_from_row,
-    bio_classification_report, get_n_grams,
+    bio_classification_report,
+    get_n_grams,
 )
 from preprocess import SPEECH_ACT, ADULT
 from utils import (
@@ -130,7 +131,13 @@ def baseline_model(name: str, weights: dict, balance: bool):
 
 
 def get_baseline_features_from_row(
-    features: dict, tokens: list, speaker: str, prev_speaker: str, ln: int, use_bi_grams, **kwargs
+    features: dict,
+    tokens: list,
+    speaker: str,
+    prev_speaker: str,
+    ln: int,
+    use_bi_grams,
+    **kwargs,
 ):
     """Replacing input list tokens with feature index. """
     nb_features = (
@@ -271,7 +278,9 @@ if __name__ == "__main__":
         weights = {
             labels[lab]: v / len(y) for lab, v in weights.items()
         }  # update weights as proportion, ID as labels
-        model = baseline_model(args.model, weights, True)  # Taking imbalance into account
+        model = baseline_model(
+            args.model, weights, True
+        )  # Taking imbalance into account
         model.fit(X, y)
         # dump(mdl, os.path.join(name, 'baseline.joblib'))
 
@@ -301,7 +310,9 @@ if __name__ == "__main__":
 
         # y_pred = baseline_predict(bs_model, X, labels, mode=args.prediction_mode)
         data_test["y_pred"] = y_pred
-        data_test["pred_OK"] = data_test.apply(lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1)
+        data_test["pred_OK"] = data_test.apply(
+            lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
+        )
         data_bs = data_test[~data_test[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])]
 
         report, _, acc, _ = bio_classification_report(
@@ -312,9 +323,10 @@ if __name__ == "__main__":
 
         path = os.path.join("results", "baseline")
         os.makedirs(path, exist_ok=True)
-        pickle.dump(report.T, open(os.path.join(path, f"classification_scores_{args.model}.p"), "wb"))
+        pickle.dump(
+            report.T,
+            open(os.path.join(path, f"classification_scores_{args.model}.p"), "wb"),
+        )
 
     print("Mean acc: ", np.mean(accuracies))
     print("std acc: ", np.std(accuracies))
-
-

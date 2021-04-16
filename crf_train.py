@@ -18,7 +18,11 @@ import numpy as np
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
-from utils import SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION, make_train_test_splits
+from utils import (
+    SPEECH_ACT_UNINTELLIGIBLE,
+    SPEECH_ACT_NO_FUNCTION,
+    make_train_test_splits,
+)
 
 
 def argparser():
@@ -501,7 +505,20 @@ def bio_classification_report(y_true, y_pred):
         cks,
     )
 
-def train(data_file, use_bi_grams=False, use_action=False, use_repetitions=False, use_past=False, use_past_actions=False, use_pos=False, test_ratio=0.2, cut_train_set=1.0, nb_occurrences=5, verbose=False):
+
+def train(
+    data_file,
+    use_bi_grams=False,
+    use_action=False,
+    use_repetitions=False,
+    use_past=False,
+    use_past_actions=False,
+    use_pos=False,
+    test_ratio=0.2,
+    cut_train_set=1.0,
+    nb_occurrences=5,
+    verbose=False,
+):
     # Definitions
     number_segments_length_feature = 10
 
@@ -521,12 +538,12 @@ def train(data_file, use_bi_grams=False, use_action=False, use_repetitions=False
     data_train, data_test = make_train_test_splits(data, test_ratio)
 
     if cut_train_set < 1.0:
-        train_files = data_train['file_id'].unique().tolist()
+        train_files = data_train["file_id"].unique().tolist()
         train_subset = np.random.choice(
             len(train_files), size=int(len(train_files) * cut_train_set), replace=False
         )
         train_files = [train_files[x] for x in train_subset]
-        data_train = data_train[data_train['file_id'].isin(train_files)]
+        data_train = data_train[data_train["file_id"].isin(train_files)]
 
     print("### Creating features:")
     feature_vocabs = generate_features_vocabs(
@@ -655,9 +672,20 @@ def train(data_file, use_bi_grams=False, use_action=False, use_repetitions=False
 
     return acc, len(data_train)
 
-#### MAIN
+
 if __name__ == "__main__":
     args = argparser()
     print(args)
-    train(args.data, args.use_bi_grams, args.use_action, args.use_repetitions, args.use_past,
-          args.use_past_actions, args.use_pos, args.test_ratio, args.cut_train_set, args.nb_occurrences, args.verbose)
+    train(
+        args.data,
+        args.use_bi_grams,
+        args.use_action,
+        args.use_repetitions,
+        args.use_past,
+        args.use_past_actions,
+        args.use_pos,
+        args.test_ratio,
+        args.cut_train_set,
+        args.nb_occurrences,
+        args.verbose,
+    )

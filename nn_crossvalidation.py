@@ -32,6 +32,7 @@ MODEL_LSTM = "lstm"
 
 VAL_SPLIT_SIZE = 0.1
 
+
 def train(args):
     print("Start training with args: ", args)
     print("Device: ", device)
@@ -110,8 +111,14 @@ def train(args):
                 len(label_vocab),
             )
         elif args.model == MODEL_TRANSFORMER:
-            model = SpeechActBERTLSTM(len(label_vocab), args.emsize, args.nhid_utterance_lstm, args.dropout,
-                                      len(label_vocab), finetune_bert=True)
+            model = SpeechActBERTLSTM(
+                len(label_vocab),
+                args.emsize,
+                args.nhid_utterance_lstm,
+                args.dropout,
+                len(label_vocab),
+                finetune_bert=True,
+            )
         else:
             raise RuntimeError("Unknown model type: ", args.model)
 

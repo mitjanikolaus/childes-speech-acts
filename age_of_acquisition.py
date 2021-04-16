@@ -25,13 +25,219 @@ MAX_AGE = 12 * 18
 
 ADD_EXTRA_DATAPOINTS = False
 
-COMPREHENSION_DATA_POINTS_2_OCCURRENCES = {14: ['ST', 'TO', 'SA', 'AC', 'RP', 'CR', 'MK', 'YQ', 'RQ', 'CM', 'OO', 'QN', 'TX', 'PR', 'RR', 'EA', 'XA', 'CS', 'YA', 'SS', 'DC', 'PF', 'AP', 'CL', 'AB', 'TQ', 'SI', 'EI', 'EQ', 'YY', 'CT', 'PM', 'AA', 'DW', 'RT', 'ET', 'GR', 'DS', 'PA', 'FP', 'AD', 'WD', 'RD', 'CN', 'GI', 'ED', 'PD'], 20: ['QN', 'RP', 'PD', 'PM', 'SS', 'MK', 'OO', 'AP', 'ST', 'AC', 'AA', 'RQ', 'RT', 'ET', 'SI', 'PR', 'PF', 'CL', 'AD', 'YQ', 'AB', 'RD', 'YA', 'EA', 'DC', 'GI', 'WD', 'SA', 'YY', 'GR', 'EQ', 'RR', 'TO', 'CS', 'AL', 'YD', 'CT', 'EI', 'DS', 'CR', 'DW', 'AN', 'CM', 'FP', 'TQ', 'TX', 'XA', 'CN', 'AQ', 'PA', 'EC'], 32: ['QN', 'YQ', 'MK', 'AP', 'SA', 'DW', 'AC', 'RR', 'FP', 'ST', 'RP', 'RQ', 'AD', 'PR', 'PM', 'XA', 'SI', 'GI', 'PA', 'OO', 'TQ', 'YA', 'CS', 'AQ', 'TX', 'CT', 'CM', 'CL', 'RT', 'GR', 'PF', 'EI', 'AA', 'SS', 'EQ', 'DC', 'YY', 'RD', 'AB', 'AN', 'TO', 'EC', 'ET', 'EX', 'WD', 'SC', 'PD', 'EA']}
-COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES = ['ST', 'TO', 'SA', 'AC', 'RP', 'CR', 'MK', 'YQ', 'RQ', 'CM', 'OO', 'QN', 'TX', 'PR', 'RR', 'EA', 'XA', 'CS', 'YA', 'SS', 'DC', 'PF', 'AP', 'CL', 'AB', 'TQ', 'SI', 'EI', 'EQ', 'YY', 'CT', 'PM', 'AA', 'DW', 'RT', 'ET', 'GR', 'DS', 'PA', 'FP', 'AD', 'WD', 'RD', 'CN', 'GI', 'PD', 'AN', 'AQ', 'EC']
+COMPREHENSION_DATA_POINTS_2_OCCURRENCES = {
+    14: [
+        "ST",
+        "TO",
+        "SA",
+        "AC",
+        "RP",
+        "CR",
+        "MK",
+        "YQ",
+        "RQ",
+        "CM",
+        "OO",
+        "QN",
+        "TX",
+        "PR",
+        "RR",
+        "EA",
+        "XA",
+        "CS",
+        "YA",
+        "SS",
+        "DC",
+        "PF",
+        "AP",
+        "CL",
+        "AB",
+        "TQ",
+        "SI",
+        "EI",
+        "EQ",
+        "YY",
+        "CT",
+        "PM",
+        "AA",
+        "DW",
+        "RT",
+        "ET",
+        "GR",
+        "DS",
+        "PA",
+        "FP",
+        "AD",
+        "WD",
+        "RD",
+        "CN",
+        "GI",
+        "ED",
+        "PD",
+    ],
+    20: [
+        "QN",
+        "RP",
+        "PD",
+        "PM",
+        "SS",
+        "MK",
+        "OO",
+        "AP",
+        "ST",
+        "AC",
+        "AA",
+        "RQ",
+        "RT",
+        "ET",
+        "SI",
+        "PR",
+        "PF",
+        "CL",
+        "AD",
+        "YQ",
+        "AB",
+        "RD",
+        "YA",
+        "EA",
+        "DC",
+        "GI",
+        "WD",
+        "SA",
+        "YY",
+        "GR",
+        "EQ",
+        "RR",
+        "TO",
+        "CS",
+        "AL",
+        "YD",
+        "CT",
+        "EI",
+        "DS",
+        "CR",
+        "DW",
+        "AN",
+        "CM",
+        "FP",
+        "TQ",
+        "TX",
+        "XA",
+        "CN",
+        "AQ",
+        "PA",
+        "EC",
+    ],
+    32: [
+        "QN",
+        "YQ",
+        "MK",
+        "AP",
+        "SA",
+        "DW",
+        "AC",
+        "RR",
+        "FP",
+        "ST",
+        "RP",
+        "RQ",
+        "AD",
+        "PR",
+        "PM",
+        "XA",
+        "SI",
+        "GI",
+        "PA",
+        "OO",
+        "TQ",
+        "YA",
+        "CS",
+        "AQ",
+        "TX",
+        "CT",
+        "CM",
+        "CL",
+        "RT",
+        "GR",
+        "PF",
+        "EI",
+        "AA",
+        "SS",
+        "EQ",
+        "DC",
+        "YY",
+        "RD",
+        "AB",
+        "AN",
+        "TO",
+        "EC",
+        "ET",
+        "EX",
+        "WD",
+        "SC",
+        "PD",
+        "EA",
+    ],
+}
+COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES = [
+    "ST",
+    "TO",
+    "SA",
+    "AC",
+    "RP",
+    "CR",
+    "MK",
+    "YQ",
+    "RQ",
+    "CM",
+    "OO",
+    "QN",
+    "TX",
+    "PR",
+    "RR",
+    "EA",
+    "XA",
+    "CS",
+    "YA",
+    "SS",
+    "DC",
+    "PF",
+    "AP",
+    "CL",
+    "AB",
+    "TQ",
+    "SI",
+    "EI",
+    "EQ",
+    "YY",
+    "CT",
+    "PM",
+    "AA",
+    "DW",
+    "RT",
+    "ET",
+    "GR",
+    "DS",
+    "PA",
+    "FP",
+    "AD",
+    "WD",
+    "RD",
+    "CN",
+    "GI",
+    "PD",
+    "AN",
+    "AQ",
+    "EC",
+]
 
 COMPREHENSION_DATA_POINTS = COMPREHENSION_DATA_POINTS_2_OCCURRENCES
 COMPREHENSION_SPEECH_ACTS = COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES
 
-def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_datapoints=True):
+
+def get_fraction_contingent_responses(
+    ages, observed_speech_acts, add_extra_datapoints=True
+):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
     fraction_contingent_responses = []
 
@@ -71,13 +277,18 @@ def get_fraction_contingent_responses(ages, observed_speech_acts, add_extra_data
                         "month": month,
                         "fraction": fraction,
                     }
-            )
+                )
 
     return pd.DataFrame(fraction_contingent_responses)
 
 
-def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts, column_name_speech_act=SPEECH_ACT,
-                                       add_extra_datapoints=True):
+def get_fraction_producing_speech_acts(
+    data_children,
+    ages,
+    observed_speech_acts,
+    column_name_speech_act=SPEECH_ACT,
+    add_extra_datapoints=True,
+):
     fraction_acquired_speech_act = []
 
     print("Processing speech acts...")
@@ -141,9 +352,17 @@ def get_fraction_producing_speech_acts(data_children, ages, observed_speech_acts
 
     return pd.DataFrame(fraction_acquired_speech_act)
 
-def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_name_speech_act=SPEECH_ACT,
-                             add_extra_datapoints=True, max_age=MAX_AGE,
-                             threshold_speech_act_observed_production=THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION):
+
+def calc_ages_of_acquisition(
+    target,
+    data,
+    observed_speech_acts,
+    ages,
+    column_name_speech_act=SPEECH_ACT,
+    add_extra_datapoints=True,
+    max_age=MAX_AGE,
+    threshold_speech_act_observed_production=THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION,
+):
 
     if target == TARGET_PRODUCTION:
         data_children = data[data["speaker"] == CHILD]
@@ -152,12 +371,16 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
             s
             for s in observed_speech_acts
             if s in data_children[column_name_speech_act].unique()
-               and data_children[column_name_speech_act].value_counts()[s]
-               > threshold_speech_act_observed_production
+            and data_children[column_name_speech_act].value_counts()[s]
+            > threshold_speech_act_observed_production
         ]
 
         fraction_producing_speech_act = get_fraction_producing_speech_acts(
-            data_children, ages, observed_speech_acts, column_name_speech_act, add_extra_datapoints
+            data_children,
+            ages,
+            observed_speech_acts,
+            column_name_speech_act,
+            add_extra_datapoints,
         )
 
         fraction_data = fraction_producing_speech_act
@@ -177,7 +400,7 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
     g.set(ylim=(0, 1), xlim=(min(ages) - 4, max_age))
     g.map(sns.regplot, "month", "fraction", truncate=False, logistic=True, ci=None)
     h, l = g.axes[0][0].get_legend_handles_labels()
-    g.fig.legend(h, l, loc='upper center', ncol=10)
+    g.fig.legend(h, l, loc="upper center", ncol=10)
     plt.subplots_adjust(top=0.7, bottom=0.09, left=0.057)
     plt.xlabel("age (months)")
     if target == TARGET_PRODUCTION:
@@ -193,7 +416,9 @@ def calc_ages_of_acquisition(target, data, observed_speech_acts, ages, column_na
 
         # If the logistic regression has failed: use data from points
         if np.isnan(fractions).all():
-            warnings.warn(f"Couldn't calculate logistic regression for {speech_act}. Setting AoA to max_age.")
+            warnings.warn(
+                f"Couldn't calculate logistic regression for {speech_act}. Setting AoA to max_age."
+            )
             age_of_acquisition[speech_act] = max_age
 
         # Take data from logistic regression curve
@@ -239,7 +464,13 @@ if __name__ == "__main__":
 
     ages = [14, 20, 32]
 
-    ages_of_acquisition = calc_ages_of_acquisition(args.target, data, observed_speech_acts, ages, add_extra_datapoints=ADD_EXTRA_DATAPOINTS)
+    ages_of_acquisition = calc_ages_of_acquisition(
+        args.target,
+        data,
+        observed_speech_acts,
+        ages,
+        add_extra_datapoints=ADD_EXTRA_DATAPOINTS,
+    )
 
     path = f"results/age_of_acquisition_{args.target}.p"
     pickle.dump(ages_of_acquisition, open(path, "wb"))

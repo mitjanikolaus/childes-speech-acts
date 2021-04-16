@@ -1,8 +1,18 @@
 # Speech Act Annotations
-Repository for classification of speech acts in child-caregiver conversations using CRFs, LSTMs and Transformers.
-
+Classification of speech acts in child-caregiver conversations using CRFs, LSTMs and Transformers.
 As recommended by the [CHAT transcription format](https://talkbank.org/manuals/CHAT.pdf), we use INCA-A as speech acts
 annotation scheme.
+
+This repository contains code accompanying the following papers:  
+
+**Large-scale Study of Speech Acts' Development Using Automatic Labelling**  
+_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+Mitja Nikolaus, Juliette Maes, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi (* Joint first authors)
+
+**Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
+_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
+
 
 # Environment
 An anaconda environment can be setup by using the `environment.yml` file:
@@ -22,14 +32,15 @@ Data for supervised training is taken from the [New England corpus](https://chil
     ```
 3. Preprocess data
     ```
-    python preprocess.py --input-path java_out/ --output-path data/new_england_preprocessed.p --drop-untagged
+    python preprocess.py --input-dir java_out/ --output-path data/new_england_preprocessed.p --drop-untagged
    ```
   
 # CRF  
 ## Train CRF classifier
 
+To train the CRF with the features as described in the paper:
 ```
-python crf_train.py data/new_england_preprocessed.p [optional_feature_args]
+python crf_train.py data/new_england_preprocessed.p --use-pos --use-bi-grams --use-repetitions
 ```
 
 ## Test CRF classifier
@@ -46,13 +57,34 @@ Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/
    python crf_test.py data/rollins_preprocessed.p -m checkpoints/crf/
    ```
 # Neural Networks
-## Train LSTM classifier
+(The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)
+
+## LSTM classifier
+### Training:
 ```
-python nn_train.py --data data/new_england_preprocessed.p --model lstm --epochs 50
+python nn_train.py --data data/new_england_preprocessed.p --model lstm --epochs 50 --out lstm/
 ```
 
-## Test LSTM classifier
+### Testing:
 ```
-python nn_test.py --model out --data data/new_england_preprocessed.p
+python nn_test.py --model lstm --data data/new_england_preprocessed.p
 ```
+
+## Transformer classifier (using BERT)
+### Training:
+```
+python nn_train.py --data data/new-england_preprocessed.p --epochs 20 --model transformer --lr 0.00001 --out bert/
+```
+
+### Testing:
+```
+python nn_test.py --model bert --data data/new_england_preprocessed.p
+```
+
+# Collapsed force codes
+The `collapsed_force_codes` branch contains code for analyses that utilize collapsed force codes, as described in:
+
+**Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
+_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
 

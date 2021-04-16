@@ -12,4 +12,3 @@
 
 source activate questions-analysis
 python -u nn_train.py --data data/new-england_preprocessed.p --epochs 20 --model transformer --lr 0.00001 --out bert/
-

@@ -4,7 +4,13 @@ import argparse
 
 from nltk import word_tokenize
 
-from utils import parse_xml, get_xml_as_dict, calculate_frequencies, SPEECH_ACT_UNINTELLIGIBLE, SPEECH_ACT_NO_FUNCTION
+from utils import (
+    parse_xml,
+    get_xml_as_dict,
+    calculate_frequencies,
+    SPEECH_ACT_UNINTELLIGIBLE,
+    SPEECH_ACT_NO_FUNCTION,
+)
 
 SPEECH_ACT = "speech_act"
 
@@ -95,15 +101,19 @@ if __name__ == "__main__":
 
     frequencies = calculate_frequencies(data[SPEECH_ACT])
     print(f"Speech act frequencies:")
-    print({k: round(v,2) for k, v in frequencies.items()})
+    print({k: round(v, 2) for k, v in frequencies.items()})
 
-    speech_acts_relevant = [k for k, v in frequencies.items() if v >= .005]
-    print(f"Speech acts that form at least .5% of the data ({len(speech_acts_relevant)}): {speech_acts_relevant}")
+    speech_acts_relevant = [k for k, v in frequencies.items() if v >= 0.005]
+    print(
+        f"Speech acts that form at least .5% of the data ({len(speech_acts_relevant)}): {speech_acts_relevant}"
+    )
 
     data_child = data[data["speaker"] == "CHI"]
     frequencies_child = calculate_frequencies(data_child[SPEECH_ACT])
-    speech_acts_relevant_child = [k for k, v in frequencies_child.items() if v >= .005]
-    print(f"Speech acts that form at least .5% of the data of children's utterances ({len(speech_acts_relevant_child)}): {speech_acts_relevant_child}")
+    speech_acts_relevant_child = [k for k, v in frequencies_child.items() if v >= 0.005]
+    print(
+        f"Speech acts that form at least .5% of the data of children's utterances ({len(speech_acts_relevant_child)}): {speech_acts_relevant_child}"
+    )
 
     # Clean single-token utterances (these are only punctuation)
     data.loc[data.tokens.map(len) == 1, "tokens"] = ""
