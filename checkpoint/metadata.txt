@@ -1,0 +1,11 @@
+data:	data/new_england_preprocessed.p
+match_age:	None
+nb_occurrences:	5
+test_ratio:	0.0001
+use_bi_grams:	True
+use_action:	False
+use_pos:	True
+use_past:	False
+use_repetitions:	True
+use_past_actions:	False
+verbose:	False
