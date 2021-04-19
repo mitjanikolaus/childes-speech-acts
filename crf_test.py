@@ -104,6 +104,42 @@ def parse_args():
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
+    argparser.add_argument(
+        "--use-bi-grams",
+        "-bi",
+        action="store_true",
+        help="whether to use bi-gram features to train the algorithm",
+    )
+    argparser.add_argument(
+        "--use-action",
+        "-act",
+        action="store_true",
+        help="whether to use action features to train the algorithm, if they are in the data",
+    )
+    argparser.add_argument(
+        "--use-pos",
+        "-pos",
+        action="store_true",
+        help="whether to add POS tags to features",
+    )
+    argparser.add_argument(
+        "--use-past",
+        "-past",
+        action="store_true",
+        help="whether to add previous sentence as features",
+    )
+    argparser.add_argument(
+        "--use-repetitions",
+        "-rep",
+        action="store_true",
+        help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
+    )
+    argparser.add_argument(
+        "--use-past-actions",
+        "-pa",
+        action="store_true",
+        help="whether to add actions from the previous sentence to features",
+    )
 
     args = argparser.parse_args()
 
