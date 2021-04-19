@@ -7,7 +7,7 @@ This repository contains code accompanying the following papers:
 
 **Large-scale Study of Speech Acts' Development Using Automatic Labelling**  
 _In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
-Mitja Nikolaus, Juliette Maes, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi (* Joint first authors)
+Mitja Nikolaus*, Juliette Maes*, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi (*Joint first authors)
 
 **Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
 _In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
