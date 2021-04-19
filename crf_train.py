@@ -106,6 +106,7 @@ def add_feature_columns(
     use_pastact: bool = False,
     use_pos: bool = False,
     check_repetition: bool = False,
+    split_tokens: bool = False,
 ):
     """Function adding features to the data:
     * turn_length
@@ -116,7 +117,10 @@ def add_feature_columns(
     * number of repeated words
     * ratio of words that were repeated from previous sentence over sentence length
     """
-    p["tokens"] = p.tokens.apply(lambda x: str(x).lower().split(" "))
+    p["tokens"] = p.tokens
+    if split_tokens:
+        p["tokens"] = p.tokens.apply(lambda x: str(x).lower().split(" "))
+
     p["turn_length"] = p.tokens.apply(len)
 
     p["prev_speaker"] = p["speaker"].shift(1)

@@ -92,6 +92,7 @@ if __name__ == "__main__":
         use_past=args.use_past,
         use_pastact=args.use_past_actions,
         use_pos=args.use_pos,
+        split_tokens=True
     )
 
     data["features"] = data.apply(

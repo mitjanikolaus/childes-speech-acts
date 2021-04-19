@@ -301,6 +301,13 @@ if __name__ == "__main__":
         mode=args.prediction_mode,
     )
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+
+    # Filter for important columns
+    data_test["speech_act_predicted"] = data_test["y_pred"]
+    data_filtered = data_test[["file_id", "utterance_id", "child", "age_months", "tokens", "pos",
+                              "speaker", "speech_act", "speech_act_predicted"]]
+    data_filtered.to_csv(os.path.join("checkpoints", "crf", "speech_acts.csv"), index_label="index")
+
     data_test["pred_OK"] = data_test.apply(
         lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
     )
