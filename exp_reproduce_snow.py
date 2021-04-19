@@ -602,7 +602,11 @@ if __name__ == "__main__":
     print("Min num utterances: ", min_num_utterances)
 
     # Load annotated data for whole CHILDES
-    data_whole_childes = pd.read_hdf("~/data/speech_acts/data/speech_acts_chi.h5")
+    data_whole_childes = pd.read_csv("data/speech_acts.csv")
+    data_whole_childes.set_index("index", drop=True, inplace=True)
+
+    # Filter for children's utterances
+    data_whole_childes = data_whole_childes[data_whole_childes.speaker == CHILD]
 
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[

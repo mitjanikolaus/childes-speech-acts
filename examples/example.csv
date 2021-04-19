@@ -1,0 +1,101 @@
+,file_id,child_id,age_months,tokens,pos,speaker
+0,2765,2454,27,yeah .,co,Target_Child
+1,2765,2454,27,what was the book about ?,pro:int cop det:art n adv,Investigator
+2,2765,2454,27,ow .,co,Target_Child
+3,2765,2454,27,ow ?,co,Investigator
+4,2765,2454,27,yeah .,co,Target_Child
+5,2765,2454,27,want a bite of my cracker ?,v det:art n prep det:poss n,Investigator
+6,2765,2454,27,ow .,co,Target_Child
+7,2765,2454,27,ow what 's that ?,co pro:int pro:dem,Investigator
+8,2765,2454,27,Richard ?,n:prop,Investigator
+9,2765,2454,27,no .,co,Target_Child
+10,2765,2454,27,what 's he doing ?,pro:int pro:sub part,Investigator
+11,2765,2454,27,no yeah ?,co co,Target_Child
+12,2765,2454,27,dog .,v,Target_Child
+13,2765,2454,27,that 's a dog right ?,pro:dem det:art n adj,Investigator
+14,2765,2454,27,yeah .,co,Target_Child
+15,2765,2454,27,what 's the dog doing ?,pro:int det:art n part,Investigator
+16,2765,2454,27,rowf ruff .,on on,Target_Child
+17,2765,2454,27,rowf ?,on,Investigator
+18,2765,2454,27,ruff uff .,on on,Target_Child
+19,2765,2454,27,is that the sound the dog makes ?,cop pro:rel det:art n det:art n v,Investigator
+20,2765,2454,27,yeah ruff ruff .,co on on,Target_Child
+21,2765,2454,27,when does the dog say that ?,conj v det:art n v pro:dem,Investigator
+22,2765,2454,27,we 're going to have some tea oh what did mommy bring ?,pro:sub part inf v qn n co det:int v n v,Investigator
+23,2765,2454,27,the juice that 's orange juice .,det:art n pro:rel adj n,Target_Child
+24,2765,2454,27,that 's orange juice ?,pro:dem adj n,Investigator
+25,2765,2454,27,yeah .,co,Target_Child
+26,2765,2454,27,here I 'll hold your cracker no you can hold your cracker .,adv pro:sub v det:poss n co pro:per mod v det:poss n,Investigator
+27,2765,2454,27,da good juice .,det:art adj n,Target_Child
+28,2765,2454,27,good juice hm ?,adj n co,Investigator
+29,2765,2454,27,what 's mommy doing ?,pro:int n part,Investigator
+30,2765,2454,27,reading a paper .,part det:art n,Target_Child
+31,2765,2454,27,right can I have a bite of this cracker ?,adv mod pro:sub v det:art n prep pro:dem n,Investigator
+32,2765,2454,27,yeah .,co,Target_Child
+33,2765,2454,27,delicious what 's mommy doing now hm ?,adj pro:int n part adv co,Investigator
+34,2765,2454,27,yeah .,co,Target_Child
+35,2765,2454,27,can you ask Cindy if she wants milk or sugar in her tea ?,mod pro:per v n:prop conj pro:sub v n coord n prep det:poss n,Mother
+36,2765,2454,27,uhoh .,co,Target_Child
+37,2765,2454,27,uhoh what happened ?,co pro:int v,Investigator
+38,2765,2454,27,uhoh down in the shirt .,co adv prep det:art n,Target_Child
+39,2765,2454,27,what ?,pro:int,Investigator
+40,2765,2454,27,went on my shirt ?,v prep det:poss n,Investigator
+41,2765,2454,27,on Shem 's shirt .,prep n:prop n,Target_Child
+42,2765,2454,27,we have a shirt we have the same shirt .,pro:sub v det:art n pro:sub v det:art adj n,Investigator
+43,2765,2454,27,uhoh .,co,Investigator
+44,2765,2454,27,uhoh uhoh .,co co,Target_Child
+45,2765,2454,27,do you have these crackers every day after your nap ?,mod pro:per v pro:dem n qn n prep det:poss n,Investigator
+46,2765,2454,27,want my juice ?,v det:poss n,Investigator
+47,2765,2454,27,want some juice .,v qn n,Target_Child
+48,2765,2454,27,you want some more juice ?,pro:per v qn qn n,Investigator
+49,2765,2454,27,no !,co,Target_Child
+50,2765,2454,27,no .,co,Investigator
+51,2765,2454,27,what 's that ?,pro:int pro:dem,Target_Child
+52,2765,2454,27,what 's this ?,pro:int pro:dem,Investigator
+53,2765,2454,27,what 's this ?,pro:int pro:dem,Target_Child
+54,2765,2454,27,that 's a tape+recorder do you know what that is ?,pro:dem det:art v pro:per v pro:int pro:dem cop,Investigator
+55,2765,2454,27,yeah .,co,Target_Child
+56,2765,2454,27,what is it ?,pro:int aux pro:per,Investigator
+57,2765,2454,27,xxx .,,Target_Child
+58,2765,2454,27,what 's that ?,pro:int pro:dem,Target_Child
+59,2765,2454,27,what 's that ?,pro:int pro:dem,Target_Child
+60,2765,2454,27,that 's a tape+recorder do you know what a tape+recorder is ?,pro:dem det:art mod pro:per v pro:int det:art aux,Investigator
+61,2765,2454,27,yeah .,co,Target_Child
+62,2765,2454,27,what is it ?,pro:int aux pro:per,Investigator
+63,2765,2454,27,xxx .,,Target_Child
+64,2765,2454,27,it 's a xxx .,pro:per det:art,Target_Child
+65,2765,2454,27,it taperecords your voice it 's making a recording of your voice .,pro:per det:poss n pro:per part det:art part prep det:poss n,Investigator
+66,2765,2454,27,that 's my toy .,pro:dem det:poss n,Investigator
+67,2765,2454,27,uhoh !,co,Target_Child
+68,2765,2454,27,Shem was holding it funny .,n:prop aux part pro:per adj,Investigator
+69,2765,2454,27,uhoh .,co,Target_Child
+70,2765,2454,27,what are you holding ?,pro:int aux pro:per part,Investigator
+71,2765,2454,27,what are you holding ?,pro:int aux pro:per part,Investigator
+72,2765,2454,27,a cookie ?,det:art n,Target_Child
+73,2765,2454,27,a cookie you want some juice ?,det:art n pro:per v qn n,Investigator
+74,2765,2454,27,I want some more .,pro:sub v qn pro:indef,Target_Child
+75,2765,2454,27,you want some more ?,pro:per v qn pro:indef,Investigator
+76,2765,2454,27,you want some more of this ?,pro:per v qn qn prep pro:dem,Investigator
+77,2765,2454,27,yeah .,co,Target_Child
+78,2765,2454,27,what are these ?,pro:int aux pro:dem,Investigator
+79,2765,2454,27,crackers .,n,Target_Child
+80,2765,2454,27,more crackers .,qn n,Investigator
+81,2765,2454,27,uhoh .,co,Target_Child
+82,2765,2454,27,little bit of cracker .,adj n prep n,Target_Child
+83,2765,2454,27,what 's this called ?,pro:int pro:dem part,Investigator
+84,2765,2454,27,what 'd you just do ?,pro:int pro:per adv v,Investigator
+85,2765,2454,27,I made a bup .,pro:sub v det:art chi,Target_Child
+86,2765,2454,27,just bup ?,adv chi,Investigator
+87,2765,2454,27,Shem what are you doing to that cracker ?,n:prop pro:int aux pro:per part prep pro:dem n,Investigator
+88,2765,2454,27,Shem what are you doing to that cracker ?,n:prop pro:int aux pro:per part prep pro:dem n,Investigator
+89,2765,2454,27,hop .,n,Target_Child
+90,2765,2454,27,hop ?,n,Investigator
+91,2765,2454,27,mommy !,n,Target_Child
+92,2765,2454,27,mommy ?,n,Investigator
+93,2765,2454,27,what 's that ?,pro:int pro:dem,Target_Child
+94,2765,2454,27,tape+recorder .,,Investigator
+95,2765,2454,27,kakeeeporper .,wplay,Target_Child
+96,2765,2454,27,good that 's good tape+recorder .,adj pro:dem adj,Investigator
+97,2765,2454,27,xxx little baby again uhoh .,adj n adv co,Target_Child
+98,2765,2454,27,what 'd I just do to the cracker ?,pro:int pro:sub adv v prep det:art n,Investigator
+99,2765,2454,27,what did I do to the cracker ?,pro:int mod pro:sub v prep det:art n,Investigator

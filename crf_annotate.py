@@ -1,8 +1,7 @@
 import os
 import pickle
 import argparse
-from collections import Counter
-import json
+from pathlib import Path
 
 import seaborn as sns
 
@@ -28,7 +27,10 @@ def parse_args():
         help="folder containing model, features and metadata",
     )
     argparser.add_argument(
-        "--data", type=str, required=True, help="Path to preprocessed data to annotate"
+        "--data", type=str, required=True, help="Path to CSV with preprocessed data to annotate"
+    )
+    argparser.add_argument(
+        "--out", type=str, required=True, help="Directory to store output files."
     )
     argparser.add_argument(
         "--compare", type=str, help="Path to frequencies to compare to"
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     print(args)
 
     # Loading data
-    data = pd.read_hdf(args.data)
+    data = pd.read_csv(args.data)
 
     # Loading model
     model_path = args.model + os.sep + "model.pycrfsuite"
@@ -86,7 +88,6 @@ if __name__ == "__main__":
     data = add_feature_columns(
         data,
         use_action=args.use_action,
-        match_age=args.match_age,
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
         use_pastact=args.use_past_actions,
@@ -126,19 +127,13 @@ if __name__ == "__main__":
     )
     data["y_pred"] = [y for x in y_pred for y in x]
 
-    # Filter for children's and adults' utterances
-    data_children = data[data.speaker == CHILD]
-    data_adults = data[data.speaker != CHILD]
+    # Filter for important columns
+    data_filtered = data[["file_id", "child_id", "age_months", "tokens", "pos", "speaker", "y_pred"]]
 
-    speech_acts_adults = data_adults["y_pred"].tolist()
-
-    data_children.to_hdf("data/speech_acts_chi.h5", key="speech_acts")
-    data_adults.to_hdf("data/speech_acts_adu.h5", key="speech_acts")
+    Path(args.out).mkdir(parents=True, exist_ok=True)
+    data_filtered.to_csv(os.path.join(args.out, "speech_acts.csv"), index_label="index")
 
     if args.compare:
+        data_children = data_filtered[data.speaker == CHILD]
         frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())
         compare_frequencies(frequencies_children, args)
-
-    #
-    # for _, row in data.iterrows():
-    #     print(f"({row.y_pred}) {row.speaker}: {' '.join(row.tokens)}")

@@ -112,11 +112,11 @@ def add_feature_columns(
     * tags (if necessary): extract interchange/illocutionary from general tag
     * action_tokens (if necessary): splitting action sentence into individual words
     * age_months: matching age to experimental labels
-    * repeted_words:
+    * repeated_words:
     * number of repeated words
     * ratio of words that were repeated from previous sentence over sentence length
     """
-    p["tokens"] = p.tokens
+    p["tokens"] = p.tokens.apply(lambda x: str(x).lower().split(" "))
     p["turn_length"] = p.tokens.apply(len)
 
     p["prev_speaker"] = p["speaker"].shift(1)
@@ -157,7 +157,7 @@ def add_feature_columns(
         )
 
     if use_pos:
-        p["pos"] = p.pos.apply(lambda x: x.lower().split(" "))
+        p["pos"] = p.pos.apply(lambda x: str(x).lower().split(" "))
 
     # remove helper columns
     p = p.drop(

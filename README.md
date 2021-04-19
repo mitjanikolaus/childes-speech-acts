@@ -56,6 +56,31 @@ Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/
    ```
    python crf_test.py data/rollins_preprocessed.p -m checkpoints/crf/
    ```
+   
+## Apply the CRF classifier
+
+We provide a [trained checkpoint](checkpoint) of the CRF classifier. It can be applied to annotate new data.
+
+The data should be stored in a CSV file, containing the following columns 
+(see also [example.csv](examples/example.csv)).:
+- `file_id`: transcript ID  
+- `child_id`: ID of the target child of the transcript
+- `age_months`: child age in months
+- `tokens`: A string containing the tokens of the utterance (separated by spaces)
+- `pos`: part-of-speech tags for each token
+- `speaker`: A value of `Target_Child` if the current speaker is the child, any other value is treated as adult speaker. 
+ 
+An example for the creation of CSVs from
+childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.).
+
+Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
+```
+python crf_annotate.py --model checkpoint --data examples/example.csv --out data_annotated
+```
+
+An output CSV is stored to the indicated directory (`data_annotated`). It contains an additional column `y_pred` 
+in which the predicted speech act is stored.
+
 # Neural Networks
 (The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)
 

@@ -92,7 +92,7 @@ def load_utts():
                                     "file_id": transcript["transcript_id"],
                                     "child_id": utt["target_child_id"],
                                     "age_months": round(transcript["target_child_age"]),
-                                    "tokens": tokenized_utterance,
+                                    "tokens": " ".join(tokenized_utterance),
                                     "pos": utt["part_of_speech"],
                                     "speaker": utt["speaker_role"],
                                 }
@@ -107,4 +107,6 @@ if __name__ == "__main__":
 
     # Store utterances for future re-use
     data_path = f"data/utterances.h5"
+
+    data.rename(columns={'child_age': 'age_months'}, inplace=True)
     data.to_hdf(data_path, key="utterances")
