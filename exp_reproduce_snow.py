@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import seaborn as sns
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr, entropy
 
 from age_of_acquisition import TARGET_PRODUCTION, calc_ages_of_acquisition
 from preprocess import SPEECH_ACT, CHILD
@@ -316,6 +316,16 @@ def reproduce_num_speech_acts(data, data_whole_childes):
 
     results = results_snow.append(results_crf).append(results_childes)
 
+    # Calculate KL divergences:
+    for age in AGES:
+        kl_divergence = entropy(results_crf[results_crf.age == age].frac_children.to_list(),
+                                qk=results_snow[results_snow.age == age].frac_children.to_list())
+        print(f"KL Divergence (NewEngland, {age} months): {kl_divergence:.3f}")
+
+        kl_divergence = entropy(results_childes[results_childes.age == age].frac_children.to_list(),
+                                qk=results_snow[results_snow.age == age].frac_children.to_list())
+        print(f"KL Divergence (CHILDES, {age} months): {kl_divergence:.3f}")
+
     fig, (axes) = plt.subplots(3, 1, sharex="all")
 
     # Move title into figure
@@ -366,8 +376,12 @@ def calculate_freq_distributions(
     # Filter for speech acts analyzed
     frequencies = {s: f for s, f in frequencies.items() if s in speech_acts_analyzed}
 
+    # Add missing entries
+    frequencies_complete = dict.fromkeys(speech_acts_analyzed, 0)
+    frequencies_complete.update(frequencies)
+
     results = []
-    for s, f in frequencies.items():
+    for s, f in frequencies_complete.items():
         results.append(
             {
                 "source": source,
@@ -375,6 +389,9 @@ def calculate_freq_distributions(
                 "frequency": f,
             }
         )
+
+    results = pd.DataFrame(results)
+    results.sort_values(by=["speech_act"], inplace=True)
 
     return results
 
@@ -415,8 +432,14 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
             SOURCE_AUTOMATIC_CHILDES,
         )
 
-        results = pd.DataFrame(results_snow + results_crf + results_childes)
-        results.sort_values(by=["speech_act"], inplace=True)
+        # Calculate KL divergences:
+        kl_divergence = entropy(results_crf.frequency.to_list(), qk=results_snow.frequency.to_list())
+        print(f"KL Divergence (NewEngland, {age} months): {kl_divergence:.3f}")
+
+        kl_divergence = entropy(results_childes.frequency.to_list(), qk=results_snow.frequency.to_list())
+        print(f"KL Divergence (CHILDES, {age} months): {kl_divergence:.3f}")
+
+        results = pd.concat([results_snow, results_crf, results_childes])
 
         sns.barplot(
             ax=axes[i],
@@ -437,8 +460,10 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")
 
-        # axes[i].legend(loc="upper left", bbox_to_anchor=(0, 0.8))
-        axes[i].legend_.remove()
+        if i == 0:
+            axes[i].legend(loc="upper left", bbox_to_anchor=(0, 0.79))
+        else:
+            axes[i].legend_.remove()
 
         axes[i].set_ylim(0, 0.3)
 
