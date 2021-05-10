@@ -7,6 +7,7 @@ import pandas as pd
 
 import seaborn as sns
 from scipy.stats import spearmanr, entropy
+from scipy.spatial.distance import jensenshannon
 
 from age_of_acquisition import TARGET_PRODUCTION, calc_ages_of_acquisition
 from preprocess import SPEECH_ACT, CHILD
@@ -318,13 +319,33 @@ def reproduce_num_speech_acts(data, data_whole_childes):
 
     # Calculate KL divergences:
     for age in AGES:
-        kl_divergence = entropy(results_crf[results_crf.age == age].frac_children.to_list(),
-                                qk=results_snow[results_snow.age == age].frac_children.to_list())
+        kl_divergence = entropy(
+            results_crf[results_crf.age == age].frac_children.to_list(),
+            qk=results_snow[results_snow.age == age].frac_children.to_list(),
+        )
         print(f"KL Divergence (NewEngland, {age} months): {kl_divergence:.3f}")
 
-        kl_divergence = entropy(results_childes[results_childes.age == age].frac_children.to_list(),
-                                qk=results_snow[results_snow.age == age].frac_children.to_list())
+        kl_divergence = entropy(
+            results_childes[results_childes.age == age].frac_children.to_list(),
+            qk=results_snow[results_snow.age == age].frac_children.to_list(),
+        )
         print(f"KL Divergence (CHILDES, {age} months): {kl_divergence:.3f}")
+
+        jensen_shannon_distance = jensenshannon(
+            results_crf[results_crf.age == age].frac_children.to_list(),
+            results_snow[results_snow.age == age].frac_children.to_list(),
+        )
+        print(
+            f"Jensen-Shannon Distance (NewEngland, {age} months): {jensen_shannon_distance:.3f}"
+        )
+
+        jensen_shannon_distance = jensenshannon(
+            results_childes[results_childes.age == age].frac_children.to_list(),
+            results_snow[results_snow.age == age].frac_children.to_list(),
+        )
+        print(
+            f"Jensen-Shannon Distance (CHILDES, {age} months): {jensen_shannon_distance:.3f}"
+        )
 
     fig, (axes) = plt.subplots(3, 1, sharex="all")
 
@@ -433,11 +454,29 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         )
 
         # Calculate KL divergences:
-        kl_divergence = entropy(results_crf.frequency.to_list(), qk=results_snow.frequency.to_list())
+        kl_divergence = entropy(
+            results_crf.frequency.to_list(), qk=results_snow.frequency.to_list()
+        )
         print(f"KL Divergence (NewEngland, {age} months): {kl_divergence:.3f}")
 
-        kl_divergence = entropy(results_childes.frequency.to_list(), qk=results_snow.frequency.to_list())
+        kl_divergence = entropy(
+            results_childes.frequency.to_list(), qk=results_snow.frequency.to_list()
+        )
         print(f"KL Divergence (CHILDES, {age} months): {kl_divergence:.3f}")
+
+        jensen_shannon_distance = jensenshannon(
+            results_crf.frequency.to_list(), results_snow.frequency.to_list()
+        )
+        print(
+            f"Jensen-Shannon Distance (NewEngland, {age} months): {jensen_shannon_distance:.3f}"
+        )
+
+        jensen_shannon_distance = jensenshannon(
+            results_childes.frequency.to_list(), results_snow.frequency.to_list()
+        )
+        print(
+            f"Jensen-Shannon Distance (CHILDES, {age} months): {jensen_shannon_distance:.3f}"
+        )
 
         results = pd.concat([results_snow, results_crf, results_childes])
 
