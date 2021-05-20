@@ -12,6 +12,8 @@ from sklearn.metrics import (
     cohen_kappa_score,
     accuracy_score,
 )
+from scipy.stats import spearmanr
+
 import pycrfsuite
 
 from preprocess import SPEECH_ACT, ADULT
@@ -380,6 +382,12 @@ if __name__ == "__main__":
         data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3
     )
     print(report)
+
+    report_dict = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3, output_dict=True)
+    report_df = pd.DataFrame(report_dict).T
+    corr, p_value = spearmanr(report_df["f1-score"].to_list(), report_df["support"].to_list())
+
+    print(f"Spearman correlation between support and f-score: {corr} (p = {p_value})")
 
     # Write excel with all reports
     report_to_file(report_d, report_path)
