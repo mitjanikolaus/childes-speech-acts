@@ -374,6 +374,7 @@ def calc_ages_of_acquisition(
             and data_children[column_name_speech_act].value_counts()[s]
             > threshold_speech_act_observed_production
         ]
+        observed_speech_acts = ["ST","MK","YQ","SA","RR","FP"]
 
         fraction_producing_speech_act = get_fraction_producing_speech_acts(
             data_children,
@@ -475,4 +476,6 @@ if __name__ == "__main__":
     path = f"results/age_of_acquisition_{args.target}.p"
     pickle.dump(ages_of_acquisition, open(path, "wb"))
 
+    plt.axhline(y=0.5, linestyle="--")
+    plt.xlim(10, 60)
     plt.show()
