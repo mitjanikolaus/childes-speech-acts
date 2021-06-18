@@ -374,7 +374,7 @@ def calc_ages_of_acquisition(
             and data_children[column_name_speech_act].value_counts()[s]
             > threshold_speech_act_observed_production
         ]
-        observed_speech_acts = ["ST","MK","YQ","SA","RR","FP"]
+        # observed_speech_acts = ["ST","MK","YQ","SA","RR","FP"]
 
         fraction_producing_speech_act = get_fraction_producing_speech_acts(
             data_children,
