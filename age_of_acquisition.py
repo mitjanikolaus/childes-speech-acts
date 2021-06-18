@@ -397,12 +397,12 @@ def calc_ages_of_acquisition(
 
     sns.set_palette(COLORS_PLOT_CATEGORICAL)
 
-    g = sns.FacetGrid(data=fraction_data, hue="speech_act")
+    g = sns.FacetGrid(data=fraction_data, hue="speech_act", height=6, aspect=1.3)
     g.set(ylim=(0, 1), xlim=(min(ages) - 4, max_age))
     g.map(sns.regplot, "month", "fraction", truncate=False, logistic=True, ci=None)
+    # g.map(sns.scatterplot, "month", "fraction")
     h, l = g.axes[0][0].get_legend_handles_labels()
     g.fig.legend(h, l, loc="upper center", ncol=10)
-    plt.subplots_adjust(top=0.7, bottom=0.09, left=0.057)
     plt.xlabel("age (months)")
     if target == TARGET_PRODUCTION:
         plt.ylabel("fraction of children producing the target speech act")
@@ -478,4 +478,6 @@ if __name__ == "__main__":
 
     plt.axhline(y=0.5, linestyle="--")
     plt.xlim(10, 60)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.9, bottom=0.09)
     plt.show()
