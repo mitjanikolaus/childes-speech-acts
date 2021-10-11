@@ -86,7 +86,7 @@ def plot_sankey(
     fig.update_layout(
         hovermode="x",
         title=sk_title,
-        font=dict(size=10, color="black"),
+        font=dict(size=25, color="black"),
     )
 
     return fig
