@@ -473,8 +473,11 @@ if __name__ == "__main__":
         add_extra_datapoints=ADD_EXTRA_DATAPOINTS,
     )
 
-    path = f"results/age_of_acquisition_{args.target}.p"
-    pickle.dump(ages_of_acquisition, open(path, "wb"))
+    path = f"results/age_of_acquisition_{args.target}.csv"
+    ages_of_acquisition = pd.DataFrame.from_records([ages_of_acquisition]).T
+    ages_of_acquisition.index.rename('speech_act', inplace=True)
+    ages_of_acquisition.rename(columns={0: "age_of_acquisition"}, inplace=True)
+    ages_of_acquisition.to_csv(path)
 
     plt.axhline(y=0.5, linestyle="--")
     plt.xlim(10, 60)
