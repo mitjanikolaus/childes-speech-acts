@@ -8,14 +8,8 @@ from utils import (
     parse_xml,
     get_xml_as_dict,
     calculate_frequencies,
-    SPEECH_ACT_UNINTELLIGIBLE,
-    SPEECH_ACT_NO_FUNCTION,
+    CHILD, ADULT, SPEECH_ACT, PATH_NEW_ENGLAND_UTTERANCES,
 )
-
-SPEECH_ACT = "speech_act"
-
-CHILD = "CHI"
-ADULT = "ADU"
 
 
 def read_files(input_dir, input_format="xml"):
@@ -69,7 +63,7 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     # Data files
     argparser.add_argument("--input-dir", "-i", type=str, required=True)
-    argparser.add_argument("--output-path", "-o", type=str, required=True)
+    argparser.add_argument("--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES)
 
     argparser.add_argument(
         "--drop-untagged",

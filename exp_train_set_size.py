@@ -1,15 +1,9 @@
 import matplotlib.pyplot as plt
 
-import pandas as pd
-
-
-import seaborn as sns
-
 from crf_train import train
+from utils import PATH_NEW_ENGLAND_UTTERANCES
 
 if __name__ == "__main__":
-
-    data_file = "data/new_england_preprocessed.p"
 
     test_percentages = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.0]
 
@@ -17,7 +11,7 @@ if __name__ == "__main__":
     num_utterances = []
     for train_set_percentage in test_percentages:
         acc, num = train(
-            data_file,
+            PATH_NEW_ENGLAND_UTTERANCES,
             use_bi_grams=True,
             use_action=False,
             use_repetitions=True,

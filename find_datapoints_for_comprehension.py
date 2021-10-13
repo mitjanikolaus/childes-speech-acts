@@ -2,12 +2,12 @@ from collections import Counter
 
 import pandas as pd
 
-from preprocess import SPEECH_ACT, CHILD, ADULT
+from utils import SPEECH_ACT, CHILD, ADULT, PATH_NEW_ENGLAND_UTTERANCES
 
 
 def find_speech_acts(source=ADULT, target=CHILD, min_occurrences=0):
     # Load data
-    data = pd.read_pickle("data/new_england_preprocessed.p")
+    data = pd.read_pickle(PATH_NEW_ENGLAND_UTTERANCES)
 
     match_age = [14, 20, 32]
     # data["age_months"] = data["age_months"].apply(age_bin)

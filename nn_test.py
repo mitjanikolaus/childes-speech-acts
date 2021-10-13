@@ -9,7 +9,6 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
     cohen_kappa_score,
-    plot_confusion_matrix,
 )
 from torch.utils.data import DataLoader
 
@@ -17,8 +16,8 @@ import matplotlib.pyplot as plt
 
 from nn_dataset import SpeechActsDataset
 from nn_train import prepare_data
-from utils import TRAIN_TEST_SPLIT_RANDOM_STATE, make_train_test_splits, get_words
-from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD, preprend_speaker_token
+from utils import make_train_test_splits, get_words, PATH_NEW_ENGLAND_UTTERANCES
+from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -208,13 +207,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data",
         type=str,
-        default="data/new_england_preprocessed.p",
+        default=PATH_NEW_ENGLAND_UTTERANCES,
         help="path to the data corpus",
     )
     parser.add_argument(
         "--model",
         type=str,
-        default="data/",
+        default=os.path.expanduser("~/data/speech_acts/data/"),
         help="directory of the model checkpoint and vocabs",
     )
     parser.add_argument(

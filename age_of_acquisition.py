@@ -1,5 +1,4 @@
 import argparse
-import pickle
 import warnings
 
 import matplotlib.pyplot as plt
@@ -10,8 +9,9 @@ import pandas as pd
 
 import seaborn as sns
 
-from preprocess import SPEECH_ACT, CHILD
-from utils import COLORS_PLOT_CATEGORICAL, age_bin
+from utils import SPEECH_ACT, CHILD, PATH_NEW_ENGLAND_UTTERANCES, AGES
+from process_contingencies import get_contingency_data
+from utils import COLORS_PLOT_CATEGORICAL, age_bin, SOURCE_SNOW, SOURCE_CRF, TARGET_PRODUCTION, TARGET_COMPREHENSION
 
 MIN_NUM_UTTERANCES = 0
 MIN_CHILDREN_REQUIRED = 0
@@ -190,7 +190,6 @@ COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES = [
     "YQ",
     "RQ",
     "CM",
-    "OO",
     "QN",
     "TX",
     "PR",
@@ -209,7 +208,6 @@ COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES = [
     "SI",
     "EI",
     "EQ",
-    "YY",
     "CT",
     "PM",
     "AA",
@@ -236,15 +234,16 @@ COMPREHENSION_SPEECH_ACTS = COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES
 
 
 def get_fraction_contingent_responses(
-    ages, observed_speech_acts, add_extra_datapoints=True
+    data, ages, observed_speech_acts, add_extra_datapoints=True, data_source=SOURCE_SNOW,
 ):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
+    if data_source not in (SOURCE_SNOW, SOURCE_CRF):
+        raise ValueError("Unknown data source: ", data_source)
+
     fraction_contingent_responses = []
 
-    for month in ages:
-        contingency_data = pd.read_csv(
-            f"adjacency_pairs/ADU-CHI_age_{month}_contingency.csv"
-        )
+    for age_months in ages:
+        contingency_data = get_contingency_data(data, age_months, data_source)
 
         for speech_act in observed_speech_acts:
             if add_extra_datapoints:
@@ -265,7 +264,7 @@ def get_fraction_contingent_responses(
                     }
                 )
 
-            if speech_act in COMPREHENSION_DATA_POINTS[month]:
+            if speech_act in COMPREHENSION_DATA_POINTS[age_months]:
                 fraction = contingency_data[
                     (contingency_data["source"] == speech_act)
                     & (contingency_data["contingency"] == 1)
@@ -274,7 +273,7 @@ def get_fraction_contingent_responses(
                 fraction_contingent_responses.append(
                     {
                         "speech_act": speech_act,
-                        "month": month,
+                        "month": age_months,
                         "fraction": fraction,
                     }
                 )
@@ -358,7 +357,7 @@ def calc_ages_of_acquisition(
     data,
     observed_speech_acts,
     ages,
-    column_name_speech_act=SPEECH_ACT,
+    data_source=SOURCE_SNOW,
     add_extra_datapoints=True,
     max_age=MAX_AGE,
     threshold_speech_act_observed_production=THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION,
@@ -366,6 +365,13 @@ def calc_ages_of_acquisition(
 
     if target == TARGET_PRODUCTION:
         data_children = data[data["speaker"] == CHILD]
+
+        if data_source == SOURCE_SNOW:
+            column_name_speech_act = SPEECH_ACT
+        elif data_source == SOURCE_CRF:
+            column_name_speech_act = "y_pred"
+        else:
+            raise ValueError("Unknown data source: ", data_source)
 
         observed_speech_acts = [
             s
@@ -387,10 +393,8 @@ def calc_ages_of_acquisition(
         fraction_data = fraction_producing_speech_act
 
     elif target == TARGET_COMPREHENSION:
-        observed_speech_acts = COMPREHENSION_SPEECH_ACTS
-
         fraction_contingent_responses = get_fraction_contingent_responses(
-            ages, observed_speech_acts, add_extra_datapoints
+            data, ages, observed_speech_acts, add_extra_datapoints, data_source
         )
 
         fraction_data = fraction_contingent_responses
@@ -400,7 +404,7 @@ def calc_ages_of_acquisition(
     g = sns.FacetGrid(data=fraction_data, hue="speech_act", height=6, aspect=1.3)
     g.set(ylim=(0, 1), xlim=(min(ages) - 4, max_age))
     g.map(sns.regplot, "month", "fraction", truncate=False, logistic=True, ci=None)
-    # g.map(sns.scatterplot, "month", "fraction")
+
     h, l = g.axes[0][0].get_legend_handles_labels()
     g.fig.legend(h, l, loc="upper center", ncol=10)
     plt.xlabel("age (months)")
@@ -433,12 +437,12 @@ def calc_ages_of_acquisition(
         print(
             f"Age of acquisition of {speech_act}: {age_of_acquisition[speech_act]:.1f}"
         )
+        
+    # Reset color palette to default for upcoming plots
+    sns.set_palette("tab10")
 
     return age_of_acquisition
 
-
-TARGET_PRODUCTION = "production"
-TARGET_COMPREHENSION = "comprehension"
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
@@ -448,12 +452,18 @@ if __name__ == "__main__":
         default=TARGET_PRODUCTION,
         choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION],
     )
+    argparser.add_argument(
+        "--data-source",
+        type=str,
+        default=SOURCE_SNOW,
+        choices=[SOURCE_SNOW, SOURCE_CRF],
+    )
 
     args = argparser.parse_args()
 
     print("Loading data...")
 
-    data = pd.read_pickle("data/new_england_preprocessed.p")
+    data = pd.read_pickle(PATH_NEW_ENGLAND_UTTERANCES)
 
     # map ages to corresponding bins
     data["age_months"] = data["age_months"].apply(age_bin)
@@ -463,17 +473,19 @@ if __name__ == "__main__":
     # Filter out unintelligible acts
     observed_speech_acts = [s for s in observed_speech_acts if s not in ["YY", "OO"]]
 
-    ages = [14, 20, 32]
+    if args.target == TARGET_COMPREHENSION:
+        observed_speech_acts = COMPREHENSION_SPEECH_ACTS
 
     ages_of_acquisition = calc_ages_of_acquisition(
         args.target,
         data,
         observed_speech_acts,
-        ages,
+        AGES,
+        data_source=args.data_source,
         add_extra_datapoints=ADD_EXTRA_DATAPOINTS,
     )
 
-    path = f"results/age_of_acquisition_{args.target}.csv"
+    path = f"results/age_of_acquisition_{args.target}_{args.data_source}.csv"
     ages_of_acquisition = pd.DataFrame.from_records([ages_of_acquisition]).T
     ages_of_acquisition.index.rename('speech_act', inplace=True)
     ages_of_acquisition.rename(columns={0: "age_of_acquisition"}, inplace=True)

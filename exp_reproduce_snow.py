@@ -1,4 +1,3 @@
-import math
 import pickle
 
 import matplotlib.pyplot as plt
@@ -9,200 +8,16 @@ import seaborn as sns
 from scipy.stats import spearmanr, entropy
 from scipy.spatial.distance import jensenshannon
 
-from age_of_acquisition import TARGET_PRODUCTION, calc_ages_of_acquisition
-from preprocess import SPEECH_ACT, CHILD
-from utils import age_bin, calculate_frequencies
+from age_of_acquisition import calc_ages_of_acquisition, COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES, MAX_AGE
+from utils import age_bin, calculate_frequencies, SOURCE_CRF, SOURCE_SNOW, TARGET_PRODUCTION, TARGET_COMPREHENSION, \
+    AGES, load_whole_childes_data, SPEECH_ACT, CHILD, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED
 
-AGES = [14, 20, 32]
-AGES_LONG = [14, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54]
-
-SOURCE_SNOW = "Data from Snow et al. (1996)"
-SOURCE_AUTOMATIC_NEW_ENGLAND = "Automatically Annotated Data (New England)"
-SOURCE_AUTOMATIC_CHILDES = "Automatically Annotated Data (English CHILDES)"
-ORDER = [SOURCE_SNOW, SOURCE_AUTOMATIC_NEW_ENGLAND, SOURCE_AUTOMATIC_CHILDES]
+SOURCE_SNOW_LABEL = "Data from Snow et al. (1996)"
+SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL = "Automatically Annotated Data (New England)"
+SOURCE_AUTOMATIC_CHILDES_LABEL = "Automatically Annotated Data (English CHILDES)"
+ORDER = [SOURCE_SNOW_LABEL, SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL, SOURCE_AUTOMATIC_CHILDES_LABEL]
 
 MAX_NUM_SPEECH_ACT_TYPES = 25
-
-TRANSCRIPTS_NEW_ENGLAND = [
-    3580,
-    3581,
-    3582,
-    3583,
-    3584,
-    3585,
-    3586,
-    3587,
-    3588,
-    3589,
-    3590,
-    3591,
-    3592,
-    3593,
-    3594,
-    3595,
-    3596,
-    3597,
-    3598,
-    3599,
-    3600,
-    3601,
-    3602,
-    3603,
-    3604,
-    3605,
-    3606,
-    3607,
-    3608,
-    3609,
-    3610,
-    3611,
-    3612,
-    3613,
-    3614,
-    3615,
-    3616,
-    3617,
-    3618,
-    3619,
-    3620,
-    3621,
-    3622,
-    3623,
-    3624,
-    3625,
-    3626,
-    3627,
-    3628,
-    3629,
-    3630,
-    3631,
-    3632,
-    3633,
-    3634,
-    3635,
-    3636,
-    3637,
-    3638,
-    3639,
-    3640,
-    3641,
-    3642,
-    3643,
-    3644,
-    3645,
-    3646,
-    3647,
-    3648,
-    3649,
-    3650,
-    3651,
-    3652,
-    3653,
-    3654,
-    3655,
-    3656,
-    3657,
-    3658,
-    3659,
-    3660,
-    3661,
-    3662,
-    3663,
-    3664,
-    3665,
-    3666,
-    3667,
-    3668,
-    3669,
-    3670,
-    3671,
-    3672,
-    3673,
-    3674,
-    3675,
-    3676,
-    3677,
-    3678,
-    3679,
-    3680,
-    3681,
-    3682,
-    3683,
-    3684,
-    3685,
-    3686,
-    3687,
-    3688,
-    3689,
-    3690,
-    3691,
-    3692,
-    3693,
-    3694,
-    3695,
-    3696,
-    3697,
-    3698,
-    3699,
-    3700,
-    3701,
-    3702,
-    3703,
-    3704,
-    3705,
-    3706,
-    3707,
-    3708,
-    3709,
-    3710,
-    3711,
-    3712,
-    3713,
-    3714,
-    3715,
-    3716,
-    3717,
-    3718,
-    3719,
-    3720,
-    3721,
-    3722,
-    3723,
-    3724,
-    3725,
-    3726,
-    3727,
-    3728,
-    3729,
-    3730,
-    3731,
-    3732,
-    3733,
-    3734,
-    3735,
-    3736,
-    3737,
-    3738,
-    3739,
-    3740,
-    3741,
-    3742,
-    3743,
-    3744,
-    3745,
-    3746,
-    3747,
-    3748,
-    3749,
-    3750,
-    3751,
-    3752,
-    3753,
-    3754,
-    3755,
-    3756,
-    3757,
-]
 
 AGE_OF_ACQUISITION_MIN_DATAPOINTS = 2
 AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA = [
@@ -257,7 +72,6 @@ AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA_NO_DECLINE = [
     "AA",
     "SC",
 ]
-AGE_OF_ACQUISITION_MAX_AGE = 12 * 18
 
 
 def calculate_num_speech_act_types(data, column_name_speech_act):
@@ -307,13 +121,13 @@ def calculate_num_speech_act_types(data, column_name_speech_act):
 
 def reproduce_num_speech_acts(data, data_whole_childes):
     results_snow = calculate_num_speech_act_types(data, SPEECH_ACT)
-    results_snow["source"] = SOURCE_SNOW
+    results_snow["source"] = SOURCE_SNOW_LABEL
 
     results_crf = calculate_num_speech_act_types(data, "y_pred")
-    results_crf["source"] = SOURCE_AUTOMATIC_NEW_ENGLAND
+    results_crf["source"] = SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL
 
     results_childes = calculate_num_speech_act_types(data_whole_childes, "y_pred")
-    results_childes["source"] = SOURCE_AUTOMATIC_CHILDES
+    results_childes["source"] = SOURCE_AUTOMATIC_CHILDES_LABEL
 
     results = results_snow.append(results_crf).append(results_childes)
 
@@ -440,17 +254,17 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
 
     for i, age in enumerate(AGES):
         results_snow = calculate_freq_distributions(
-            data, SPEECH_ACT, speech_acts_analyzed, age, SOURCE_SNOW
+            data, SPEECH_ACT, speech_acts_analyzed, age, SOURCE_SNOW_LABEL
         )
         results_crf = calculate_freq_distributions(
-            data, "y_pred", speech_acts_analyzed, age, SOURCE_AUTOMATIC_NEW_ENGLAND
+            data, "y_pred", speech_acts_analyzed, age, SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL
         )
         results_childes = calculate_freq_distributions(
             data_whole_childes,
             "y_pred",
             speech_acts_analyzed,
             age,
-            SOURCE_AUTOMATIC_CHILDES,
+            SOURCE_AUTOMATIC_CHILDES_LABEL,
         )
 
         # Calculate KL divergences:
@@ -512,50 +326,53 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
     plt.show()
 
 
-def reproduce_speech_act_age_of_acquisition(data, data_whole_childes):
-    observed_speech_acts = AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA
+def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_measure=TARGET_PRODUCTION):
+    if target_measure == TARGET_PRODUCTION:
+        observed_speech_acts = AGE_OF_ACQUISITION_SPEECH_ACTS_ENOUGH_DATA
+    else:
+        observed_speech_acts = COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES
 
     ages_of_acquisition_snow = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
+        target_measure,
         data,
         observed_speech_acts,
         AGES,
-        SPEECH_ACT,
+        data_source=SOURCE_SNOW,
         add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
     )
 
     ages_of_acquisition_crf = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
+        target_measure,
         data,
         observed_speech_acts,
         AGES,
-        "y_pred",
+        data_source=SOURCE_CRF,
         add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
     )
 
     ages_of_acquisition_childes = calc_ages_of_acquisition(
-        TARGET_PRODUCTION,
+        target_measure,
         data_whole_childes,
         observed_speech_acts,
         AGES,
-        "y_pred",
+        SOURCE_CRF,
         add_extra_datapoints=False,
-        max_age=AGE_OF_ACQUISITION_MAX_AGE,
+        max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
     )
 
     # ages_of_acquisition_childes_long = calc_ages_of_acquisition(
-    #     TARGET_PRODUCTION,
+    #     target_measure,
     #     data_whole_childes,
     #     observed_speech_acts,
     #     AGES_LONG,
-    #     "y_pred",
+    #     SOURCE_CRF,
     #     add_extra_datapoints=False,
-    #     max_age=AGE_OF_ACQUISITION_MAX_AGE,
+    #     max_age=MAX_AGE,
     #     threshold_speech_act_observed_production=0,
     # )
 
@@ -650,50 +467,13 @@ def convert_to_ranks(ages_of_acquisition):
 
 if __name__ == "__main__":
     print("Loading data...")
-    data = pickle.load(open("data/new_england_reproduced_crf.p", "rb"))
+    data = pickle.load(open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "rb"))
 
     # map ages to corresponding bins
     data["age_months"] = data["age_months"].apply(age_bin)
 
-    # calculate minimum number of utterances for each age group
-    min_num_utterances = {}
-    for age in AGES:
-        data_age = data[(data.age_months == age) & (data.speaker == CHILD)]
-        lengths = data_age.groupby(by=["file_id"]).agg(
-            length=("utterance_id", lambda x: len(x))
-        )
-        min_num_utterances[age] = lengths.length.min()
-    print("Min num utterances: ", min_num_utterances)
-
     # Load annotated data for whole CHILDES
-    data_whole_childes = pd.read_csv("data/speech_acts.csv")
-    data_whole_childes.set_index("index", drop=True, inplace=True)
-
-    # Filter for children's utterances
-    data_whole_childes = data_whole_childes[data_whole_childes.speaker == CHILD]
-
-    # Filter out New England corpus transcripts
-    data_whole_childes = data_whole_childes[
-        ~data_whole_childes.file_id.isin(TRANSCRIPTS_NEW_ENGLAND)
-    ]
-
-    # Filter for min num utterances
-    for age in AGES:
-        lengths = (
-            data_whole_childes[data_whole_childes.age_months == age]
-            .groupby(by=["file_id"])
-            .agg(length=("file_id", lambda x: len(x)))
-        )
-        transcripts_too_short = lengths[
-            lengths.length < min_num_utterances[age]
-        ].index.to_list()
-
-        print(
-            f"Filtering out {len(transcripts_too_short)} transcripts that are too short (age {age} months)"
-        )
-        data_whole_childes = data_whole_childes[
-            ~data_whole_childes.file_id.isin(transcripts_too_short)
-        ]
+    data_whole_childes = load_whole_childes_data()
 
     print(
         "Number of analyzed transcripts in CHILDES: ",
@@ -714,7 +494,9 @@ if __name__ == "__main__":
         ),
     )
 
-    reproduce_speech_act_age_of_acquisition(data, data_whole_childes)
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_PRODUCTION)
+
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
 
     # reproduce_speech_act_distribution(data, data_whole_childes)
 

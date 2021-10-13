@@ -1,0 +1,1087 @@
+"source","target","source_description","target_description","contingency"
+"AA","OO","Answer in the affirmative to yes/no question.","Unintelligible vocalization.",0
+"AA","FP","Answer in the affirmative to yes/no question.","Ask for permission to carry out act.",1
+"AA","DW","Answer in the affirmative to yes/no question.","Disagree with proposition expressed by previous speaker.",0
+"AA","AD","Answer in the affirmative to yes/no question.","Agree to carry out an act requested or proposed by other.",0
+"AA","AA","Answer in the affirmative to yes/no question.","Answer in the affirmative to yes/no question.",0
+"AA","CL","Answer in the affirmative to yes/no question.","Call attention to hearer by name or by substitute exclamations",1
+"AA","MK","Answer in the affirmative to yes/no question.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AA","ET","Answer in the affirmative to yes/no question.","Express enthusiasm for hearer's performance.",0
+"AA","AP","Answer in the affirmative to yes/no question.","Agree with proposition or proposal expressed by previous speaker",0
+"AA","PF","Answer in the affirmative to yes/no question.","Prohibit/forbid/protest hearer's performance of an act",0
+"AA","PA","Answer in the affirmative to yes/no question.","Permit hearer to perform act.",0
+"AA","ST","Answer in the affirmative to yes/no question.","Make a declarative statement.",1
+"AA","RR","Answer in the affirmative to yes/no question.","Request to repeat utterance.",1
+"AA","PR","Answer in the affirmative to yes/no question.","Perform verbal move in game.",1
+"AA","AC","Answer in the affirmative to yes/no question.","Answer calls/ show attentiveness to communications.",0
+"AA","QN","Answer in the affirmative to yes/no question.","Ask a product-question (wh-question)",1
+"AA","RP","Answer in the affirmative to yes/no question.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AA","SC","Answer in the affirmative to yes/no question.","Complete statement or other utterance in compliance with request.",0
+"AA","SI","Answer in the affirmative to yes/no question.","State intent to carry out act by speaker.",1
+"AA","YY","Answer in the affirmative to yes/no question.","Make a word-like utterance without clear function.",0
+"AA","TO","Answer in the affirmative to yes/no question.","Mark transfer of object to hearer",1
+"AA","RT","Answer in the affirmative to yes/no question.","Repeat or imitate other's utterance.",1
+"AA","RD","Answer in the affirmative to yes/no question.","Refuse to carry out an act requested or proposed by other.",0
+"AA","YQ","Answer in the affirmative to yes/no question.","Ask a yes/no question.",1
+"AB","AD","Approve of appropriate behavior.","Agree to carry out an act requested or proposed by other.",0
+"AB","RD","Approve of appropriate behavior.","Refuse to carry out an act requested or proposed by other.",0
+"AB","PR","Approve of appropriate behavior.","Perform verbal move in game.",1
+"AB","CL","Approve of appropriate behavior.","Call attention to hearer by name or by substitute exclamations",1
+"AB","DS","Approve of appropriate behavior.","Disapprove scold protest disruptive behavior.",0
+"AB","YQ","Approve of appropriate behavior.","Ask a yes/no question.",1
+"AB","OO","Approve of appropriate behavior.","Unintelligible vocalization.",0
+"AB","ST","Approve of appropriate behavior.","Make a declarative statement.",1
+"AB","SI","Approve of appropriate behavior.","State intent to carry out act by speaker.",1
+"AB","RT","Approve of appropriate behavior.","Repeat or imitate other's utterance.",1
+"AB","MK","Approve of appropriate behavior.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AB","DC","Approve of appropriate behavior.","Create a new state of affairs by declaration",1
+"AB","YY","Approve of appropriate behavior.","Make a word-like utterance without clear function.",0
+"AB","QN","Approve of appropriate behavior.","Ask a product-question (wh-question)",1
+"AB","ED","Approve of appropriate behavior.","Exclaim in disapproval.",0
+"AB","RP","Approve of appropriate behavior.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AB","TO","Approve of appropriate behavior.","Mark transfer of object to hearer",1
+"AC","AD","Answer calls/ show attentiveness to communications.","Agree to carry out an act requested or proposed by other.",1
+"AC","CS","Answer calls/ show attentiveness to communications.","Counter-suggestion/ an indirect refusal.",0
+"AC","TX","Answer calls/ show attentiveness to communications.","Read or recite written text aloud.",1
+"AC","YQ","Answer calls/ show attentiveness to communications.","Ask a yes/no question.",1
+"AC","XA","Answer calls/ show attentiveness to communications.","Exhibit attentiveness to hearer.",1
+"AC","SA","Answer calls/ show attentiveness to communications.","Answer a wh-question with a statement.",0
+"AC","PF","Answer calls/ show attentiveness to communications.","Prohibit/forbid/protest hearer's performance of an act",1
+"AC","GR","Answer calls/ show attentiveness to communications.","Give reason/ justify a request for an action refusal or prohibition",1
+"AC","DC","Answer calls/ show attentiveness to communications.","Create a new state of affairs by declaration",1
+"AC","RQ","Answer calls/ show attentiveness to communications.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"AC","AC","Answer calls/ show attentiveness to communications.","Answer calls/ show attentiveness to communications.",0
+"AC","ED","Answer calls/ show attentiveness to communications.","Exclaim in disapproval.",1
+"AC","RR","Answer calls/ show attentiveness to communications.","Request to repeat utterance.",1
+"AC","SS","Answer calls/ show attentiveness to communications.","Signal to start performing an act such as running or rolling a ball",1
+"AC","ET","Answer calls/ show attentiveness to communications.","Express enthusiasm for hearer's performance.",1
+"AC","WD","Answer calls/ show attentiveness to communications.","Warn of danger.",1
+"AC","RD","Answer calls/ show attentiveness to communications.","Refuse to carry out an act requested or proposed by other.",1
+"AC","MK","Answer calls/ show attentiveness to communications.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AC","OO","Answer calls/ show attentiveness to communications.","Unintelligible vocalization.",0
+"AC","DS","Answer calls/ show attentiveness to communications.","Disapprove scold protest disruptive behavior.",0
+"AC","PR","Answer calls/ show attentiveness to communications.","Perform verbal move in game.",1
+"AC","QN","Answer calls/ show attentiveness to communications.","Ask a product-question (wh-question)",1
+"AC","FP","Answer calls/ show attentiveness to communications.","Ask for permission to carry out act.",1
+"AC","TO","Answer calls/ show attentiveness to communications.","Mark transfer of object to hearer",1
+"AC","CL","Answer calls/ show attentiveness to communications.","Call attention to hearer by name or by substitute exclamations",0
+"AC","YY","Answer calls/ show attentiveness to communications.","Make a word-like utterance without clear function.",0
+"AC","RP","Answer calls/ show attentiveness to communications.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AC","RT","Answer calls/ show attentiveness to communications.","Repeat or imitate other's utterance.",1
+"AC","SI","Answer calls/ show attentiveness to communications.","State intent to carry out act by speaker.",1
+"AC","ST","Answer calls/ show attentiveness to communications.","Make a declarative statement.",1
+"AD","EI","Agree to carry out an act requested or proposed by other.","Elicit imitation of word or sentence by modelling or by explicit command",1
+"AD","PR","Agree to carry out an act requested or proposed by other.","Perform verbal move in game.",1
+"AD","RQ","Agree to carry out an act requested or proposed by other.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"AD","SA","Agree to carry out an act requested or proposed by other.","Answer a wh-question with a statement.",0
+"AD","YQ","Agree to carry out an act requested or proposed by other.","Ask a yes/no question.",1
+"AD","DC","Agree to carry out an act requested or proposed by other.","Create a new state of affairs by declaration",1
+"AD","AA","Agree to carry out an act requested or proposed by other.","Answer in the affirmative to yes/no question.",0
+"AD","ED","Agree to carry out an act requested or proposed by other.","Exclaim in disapproval.",0
+"AD","GR","Agree to carry out an act requested or proposed by other.","Give reason/ justify a request for an action refusal or prohibition",0
+"AD","FP","Agree to carry out an act requested or proposed by other.","Ask for permission to carry out act.",1
+"AD","ET","Agree to carry out an act requested or proposed by other.","Express enthusiasm for hearer's performance.",1
+"AD","QN","Agree to carry out an act requested or proposed by other.","Ask a product-question (wh-question)",1
+"AD","PF","Agree to carry out an act requested or proposed by other.","Prohibit/forbid/protest hearer's performance of an act",0
+"AD","OO","Agree to carry out an act requested or proposed by other.","Unintelligible vocalization.",0
+"AD","SS","Agree to carry out an act requested or proposed by other.","Signal to start performing an act such as running or rolling a ball",1
+"AD","MK","Agree to carry out an act requested or proposed by other.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AD","RT","Agree to carry out an act requested or proposed by other.","Repeat or imitate other's utterance.",1
+"AD","DP","Agree to carry out an act requested or proposed by other.","Declare make-believe reality.",1
+"AD","CS","Agree to carry out an act requested or proposed by other.","Counter-suggestion/ an indirect refusal.",0
+"AD","CL","Agree to carry out an act requested or proposed by other.","Call attention to hearer by name or by substitute exclamations",1
+"AD","AD","Agree to carry out an act requested or proposed by other.","Agree to carry out an act requested or proposed by other.",0
+"AD","AC","Agree to carry out an act requested or proposed by other.","Answer calls/ show attentiveness to communications.",0
+"AD","RD","Agree to carry out an act requested or proposed by other.","Refuse to carry out an act requested or proposed by other.",0
+"AD","YY","Agree to carry out an act requested or proposed by other.","Make a word-like utterance without clear function.",0
+"AD","PD","Agree to carry out an act requested or proposed by other.","Promise.",1
+"AD","AN","Agree to carry out an act requested or proposed by other.","Answer in the negative to yes/no question",0
+"AD","RP","Agree to carry out an act requested or proposed by other.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AD","TO","Agree to carry out an act requested or proposed by other.","Mark transfer of object to hearer",1
+"AD","SI","Agree to carry out an act requested or proposed by other.","State intent to carry out act by speaker.",1
+"AD","ST","Agree to carry out an act requested or proposed by other.","Make a declarative statement.",1
+"AL","RP","Agree to do something for the last time.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AL","RT","Agree to do something for the last time.","Repeat or imitate other's utterance.",1
+"AN","YQ","Answer in the negative to yes/no question","Ask a yes/no question.",1
+"AN","RP","Answer in the negative to yes/no question","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AN","AN","Answer in the negative to yes/no question","Answer in the negative to yes/no question",0
+"AN","YY","Answer in the negative to yes/no question","Make a word-like utterance without clear function.",0
+"AN","RT","Answer in the negative to yes/no question","Repeat or imitate other's utterance.",1
+"AN","SA","Answer in the negative to yes/no question","Answer a wh-question with a statement.",0
+"AN","OO","Answer in the negative to yes/no question","Unintelligible vocalization.",0
+"AN","PA","Answer in the negative to yes/no question","Permit hearer to perform act.",0
+"AN","QN","Answer in the negative to yes/no question","Ask a product-question (wh-question)",1
+"AN","AC","Answer in the negative to yes/no question","Answer calls/ show attentiveness to communications.",0
+"AN","YA","Answer in the negative to yes/no question","Answer a question with a yes/no question.",0
+"AN","DS","Answer in the negative to yes/no question","Disapprove scold protest disruptive behavior.",1
+"AN","ST","Answer in the negative to yes/no question","Make a declarative statement.",1
+"AN","SI","Answer in the negative to yes/no question","State intent to carry out act by speaker.",1
+"AN","MK","Answer in the negative to yes/no question","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AP","TX","Agree with proposition or proposal expressed by previous speaker","Read or recite written text aloud.",1
+"AP","TQ","Agree with proposition or proposal expressed by previous speaker","Ask a limited-alternative yes/no question.",1
+"AP","PD","Agree with proposition or proposal expressed by previous speaker","Promise.",1
+"AP","GR","Agree with proposition or proposal expressed by previous speaker","Give reason/ justify a request for an action refusal or prohibition",0
+"AP","AA","Agree with proposition or proposal expressed by previous speaker","Answer in the affirmative to yes/no question.",0
+"AP","PM","Agree with proposition or proposal expressed by previous speaker","Praise for motor acts i.e for nonverbal behavior.",1
+"AP","YQ","Agree with proposition or proposal expressed by previous speaker","Ask a yes/no question.",1
+"AP","SA","Agree with proposition or proposal expressed by previous speaker","Answer a wh-question with a statement.",0
+"AP","CL","Agree with proposition or proposal expressed by previous speaker","Call attention to hearer by name or by substitute exclamations",1
+"AP","QN","Agree with proposition or proposal expressed by previous speaker","Ask a product-question (wh-question)",1
+"AP","RR","Agree with proposition or proposal expressed by previous speaker","Request to repeat utterance.",1
+"AP","ED","Agree with proposition or proposal expressed by previous speaker","Exclaim in disapproval.",0
+"AP","FP","Agree with proposition or proposal expressed by previous speaker","Ask for permission to carry out act.",0
+"AP","MK","Agree with proposition or proposal expressed by previous speaker","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"AP","YY","Agree with proposition or proposal expressed by previous speaker","Make a word-like utterance without clear function.",0
+"AP","TO","Agree with proposition or proposal expressed by previous speaker","Mark transfer of object to hearer",1
+"AP","ST","Agree with proposition or proposal expressed by previous speaker","Make a declarative statement.",1
+"AP","SI","Agree with proposition or proposal expressed by previous speaker","State intent to carry out act by speaker.",1
+"AP","RT","Agree with proposition or proposal expressed by previous speaker","Repeat or imitate other's utterance.",1
+"AP","PR","Agree with proposition or proposal expressed by previous speaker","Perform verbal move in game.",1
+"AP","RP","Agree with proposition or proposal expressed by previous speaker","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"AP","TA","Agree with proposition or proposal expressed by previous speaker","Answer a limited-alternative question.",0
+"AP","RQ","Agree with proposition or proposal expressed by previous speaker","Yes/no question or suggestion about hearer's wishes and intentions",1
+"AP","PF","Agree with proposition or proposal expressed by previous speaker","Prohibit/forbid/protest hearer's performance of an act",0
+"AP","ET","Agree with proposition or proposal expressed by previous speaker","Express enthusiasm for hearer's performance.",1
+"AP","OO","Agree with proposition or proposal expressed by previous speaker","Unintelligible vocalization.",0
+"AP","PA","Agree with proposition or proposal expressed by previous speaker","Permit hearer to perform act.",0
+"AP","GI","Agree with proposition or proposal expressed by previous speaker","Give in/ accept other's insistence or refusal.",0
+"AP","EI","Agree with proposition or proposal expressed by previous speaker","Elicit imitation of word or sentence by modelling or by explicit command",1
+"AP","EA","Agree with proposition or proposal expressed by previous speaker","Elicit onomatopoeic or animal sounds.",1
+"AP","AN","Agree with proposition or proposal expressed by previous speaker","Answer in the negative to yes/no question",0
+"AP","AP","Agree with proposition or proposal expressed by previous speaker","Agree with proposition or proposal expressed by previous speaker",0
+"AP","RD","Agree with proposition or proposal expressed by previous speaker","Refuse to carry out an act requested or proposed by other.",0
+"AP","AC","Agree with proposition or proposal expressed by previous speaker","Answer calls/ show attentiveness to communications.",0
+"AP","AD","Agree with proposition or proposal expressed by previous speaker","Agree to carry out an act requested or proposed by other.",0
+"AP","DW","Agree with proposition or proposal expressed by previous speaker","Disagree with proposition expressed by previous speaker.",0
+"AP","NA","Agree with proposition or proposal expressed by previous speaker","Intentionally nonsatisfying answer to question",0
+"AP","DC","Agree with proposition or proposal expressed by previous speaker","Create a new state of affairs by declaration",1
+"AQ","OO","Aggravated question expression of disapproval by restating a question","Unintelligible vocalization.",0
+"AQ","SA","Aggravated question expression of disapproval by restating a question","Answer a wh-question with a statement.",1
+"AQ","ST","Aggravated question expression of disapproval by restating a question","Make a declarative statement.",0
+"AQ","YY","Aggravated question expression of disapproval by restating a question","Make a word-like utterance without clear function.",0
+"AQ","AA","Aggravated question expression of disapproval by restating a question","Answer in the affirmative to yes/no question.",1
+"AQ","SI","Aggravated question expression of disapproval by restating a question","State intent to carry out act by speaker.",0
+"CL","PR","Call attention to hearer by name or by substitute exclamations","Perform verbal move in game.",1
+"CL","PF","Call attention to hearer by name or by substitute exclamations","Prohibit/forbid/protest hearer's performance of an act",0
+"CL","RP","Call attention to hearer by name or by substitute exclamations","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"CL","RT","Call attention to hearer by name or by substitute exclamations","Repeat or imitate other's utterance.",1
+"CL","YY","Call attention to hearer by name or by substitute exclamations","Make a word-like utterance without clear function.",0
+"CL","CL","Call attention to hearer by name or by substitute exclamations","Call attention to hearer by name or by substitute exclamations",1
+"CL","MK","Call attention to hearer by name or by substitute exclamations","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"CL","TA","Call attention to hearer by name or by substitute exclamations","Answer a limited-alternative question.",0
+"CL","ST","Call attention to hearer by name or by substitute exclamations","Make a declarative statement.",0
+"CL","SI","Call attention to hearer by name or by substitute exclamations","State intent to carry out act by speaker.",1
+"CL","SA","Call attention to hearer by name or by substitute exclamations","Answer a wh-question with a statement.",0
+"CL","RD","Call attention to hearer by name or by substitute exclamations","Refuse to carry out an act requested or proposed by other.",0
+"CL","AD","Call attention to hearer by name or by substitute exclamations","Agree to carry out an act requested or proposed by other.",0
+"CL","CS","Call attention to hearer by name or by substitute exclamations","Counter-suggestion/ an indirect refusal.",0
+"CL","AC","Call attention to hearer by name or by substitute exclamations","Answer calls/ show attentiveness to communications.",1
+"CL","RR","Call attention to hearer by name or by substitute exclamations","Request to repeat utterance.",1
+"CL","QN","Call attention to hearer by name or by substitute exclamations","Ask a product-question (wh-question)",1
+"CL","YQ","Call attention to hearer by name or by substitute exclamations","Ask a yes/no question.",0
+"CL","TX","Call attention to hearer by name or by substitute exclamations","Read or recite written text aloud.",1
+"CL","OO","Call attention to hearer by name or by substitute exclamations","Unintelligible vocalization.",0
+"CM","OO","Commiserate express sympathy for hearer's distress.","Unintelligible vocalization.",0
+"CM","AD","Commiserate express sympathy for hearer's distress.","Agree to carry out an act requested or proposed by other.",0
+"CM","PF","Commiserate express sympathy for hearer's distress.","Prohibit/forbid/protest hearer's performance of an act",1
+"CM","RP","Commiserate express sympathy for hearer's distress.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"CM","YY","Commiserate express sympathy for hearer's distress.","Make a word-like utterance without clear function.",0
+"CM","CM","Commiserate express sympathy for hearer's distress.","Commiserate express sympathy for hearer's distress.",0
+"CM","RT","Commiserate express sympathy for hearer's distress.","Repeat or imitate other's utterance.",1
+"CM","MK","Commiserate express sympathy for hearer's distress.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"CM","QN","Commiserate express sympathy for hearer's distress.","Ask a product-question (wh-question)",1
+"CM","AA","Commiserate express sympathy for hearer's distress.","Answer in the affirmative to yes/no question.",0
+"CM","ST","Commiserate express sympathy for hearer's distress.","Make a declarative statement.",1
+"CN","CN","Count.","Count.",1
+"CN","YY","Count.","Make a word-like utterance without clear function.",0
+"CN","RD","Count.","Refuse to carry out an act requested or proposed by other.",0
+"CN","OO","Count.","Unintelligible vocalization.",0
+"CR","AD","Criticize or point out error in nonverbal act.","Agree to carry out an act requested or proposed by other.",0
+"CR","SI","Criticize or point out error in nonverbal act.","State intent to carry out act by speaker.",1
+"CR","RR","Criticize or point out error in nonverbal act.","Request to repeat utterance.",1
+"CR","YY","Criticize or point out error in nonverbal act.","Make a word-like utterance without clear function.",0
+"CR","OO","Criticize or point out error in nonverbal act.","Unintelligible vocalization.",0
+"CR","RT","Criticize or point out error in nonverbal act.","Repeat or imitate other's utterance.",1
+"CS","CS","Counter-suggestion/ an indirect refusal.","Counter-suggestion/ an indirect refusal.",1
+"CS","OO","Counter-suggestion/ an indirect refusal.","Unintelligible vocalization.",0
+"CS","ED","Counter-suggestion/ an indirect refusal.","Exclaim in disapproval.",1
+"CS","RQ","Counter-suggestion/ an indirect refusal.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"CS","YQ","Counter-suggestion/ an indirect refusal.","Ask a yes/no question.",0
+"CS","ST","Counter-suggestion/ an indirect refusal.","Make a declarative statement.",0
+"CS","PF","Counter-suggestion/ an indirect refusal.","Prohibit/forbid/protest hearer's performance of an act",0
+"CS","RP","Counter-suggestion/ an indirect refusal.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"CS","YY","Counter-suggestion/ an indirect refusal.","Make a word-like utterance without clear function.",0
+"CS","MK","Counter-suggestion/ an indirect refusal.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"CS","RT","Counter-suggestion/ an indirect refusal.","Repeat or imitate other's utterance.",0
+"CS","GI","Counter-suggestion/ an indirect refusal.","Give in/ accept other's insistence or refusal.",1
+"CS","DW","Counter-suggestion/ an indirect refusal.","Disagree with proposition expressed by previous speaker.",1
+"CS","AD","Counter-suggestion/ an indirect refusal.","Agree to carry out an act requested or proposed by other.",1
+"CS","RD","Counter-suggestion/ an indirect refusal.","Refuse to carry out an act requested or proposed by other.",1
+"CT","EI","Correct provide correct verbal form in place of erroneous one.","Elicit imitation of word or sentence by modelling or by explicit command",1
+"CT","AD","Correct provide correct verbal form in place of erroneous one.","Agree to carry out an act requested or proposed by other.",0
+"CT","CS","Correct provide correct verbal form in place of erroneous one.","Counter-suggestion/ an indirect refusal.",1
+"CT","FP","Correct provide correct verbal form in place of erroneous one.","Ask for permission to carry out act.",1
+"CT","CT","Correct provide correct verbal form in place of erroneous one.","Correct provide correct verbal form in place of erroneous one.",0
+"CT","CL","Correct provide correct verbal form in place of erroneous one.","Call attention to hearer by name or by substitute exclamations",1
+"CT","AP","Correct provide correct verbal form in place of erroneous one.","Agree with proposition or proposal expressed by previous speaker",1
+"CT","YQ","Correct provide correct verbal form in place of erroneous one.","Ask a yes/no question.",1
+"CT","SI","Correct provide correct verbal form in place of erroneous one.","State intent to carry out act by speaker.",1
+"CT","RR","Correct provide correct verbal form in place of erroneous one.","Request to repeat utterance.",1
+"CT","OO","Correct provide correct verbal form in place of erroneous one.","Unintelligible vocalization.",0
+"CT","RT","Correct provide correct verbal form in place of erroneous one.","Repeat or imitate other's utterance.",1
+"CT","SA","Correct provide correct verbal form in place of erroneous one.","Answer a wh-question with a statement.",0
+"CT","ST","Correct provide correct verbal form in place of erroneous one.","Make a declarative statement.",1
+"CT","YY","Correct provide correct verbal form in place of erroneous one.","Make a word-like utterance without clear function.",0
+"CT","QN","Correct provide correct verbal form in place of erroneous one.","Ask a product-question (wh-question)",1
+"CT","RD","Correct provide correct verbal form in place of erroneous one.","Refuse to carry out an act requested or proposed by other.",0
+"CT","AA","Correct provide correct verbal form in place of erroneous one.","Answer in the affirmative to yes/no question.",0
+"CT","TO","Correct provide correct verbal form in place of erroneous one.","Mark transfer of object to hearer",1
+"CT","RP","Correct provide correct verbal form in place of erroneous one.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"CT","PR","Correct provide correct verbal form in place of erroneous one.","Perform verbal move in game.",1
+"CT","MK","Correct provide correct verbal form in place of erroneous one.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"CT","EX","Correct provide correct verbal form in place of erroneous one.","Elicit completion of rote-learned text.",1
+"CT","EA","Correct provide correct verbal form in place of erroneous one.","Elicit onomatopoeic or animal sounds.",1
+"CT","DW","Correct provide correct verbal form in place of erroneous one.","Disagree with proposition expressed by previous speaker.",1
+"CT","DC","Correct provide correct verbal form in place of erroneous one.","Create a new state of affairs by declaration",1
+"CT","AC","Correct provide correct verbal form in place of erroneous one.","Answer calls/ show attentiveness to communications.",0
+"CT","ED","Correct provide correct verbal form in place of erroneous one.","Exclaim in disapproval.",1
+"DC","YD","Create a new state of affairs by declaration","Agree to a declaration.",1
+"DC","YQ","Create a new state of affairs by declaration","Ask a yes/no question.",1
+"DC","OO","Create a new state of affairs by declaration","Unintelligible vocalization.",0
+"DC","RD","Create a new state of affairs by declaration","Refuse to carry out an act requested or proposed by other.",0
+"DC","DC","Create a new state of affairs by declaration","Create a new state of affairs by declaration",1
+"DC","TO","Create a new state of affairs by declaration","Mark transfer of object to hearer",1
+"DC","RT","Create a new state of affairs by declaration","Repeat or imitate other's utterance.",1
+"DC","PR","Create a new state of affairs by declaration","Perform verbal move in game.",1
+"DC","ND","Create a new state of affairs by declaration","Disagree with a declaration.",1
+"DC","AC","Create a new state of affairs by declaration","Answer calls/ show attentiveness to communications.",0
+"DC","CS","Create a new state of affairs by declaration","Counter-suggestion/ an indirect refusal.",0
+"DC","CL","Create a new state of affairs by declaration","Call attention to hearer by name or by substitute exclamations",1
+"DC","QN","Create a new state of affairs by declaration","Ask a product-question (wh-question)",1
+"DC","ST","Create a new state of affairs by declaration","Make a declarative statement.",1
+"DC","MK","Create a new state of affairs by declaration","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"DC","SI","Create a new state of affairs by declaration","State intent to carry out act by speaker.",1
+"DC","PF","Create a new state of affairs by declaration","Prohibit/forbid/protest hearer's performance of an act",1
+"DC","RP","Create a new state of affairs by declaration","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"DC","YY","Create a new state of affairs by declaration","Make a word-like utterance without clear function.",0
+"DP","YD","Declare make-believe reality.","Agree to a declaration.",1
+"DP","TO","Declare make-believe reality.","Mark transfer of object to hearer",1
+"DS","ED","Disapprove scold protest disruptive behavior.","Exclaim in disapproval.",1
+"DS","RD","Disapprove scold protest disruptive behavior.","Refuse to carry out an act requested or proposed by other.",0
+"DS","YY","Disapprove scold protest disruptive behavior.","Make a word-like utterance without clear function.",0
+"DS","ST","Disapprove scold protest disruptive behavior.","Make a declarative statement.",1
+"DS","RP","Disapprove scold protest disruptive behavior.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"DS","DC","Disapprove scold protest disruptive behavior.","Create a new state of affairs by declaration",1
+"DS","SI","Disapprove scold protest disruptive behavior.","State intent to carry out act by speaker.",1
+"DS","OO","Disapprove scold protest disruptive behavior.","Unintelligible vocalization.",0
+"DS","MK","Disapprove scold protest disruptive behavior.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"DS","PF","Disapprove scold protest disruptive behavior.","Prohibit/forbid/protest hearer's performance of an act",1
+"DS","DS","Disapprove scold protest disruptive behavior.","Disapprove scold protest disruptive behavior.",0
+"DW","QN","Disagree with proposition expressed by previous speaker.","Ask a product-question (wh-question)",1
+"DW","RD","Disagree with proposition expressed by previous speaker.","Refuse to carry out an act requested or proposed by other.",0
+"DW","SI","Disagree with proposition expressed by previous speaker.","State intent to carry out act by speaker.",1
+"DW","ST","Disagree with proposition expressed by previous speaker.","Make a declarative statement.",1
+"DW","OO","Disagree with proposition expressed by previous speaker.","Unintelligible vocalization.",0
+"DW","RR","Disagree with proposition expressed by previous speaker.","Request to repeat utterance.",1
+"DW","DW","Disagree with proposition expressed by previous speaker.","Disagree with proposition expressed by previous speaker.",0
+"DW","AP","Disagree with proposition expressed by previous speaker.","Agree with proposition or proposal expressed by previous speaker",0
+"DW","AN","Disagree with proposition expressed by previous speaker.","Answer in the negative to yes/no question",0
+"DW","AC","Disagree with proposition expressed by previous speaker.","Answer calls/ show attentiveness to communications.",0
+"DW","AD","Disagree with proposition expressed by previous speaker.","Agree to carry out an act requested or proposed by other.",0
+"DW","RP","Disagree with proposition expressed by previous speaker.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"DW","TO","Disagree with proposition expressed by previous speaker.","Mark transfer of object to hearer",1
+"DW","CS","Disagree with proposition expressed by previous speaker.","Counter-suggestion/ an indirect refusal.",1
+"DW","YY","Disagree with proposition expressed by previous speaker.","Make a word-like utterance without clear function.",0
+"DW","YQ","Disagree with proposition expressed by previous speaker.","Ask a yes/no question.",1
+"DW","CT","Disagree with proposition expressed by previous speaker.","Correct provide correct verbal form in place of erroneous one.",1
+"DW","CL","Disagree with proposition expressed by previous speaker.","Call attention to hearer by name or by substitute exclamations",1
+"DW","PR","Disagree with proposition expressed by previous speaker.","Perform verbal move in game.",1
+"DW","AA","Disagree with proposition expressed by previous speaker.","Answer in the affirmative to yes/no question.",0
+"DW","MK","Disagree with proposition expressed by previous speaker.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"DW","RT","Disagree with proposition expressed by previous speaker.","Repeat or imitate other's utterance.",1
+"DW","SA","Disagree with proposition expressed by previous speaker.","Answer a wh-question with a statement.",0
+"DW","YA","Disagree with proposition expressed by previous speaker.","Answer a question with a yes/no question.",0
+"EA","ST","Elicit onomatopoeic or animal sounds.","Make a declarative statement.",1
+"EA","SI","Elicit onomatopoeic or animal sounds.","State intent to carry out act by speaker.",1
+"EA","SA","Elicit onomatopoeic or animal sounds.","Answer a wh-question with a statement.",0
+"EA","YY","Elicit onomatopoeic or animal sounds.","Make a word-like utterance without clear function.",0
+"EA","RD","Elicit onomatopoeic or animal sounds.","Refuse to carry out an act requested or proposed by other.",1
+"EA","PR","Elicit onomatopoeic or animal sounds.","Perform verbal move in game.",1
+"EA","RP","Elicit onomatopoeic or animal sounds.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"EA","EI","Elicit onomatopoeic or animal sounds.","Elicit imitation of word or sentence by modelling or by explicit command",0
+"EA","QN","Elicit onomatopoeic or animal sounds.","Ask a product-question (wh-question)",1
+"EA","OO","Elicit onomatopoeic or animal sounds.","Unintelligible vocalization.",0
+"EA","AC","Elicit onomatopoeic or animal sounds.","Answer calls/ show attentiveness to communications.",0
+"EA","MK","Elicit onomatopoeic or animal sounds.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"EA","RR","Elicit onomatopoeic or animal sounds.","Request to repeat utterance.",1
+"EA","YQ","Elicit onomatopoeic or animal sounds.","Ask a yes/no question.",1
+"EA","AD","Elicit onomatopoeic or animal sounds.","Agree to carry out an act requested or proposed by other.",0
+"EA","RT","Elicit onomatopoeic or animal sounds.","Repeat or imitate other's utterance.",1
+"EA","TX","Elicit onomatopoeic or animal sounds.","Read or recite written text aloud.",1
+"EC","YY","Elicit completion of word or sentence.","Make a word-like utterance without clear function.",0
+"EC","PR","Elicit completion of word or sentence.","Perform verbal move in game.",0
+"EC","EC","Elicit completion of word or sentence.","Elicit completion of word or sentence.",0
+"EC","ST","Elicit completion of word or sentence.","Make a declarative statement.",0
+"EC","DC","Elicit completion of word or sentence.","Create a new state of affairs by declaration",0
+"EC","RP","Elicit completion of word or sentence.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"EC","SC","Elicit completion of word or sentence.","Complete statement or other utterance in compliance with request.",1
+"EC","OO","Elicit completion of word or sentence.","Unintelligible vocalization.",0
+"ED","ED","Exclaim in disapproval.","Exclaim in disapproval.",1
+"ED","OO","Exclaim in disapproval.","Unintelligible vocalization.",0
+"ED","YY","Exclaim in disapproval.","Make a word-like utterance without clear function.",0
+"ED","RP","Exclaim in disapproval.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"ED","ST","Exclaim in disapproval.","Make a declarative statement.",1
+"EI","PF","Elicit imitation of word or sentence by modelling or by explicit command","Prohibit/forbid/protest hearer's performance of an act",0
+"EI","AD","Elicit imitation of word or sentence by modelling or by explicit command","Agree to carry out an act requested or proposed by other.",1
+"EI","QN","Elicit imitation of word or sentence by modelling or by explicit command","Ask a product-question (wh-question)",0
+"EI","CL","Elicit imitation of word or sentence by modelling or by explicit command","Call attention to hearer by name or by substitute exclamations",0
+"EI","SI","Elicit imitation of word or sentence by modelling or by explicit command","State intent to carry out act by speaker.",1
+"EI","ST","Elicit imitation of word or sentence by modelling or by explicit command","Make a declarative statement.",0
+"EI","YY","Elicit imitation of word or sentence by modelling or by explicit command","Make a word-like utterance without clear function.",0
+"EI","AA","Elicit imitation of word or sentence by modelling or by explicit command","Answer in the affirmative to yes/no question.",0
+"EI","MK","Elicit imitation of word or sentence by modelling or by explicit command","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"EI","ED","Elicit imitation of word or sentence by modelling or by explicit command","Exclaim in disapproval.",1
+"EI","RP","Elicit imitation of word or sentence by modelling or by explicit command","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"EI","RD","Elicit imitation of word or sentence by modelling or by explicit command","Refuse to carry out an act requested or proposed by other.",1
+"EI","OO","Elicit imitation of word or sentence by modelling or by explicit command","Unintelligible vocalization.",0
+"EI","EI","Elicit imitation of word or sentence by modelling or by explicit command","Elicit imitation of word or sentence by modelling or by explicit command",0
+"EI","SA","Elicit imitation of word or sentence by modelling or by explicit command","Answer a wh-question with a statement.",0
+"EI","RR","Elicit imitation of word or sentence by modelling or by explicit command","Request to repeat utterance.",1
+"EI","PR","Elicit imitation of word or sentence by modelling or by explicit command","Perform verbal move in game.",1
+"EI","RT","Elicit imitation of word or sentence by modelling or by explicit command","Repeat or imitate other's utterance.",1
+"EI","SC","Elicit imitation of word or sentence by modelling or by explicit command","Complete statement or other utterance in compliance with request.",1
+"EI","EX","Elicit imitation of word or sentence by modelling or by explicit command","Elicit completion of rote-learned text.",1
+"EI","YQ","Elicit imitation of word or sentence by modelling or by explicit command","Ask a yes/no question.",0
+"EM","YY","Exclaim in distress pain.","Make a word-like utterance without clear function.",0
+"EM","EM","Exclaim in distress pain.","Exclaim in distress pain.",1
+"EM","RP","Exclaim in distress pain.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"EM","ST","Exclaim in distress pain.","Make a declarative statement.",1
+"EM","OO","Exclaim in distress pain.","Unintelligible vocalization.",0
+"EN","EN","Express positive emotion.","Express positive emotion.",1
+"EN","YY","Express positive emotion.","Make a word-like utterance without clear function.",0
+"EQ","OO","Eliciting question (e.g. hmm?).","Unintelligible vocalization.",0
+"EQ","MK","Eliciting question (e.g. hmm?).","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"EQ","YQ","Eliciting question (e.g. hmm?).","Ask a yes/no question.",1
+"EQ","PF","Eliciting question (e.g. hmm?).","Prohibit/forbid/protest hearer's performance of an act",1
+"EQ","ST","Eliciting question (e.g. hmm?).","Make a declarative statement.",1
+"EQ","DC","Eliciting question (e.g. hmm?).","Create a new state of affairs by declaration",1
+"EQ","RP","Eliciting question (e.g. hmm?).","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"EQ","SI","Eliciting question (e.g. hmm?).","State intent to carry out act by speaker.",1
+"EQ","SA","Eliciting question (e.g. hmm?).","Answer a wh-question with a statement.",1
+"EQ","RD","Eliciting question (e.g. hmm?).","Refuse to carry out an act requested or proposed by other.",1
+"EQ","QN","Eliciting question (e.g. hmm?).","Ask a product-question (wh-question)",1
+"EQ","CL","Eliciting question (e.g. hmm?).","Call attention to hearer by name or by substitute exclamations",1
+"EQ","AD","Eliciting question (e.g. hmm?).","Agree to carry out an act requested or proposed by other.",1
+"EQ","PR","Eliciting question (e.g. hmm?).","Perform verbal move in game.",1
+"EQ","AC","Eliciting question (e.g. hmm?).","Answer calls/ show attentiveness to communications.",0
+"EQ","AN","Eliciting question (e.g. hmm?).","Answer in the negative to yes/no question",0
+"EQ","YY","Eliciting question (e.g. hmm?).","Make a word-like utterance without clear function.",0
+"EQ","AA","Eliciting question (e.g. hmm?).","Answer in the affirmative to yes/no question.",1
+"ET","DC","Express enthusiasm for hearer's performance.","Create a new state of affairs by declaration",1
+"ET","AD","Express enthusiasm for hearer's performance.","Agree to carry out an act requested or proposed by other.",0
+"ET","YQ","Express enthusiasm for hearer's performance.","Ask a yes/no question.",1
+"ET","TO","Express enthusiasm for hearer's performance.","Mark transfer of object to hearer",1
+"ET","PD","Express enthusiasm for hearer's performance.","Promise.",1
+"ET","AP","Express enthusiasm for hearer's performance.","Agree with proposition or proposal expressed by previous speaker",0
+"ET","OO","Express enthusiasm for hearer's performance.","Unintelligible vocalization.",0
+"ET","QN","Express enthusiasm for hearer's performance.","Ask a product-question (wh-question)",1
+"ET","RP","Express enthusiasm for hearer's performance.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"ET","AC","Express enthusiasm for hearer's performance.","Answer calls/ show attentiveness to communications.",0
+"ET","YY","Express enthusiasm for hearer's performance.","Make a word-like utterance without clear function.",0
+"ET","ST","Express enthusiasm for hearer's performance.","Make a declarative statement.",1
+"ET","ED","Express enthusiasm for hearer's performance.","Exclaim in disapproval.",0
+"ET","RQ","Express enthusiasm for hearer's performance.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"ET","RT","Express enthusiasm for hearer's performance.","Repeat or imitate other's utterance.",1
+"ET","SI","Express enthusiasm for hearer's performance.","State intent to carry out act by speaker.",1
+"ET","ET","Express enthusiasm for hearer's performance.","Express enthusiasm for hearer's performance.",0
+"ET","MK","Express enthusiasm for hearer's performance.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"EX","YY","Elicit completion of rote-learned text.","Make a word-like utterance without clear function.",0
+"EX","ST","Elicit completion of rote-learned text.","Make a declarative statement.",0
+"FP","MK","Ask for permission to carry out act.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"FP","RP","Ask for permission to carry out act.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"FP","PF","Ask for permission to carry out act.","Prohibit/forbid/protest hearer's performance of an act",1
+"FP","RT","Ask for permission to carry out act.","Repeat or imitate other's utterance.",0
+"FP","YY","Ask for permission to carry out act.","Make a word-like utterance without clear function.",0
+"FP","TO","Ask for permission to carry out act.","Mark transfer of object to hearer",0
+"FP","ST","Ask for permission to carry out act.","Make a declarative statement.",0
+"FP","PA","Ask for permission to carry out act.","Permit hearer to perform act.",1
+"FP","ED","Ask for permission to carry out act.","Exclaim in disapproval.",1
+"FP","CS","Ask for permission to carry out act.","Counter-suggestion/ an indirect refusal.",1
+"FP","AA","Ask for permission to carry out act.","Answer in the affirmative to yes/no question.",0
+"FP","OO","Ask for permission to carry out act.","Unintelligible vocalization.",0
+"FP","RD","Ask for permission to carry out act.","Refuse to carry out an act requested or proposed by other.",1
+"FP","RR","Ask for permission to carry out act.","Request to repeat utterance.",1
+"FP","FP","Ask for permission to carry out act.","Ask for permission to carry out act.",0
+"FP","RQ","Ask for permission to carry out act.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"FP","DC","Ask for permission to carry out act.","Create a new state of affairs by declaration",0
+"GI","CL","Give in/ accept other's insistence or refusal.","Call attention to hearer by name or by substitute exclamations",0
+"GI","RP","Give in/ accept other's insistence or refusal.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"GI","ST","Give in/ accept other's insistence or refusal.","Make a declarative statement.",1
+"GI","SI","Give in/ accept other's insistence or refusal.","State intent to carry out act by speaker.",1
+"GI","OO","Give in/ accept other's insistence or refusal.","Unintelligible vocalization.",0
+"GI","FP","Give in/ accept other's insistence or refusal.","Ask for permission to carry out act.",1
+"GI","AD","Give in/ accept other's insistence or refusal.","Agree to carry out an act requested or proposed by other.",0
+"GI","AC","Give in/ accept other's insistence or refusal.","Answer calls/ show attentiveness to communications.",0
+"GI","RD","Give in/ accept other's insistence or refusal.","Refuse to carry out an act requested or proposed by other.",0
+"GI","YY","Give in/ accept other's insistence or refusal.","Make a word-like utterance without clear function.",0
+"GI","TO","Give in/ accept other's insistence or refusal.","Mark transfer of object to hearer",1
+"GI","GI","Give in/ accept other's insistence or refusal.","Give in/ accept other's insistence or refusal.",0
+"GI","RT","Give in/ accept other's insistence or refusal.","Repeat or imitate other's utterance.",0
+"GI","QN","Give in/ accept other's insistence or refusal.","Ask a product-question (wh-question)",1
+"GR","YY","Give reason/ justify a request for an action refusal or prohibition","Make a word-like utterance without clear function.",0
+"GR","YQ","Give reason/ justify a request for an action refusal or prohibition","Ask a yes/no question.",1
+"GR","RP","Give reason/ justify a request for an action refusal or prohibition","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"GR","RD","Give reason/ justify a request for an action refusal or prohibition","Refuse to carry out an act requested or proposed by other.",1
+"GR","PF","Give reason/ justify a request for an action refusal or prohibition","Prohibit/forbid/protest hearer's performance of an act",1
+"GR","TO","Give reason/ justify a request for an action refusal or prohibition","Mark transfer of object to hearer",1
+"GR","GR","Give reason/ justify a request for an action refusal or prohibition","Give reason/ justify a request for an action refusal or prohibition",1
+"GR","RT","Give reason/ justify a request for an action refusal or prohibition","Repeat or imitate other's utterance.",1
+"GR","OO","Give reason/ justify a request for an action refusal or prohibition","Unintelligible vocalization.",0
+"GR","CL","Give reason/ justify a request for an action refusal or prohibition","Call attention to hearer by name or by substitute exclamations",1
+"GR","QN","Give reason/ justify a request for an action refusal or prohibition","Ask a product-question (wh-question)",1
+"GR","ST","Give reason/ justify a request for an action refusal or prohibition","Make a declarative statement.",1
+"GR","FP","Give reason/ justify a request for an action refusal or prohibition","Ask for permission to carry out act.",0
+"GR","AC","Give reason/ justify a request for an action refusal or prohibition","Answer calls/ show attentiveness to communications.",0
+"GR","SI","Give reason/ justify a request for an action refusal or prohibition","State intent to carry out act by speaker.",1
+"GR","DC","Give reason/ justify a request for an action refusal or prohibition","Create a new state of affairs by declaration",1
+"GR","CS","Give reason/ justify a request for an action refusal or prohibition","Counter-suggestion/ an indirect refusal.",0
+"GR","AD","Give reason/ justify a request for an action refusal or prohibition","Agree to carry out an act requested or proposed by other.",0
+"GR","MK","Give reason/ justify a request for an action refusal or prohibition","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"GR","RR","Give reason/ justify a request for an action refusal or prohibition","Request to repeat utterance.",1
+"GR","SA","Give reason/ justify a request for an action refusal or prohibition","Answer a wh-question with a statement.",0
+"MK","QN","Mark occurrence of event (thank greet apologize congratulate etc.).","Ask a product-question (wh-question)",1
+"MK","DC","Mark occurrence of event (thank greet apologize congratulate etc.).","Create a new state of affairs by declaration",1
+"MK","CS","Mark occurrence of event (thank greet apologize congratulate etc.).","Counter-suggestion/ an indirect refusal.",0
+"MK","RT","Mark occurrence of event (thank greet apologize congratulate etc.).","Repeat or imitate other's utterance.",1
+"MK","ST","Mark occurrence of event (thank greet apologize congratulate etc.).","Make a declarative statement.",1
+"MK","TO","Mark occurrence of event (thank greet apologize congratulate etc.).","Mark transfer of object to hearer",1
+"MK","YY","Mark occurrence of event (thank greet apologize congratulate etc.).","Make a word-like utterance without clear function.",0
+"MK","SC","Mark occurrence of event (thank greet apologize congratulate etc.).","Complete statement or other utterance in compliance with request.",0
+"MK","RQ","Mark occurrence of event (thank greet apologize congratulate etc.).","Yes/no question or suggestion about hearer's wishes and intentions",1
+"MK","ND","Mark occurrence of event (thank greet apologize congratulate etc.).","Disagree with a declaration.",0
+"MK","FP","Mark occurrence of event (thank greet apologize congratulate etc.).","Ask for permission to carry out act.",1
+"MK","EM","Mark occurrence of event (thank greet apologize congratulate etc.).","Exclaim in distress pain.",1
+"MK","AC","Mark occurrence of event (thank greet apologize congratulate etc.).","Answer calls/ show attentiveness to communications.",1
+"MK","AD","Mark occurrence of event (thank greet apologize congratulate etc.).","Agree to carry out an act requested or proposed by other.",0
+"MK","AA","Mark occurrence of event (thank greet apologize congratulate etc.).","Answer in the affirmative to yes/no question.",0
+"MK","AN","Mark occurrence of event (thank greet apologize congratulate etc.).","Answer in the negative to yes/no question",0
+"MK","DW","Mark occurrence of event (thank greet apologize congratulate etc.).","Disagree with proposition expressed by previous speaker.",0
+"MK","EI","Mark occurrence of event (thank greet apologize congratulate etc.).","Elicit imitation of word or sentence by modelling or by explicit command",1
+"MK","PR","Mark occurrence of event (thank greet apologize congratulate etc.).","Perform verbal move in game.",1
+"MK","RD","Mark occurrence of event (thank greet apologize congratulate etc.).","Refuse to carry out an act requested or proposed by other.",0
+"MK","WD","Mark occurrence of event (thank greet apologize congratulate etc.).","Warn of danger.",1
+"MK","SI","Mark occurrence of event (thank greet apologize congratulate etc.).","State intent to carry out act by speaker.",1
+"MK","RR","Mark occurrence of event (thank greet apologize congratulate etc.).","Request to repeat utterance.",1
+"MK","ED","Mark occurrence of event (thank greet apologize congratulate etc.).","Exclaim in disapproval.",1
+"MK","YQ","Mark occurrence of event (thank greet apologize congratulate etc.).","Ask a yes/no question.",1
+"MK","SS","Mark occurrence of event (thank greet apologize congratulate etc.).","Signal to start performing an act such as running or rolling a ball",1
+"MK","SA","Mark occurrence of event (thank greet apologize congratulate etc.).","Answer a wh-question with a statement.",0
+"MK","ET","Mark occurrence of event (thank greet apologize congratulate etc.).","Express enthusiasm for hearer's performance.",0
+"MK","MK","Mark occurrence of event (thank greet apologize congratulate etc.).","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"MK","OO","Mark occurrence of event (thank greet apologize congratulate etc.).","Unintelligible vocalization.",0
+"MK","PF","Mark occurrence of event (thank greet apologize congratulate etc.).","Prohibit/forbid/protest hearer's performance of an act",0
+"MK","RP","Mark occurrence of event (thank greet apologize congratulate etc.).","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"MK","CL","Mark occurrence of event (thank greet apologize congratulate etc.).","Call attention to hearer by name or by substitute exclamations",1
+"OO","YY","Unintelligible vocalization.","Make a word-like utterance without clear function.",0
+"OO","TO","Unintelligible vocalization.","Mark transfer of object to hearer",0
+"OO","RR","Unintelligible vocalization.","Request to repeat utterance.",0
+"OO","PA","Unintelligible vocalization.","Permit hearer to perform act.",0
+"OO","QN","Unintelligible vocalization.","Ask a product-question (wh-question)",0
+"OO","RP","Unintelligible vocalization.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"OO","DS","Unintelligible vocalization.","Disapprove scold protest disruptive behavior.",0
+"OO","PF","Unintelligible vocalization.","Prohibit/forbid/protest hearer's performance of an act",0
+"OO","OO","Unintelligible vocalization.","Unintelligible vocalization.",0
+"OO","EM","Unintelligible vocalization.","Exclaim in distress pain.",0
+"OO","AN","Unintelligible vocalization.","Answer in the negative to yes/no question",0
+"OO","MK","Unintelligible vocalization.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"OO","PR","Unintelligible vocalization.","Perform verbal move in game.",0
+"OO","ST","Unintelligible vocalization.","Make a declarative statement.",0
+"OO","RT","Unintelligible vocalization.","Repeat or imitate other's utterance.",0
+"OO","RD","Unintelligible vocalization.","Refuse to carry out an act requested or proposed by other.",0
+"OO","YQ","Unintelligible vocalization.","Ask a yes/no question.",0
+"OO","RQ","Unintelligible vocalization.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"OO","FP","Unintelligible vocalization.","Ask for permission to carry out act.",0
+"OO","CL","Unintelligible vocalization.","Call attention to hearer by name or by substitute exclamations",0
+"OO","AC","Unintelligible vocalization.","Answer calls/ show attentiveness to communications.",0
+"OO","SA","Unintelligible vocalization.","Answer a wh-question with a statement.",0
+"OO","DC","Unintelligible vocalization.","Create a new state of affairs by declaration",0
+"OO","ED","Unintelligible vocalization.","Exclaim in disapproval.",0
+"OO","EI","Unintelligible vocalization.","Elicit imitation of word or sentence by modelling or by explicit command",0
+"OO","AA","Unintelligible vocalization.","Answer in the affirmative to yes/no question.",0
+"OO","AD","Unintelligible vocalization.","Agree to carry out an act requested or proposed by other.",0
+"OO","SI","Unintelligible vocalization.","State intent to carry out act by speaker.",0
+"OO","ET","Unintelligible vocalization.","Express enthusiasm for hearer's performance.",0
+"PA","PR","Permit hearer to perform act.","Perform verbal move in game.",1
+"PA","OO","Permit hearer to perform act.","Unintelligible vocalization.",0
+"PA","RQ","Permit hearer to perform act.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"PA","YQ","Permit hearer to perform act.","Ask a yes/no question.",1
+"PA","SA","Permit hearer to perform act.","Answer a wh-question with a statement.",0
+"PA","FP","Permit hearer to perform act.","Ask for permission to carry out act.",0
+"PA","AC","Permit hearer to perform act.","Answer calls/ show attentiveness to communications.",0
+"PA","YY","Permit hearer to perform act.","Make a word-like utterance without clear function.",0
+"PA","TO","Permit hearer to perform act.","Mark transfer of object to hearer",1
+"PA","AD","Permit hearer to perform act.","Agree to carry out an act requested or proposed by other.",1
+"PA","PA","Permit hearer to perform act.","Permit hearer to perform act.",0
+"PA","MK","Permit hearer to perform act.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"PA","RT","Permit hearer to perform act.","Repeat or imitate other's utterance.",1
+"PA","QN","Permit hearer to perform act.","Ask a product-question (wh-question)",1
+"PA","RP","Permit hearer to perform act.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"PA","RR","Permit hearer to perform act.","Request to repeat utterance.",1
+"PA","SI","Permit hearer to perform act.","State intent to carry out act by speaker.",1
+"PA","ST","Permit hearer to perform act.","Make a declarative statement.",1
+"PA","ED","Permit hearer to perform act.","Exclaim in disapproval.",0
+"PA","RD","Permit hearer to perform act.","Refuse to carry out an act requested or proposed by other.",0
+"PD","AD","Promise.","Agree to carry out an act requested or proposed by other.",0
+"PD","SI","Promise.","State intent to carry out act by speaker.",1
+"PD","RQ","Promise.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"PD","RD","Promise.","Refuse to carry out an act requested or proposed by other.",0
+"PD","QN","Promise.","Ask a product-question (wh-question)",1
+"PD","PD","Promise.","Promise.",1
+"PD","AA","Promise.","Answer in the affirmative to yes/no question.",0
+"PD","ET","Promise.","Express enthusiasm for hearer's performance.",1
+"PD","YQ","Promise.","Ask a yes/no question.",1
+"PD","RP","Promise.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"PD","ST","Promise.","Make a declarative statement.",1
+"PD","PR","Promise.","Perform verbal move in game.",1
+"PD","MK","Promise.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"PD","YY","Promise.","Make a word-like utterance without clear function.",0
+"PD","OO","Promise.","Unintelligible vocalization.",0
+"PF","RT","Prohibit/forbid/protest hearer's performance of an act","Repeat or imitate other's utterance.",1
+"PF","RP","Prohibit/forbid/protest hearer's performance of an act","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"PF","RD","Prohibit/forbid/protest hearer's performance of an act","Refuse to carry out an act requested or proposed by other.",1
+"PF","PF","Prohibit/forbid/protest hearer's performance of an act","Prohibit/forbid/protest hearer's performance of an act",0
+"PF","OO","Prohibit/forbid/protest hearer's performance of an act","Unintelligible vocalization.",0
+"PF","MK","Prohibit/forbid/protest hearer's performance of an act","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"PF","AC","Prohibit/forbid/protest hearer's performance of an act","Answer calls/ show attentiveness to communications.",0
+"PF","PR","Prohibit/forbid/protest hearer's performance of an act","Perform verbal move in game.",0
+"PF","SI","Prohibit/forbid/protest hearer's performance of an act","State intent to carry out act by speaker.",0
+"PF","CL","Prohibit/forbid/protest hearer's performance of an act","Call attention to hearer by name or by substitute exclamations",1
+"PF","ET","Prohibit/forbid/protest hearer's performance of an act","Express enthusiasm for hearer's performance.",0
+"PF","FP","Prohibit/forbid/protest hearer's performance of an act","Ask for permission to carry out act.",1
+"PF","GI","Prohibit/forbid/protest hearer's performance of an act","Give in/ accept other's insistence or refusal.",1
+"PF","GR","Prohibit/forbid/protest hearer's performance of an act","Give reason/ justify a request for an action refusal or prohibition",0
+"PF","DC","Prohibit/forbid/protest hearer's performance of an act","Create a new state of affairs by declaration",1
+"PF","QN","Prohibit/forbid/protest hearer's performance of an act","Ask a product-question (wh-question)",1
+"PF","ST","Prohibit/forbid/protest hearer's performance of an act","Make a declarative statement.",1
+"PF","AD","Prohibit/forbid/protest hearer's performance of an act","Agree to carry out an act requested or proposed by other.",0
+"PF","YY","Prohibit/forbid/protest hearer's performance of an act","Make a word-like utterance without clear function.",0
+"PF","CS","Prohibit/forbid/protest hearer's performance of an act","Counter-suggestion/ an indirect refusal.",1
+"PF","RR","Prohibit/forbid/protest hearer's performance of an act","Request to repeat utterance.",1
+"PF","YQ","Prohibit/forbid/protest hearer's performance of an act","Ask a yes/no question.",1
+"PF","AA","Prohibit/forbid/protest hearer's performance of an act","Answer in the affirmative to yes/no question.",0
+"PF","ED","Prohibit/forbid/protest hearer's performance of an act","Exclaim in disapproval.",1
+"PF","TO","Prohibit/forbid/protest hearer's performance of an act","Mark transfer of object to hearer",0
+"PM","ST","Praise for motor acts i.e for nonverbal behavior.","Make a declarative statement.",1
+"PM","RT","Praise for motor acts i.e for nonverbal behavior.","Repeat or imitate other's utterance.",1
+"PM","CL","Praise for motor acts i.e for nonverbal behavior.","Call attention to hearer by name or by substitute exclamations",1
+"PM","DC","Praise for motor acts i.e for nonverbal behavior.","Create a new state of affairs by declaration",1
+"PM","EM","Praise for motor acts i.e for nonverbal behavior.","Exclaim in distress pain.",1
+"PM","PM","Praise for motor acts i.e for nonverbal behavior.","Praise for motor acts i.e for nonverbal behavior.",1
+"PM","PR","Praise for motor acts i.e for nonverbal behavior.","Perform verbal move in game.",1
+"PM","MK","Praise for motor acts i.e for nonverbal behavior.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"PM","SI","Praise for motor acts i.e for nonverbal behavior.","State intent to carry out act by speaker.",1
+"PM","OO","Praise for motor acts i.e for nonverbal behavior.","Unintelligible vocalization.",0
+"PM","RP","Praise for motor acts i.e for nonverbal behavior.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"PM","FP","Praise for motor acts i.e for nonverbal behavior.","Ask for permission to carry out act.",1
+"PM","AA","Praise for motor acts i.e for nonverbal behavior.","Answer in the affirmative to yes/no question.",0
+"PM","PF","Praise for motor acts i.e for nonverbal behavior.","Prohibit/forbid/protest hearer's performance of an act",0
+"PM","AC","Praise for motor acts i.e for nonverbal behavior.","Answer calls/ show attentiveness to communications.",0
+"PM","ET","Praise for motor acts i.e for nonverbal behavior.","Express enthusiasm for hearer's performance.",1
+"PM","YQ","Praise for motor acts i.e for nonverbal behavior.","Ask a yes/no question.",1
+"PM","QN","Praise for motor acts i.e for nonverbal behavior.","Ask a product-question (wh-question)",1
+"PM","RD","Praise for motor acts i.e for nonverbal behavior.","Refuse to carry out an act requested or proposed by other.",0
+"PM","TO","Praise for motor acts i.e for nonverbal behavior.","Mark transfer of object to hearer",1
+"PM","YY","Praise for motor acts i.e for nonverbal behavior.","Make a word-like utterance without clear function.",0
+"PR","RD","Perform verbal move in game.","Refuse to carry out an act requested or proposed by other.",0
+"PR","RP","Perform verbal move in game.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"PR","RT","Perform verbal move in game.","Repeat or imitate other's utterance.",1
+"PR","TO","Perform verbal move in game.","Mark transfer of object to hearer",1
+"PR","YY","Perform verbal move in game.","Make a word-like utterance without clear function.",0
+"PR","YQ","Perform verbal move in game.","Ask a yes/no question.",1
+"PR","ST","Perform verbal move in game.","Make a declarative statement.",1
+"PR","SI","Perform verbal move in game.","State intent to carry out act by speaker.",1
+"PR","FP","Perform verbal move in game.","Ask for permission to carry out act.",1
+"PR","CS","Perform verbal move in game.","Counter-suggestion/ an indirect refusal.",0
+"PR","OO","Perform verbal move in game.","Unintelligible vocalization.",0
+"PR","PF","Perform verbal move in game.","Prohibit/forbid/protest hearer's performance of an act",1
+"PR","QN","Perform verbal move in game.","Ask a product-question (wh-question)",1
+"PR","PR","Perform verbal move in game.","Perform verbal move in game.",1
+"PR","SS","Perform verbal move in game.","Signal to start performing an act such as running or rolling a ball",1
+"PR","MK","Perform verbal move in game.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"PR","EM","Perform verbal move in game.","Exclaim in distress pain.",1
+"PR","RQ","Perform verbal move in game.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"PR","DW","Perform verbal move in game.","Disagree with proposition expressed by previous speaker.",0
+"PR","DC","Perform verbal move in game.","Create a new state of affairs by declaration",1
+"PR","AC","Perform verbal move in game.","Answer calls/ show attentiveness to communications.",0
+"PR","AP","Perform verbal move in game.","Agree with proposition or proposal expressed by previous speaker",0
+"PR","CL","Perform verbal move in game.","Call attention to hearer by name or by substitute exclamations",1
+"PR","ED","Perform verbal move in game.","Exclaim in disapproval.",1
+"QA","SI","Answer a question with a wh-question.","State intent to carry out act by speaker.",0
+"QN","ST","Ask a product-question (wh-question)","Make a declarative statement.",0
+"QN","SA","Ask a product-question (wh-question)","Answer a wh-question with a statement.",1
+"QN","RT","Ask a product-question (wh-question)","Repeat or imitate other's utterance.",0
+"QN","TO","Ask a product-question (wh-question)","Mark transfer of object to hearer",0
+"QN","OO","Ask a product-question (wh-question)","Unintelligible vocalization.",0
+"QN","RP","Ask a product-question (wh-question)","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"QN","RD","Ask a product-question (wh-question)","Refuse to carry out an act requested or proposed by other.",0
+"QN","PR","Ask a product-question (wh-question)","Perform verbal move in game.",0
+"QN","PF","Ask a product-question (wh-question)","Prohibit/forbid/protest hearer's performance of an act",0
+"QN","MK","Ask a product-question (wh-question)","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"QN","ED","Ask a product-question (wh-question)","Exclaim in disapproval.",1
+"QN","CL","Ask a product-question (wh-question)","Call attention to hearer by name or by substitute exclamations",0
+"QN","YA","Ask a product-question (wh-question)","Answer a question with a yes/no question.",1
+"QN","SS","Ask a product-question (wh-question)","Signal to start performing an act such as running or rolling a ball",0
+"QN","ET","Ask a product-question (wh-question)","Express enthusiasm for hearer's performance.",0
+"QN","YY","Ask a product-question (wh-question)","Make a word-like utterance without clear function.",0
+"QN","EC","Ask a product-question (wh-question)","Elicit completion of word or sentence.",0
+"QN","GR","Ask a product-question (wh-question)","Give reason/ justify a request for an action refusal or prohibition",0
+"QN","RR","Ask a product-question (wh-question)","Request to repeat utterance.",1
+"QN","SC","Ask a product-question (wh-question)","Complete statement or other utterance in compliance with request.",0
+"QN","ND","Ask a product-question (wh-question)","Disagree with a declaration.",0
+"QN","PA","Ask a product-question (wh-question)","Permit hearer to perform act.",0
+"QN","PD","Ask a product-question (wh-question)","Promise.",0
+"QN","AC","Ask a product-question (wh-question)","Answer calls/ show attentiveness to communications.",0
+"QN","NA","Ask a product-question (wh-question)","Intentionally nonsatisfying answer to question",1
+"QN","FP","Ask a product-question (wh-question)","Ask for permission to carry out act.",0
+"QN","DW","Ask a product-question (wh-question)","Disagree with proposition expressed by previous speaker.",0
+"QN","DP","Ask a product-question (wh-question)","Declare make-believe reality.",0
+"QN","WD","Ask a product-question (wh-question)","Warn of danger.",0
+"QN","TX","Ask a product-question (wh-question)","Read or recite written text aloud.",0
+"QN","DC","Ask a product-question (wh-question)","Create a new state of affairs by declaration",0
+"QN","EI","Ask a product-question (wh-question)","Elicit imitation of word or sentence by modelling or by explicit command",0
+"QN","CS","Ask a product-question (wh-question)","Counter-suggestion/ an indirect refusal.",0
+"QN","QA","Ask a product-question (wh-question)","Answer a question with a wh-question.",1
+"QN","QN","Ask a product-question (wh-question)","Ask a product-question (wh-question)",0
+"QN","RQ","Ask a product-question (wh-question)","Yes/no question or suggestion about hearer's wishes and intentions",0
+"QN","AN","Ask a product-question (wh-question)","Answer in the negative to yes/no question",0
+"QN","DS","Ask a product-question (wh-question)","Disapprove scold protest disruptive behavior.",0
+"QN","XA","Ask a product-question (wh-question)","Exhibit attentiveness to hearer.",0
+"QN","AA","Ask a product-question (wh-question)","Answer in the affirmative to yes/no question.",0
+"QN","AD","Ask a product-question (wh-question)","Agree to carry out an act requested or proposed by other.",0
+"QN","SI","Ask a product-question (wh-question)","State intent to carry out act by speaker.",0
+"QN","WS","Ask a product-question (wh-question)","Express a wish.",0
+"QN","YQ","Ask a product-question (wh-question)","Ask a yes/no question.",0
+"QN","AP","Ask a product-question (wh-question)","Agree with proposition or proposal expressed by previous speaker",0
+"QN","CN","Ask a product-question (wh-question)","Count.",0
+"RD","RD","Refuse to carry out an act requested or proposed by other.","Refuse to carry out an act requested or proposed by other.",1
+"RD","SI","Refuse to carry out an act requested or proposed by other.","State intent to carry out act by speaker.",1
+"RD","FP","Refuse to carry out an act requested or proposed by other.","Ask for permission to carry out act.",0
+"RD","TO","Refuse to carry out an act requested or proposed by other.","Mark transfer of object to hearer",1
+"RD","RP","Refuse to carry out an act requested or proposed by other.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"RD","ST","Refuse to carry out an act requested or proposed by other.","Make a declarative statement.",1
+"RD","CS","Refuse to carry out an act requested or proposed by other.","Counter-suggestion/ an indirect refusal.",1
+"RD","RQ","Refuse to carry out an act requested or proposed by other.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"RD","YY","Refuse to carry out an act requested or proposed by other.","Make a word-like utterance without clear function.",0
+"RD","DW","Refuse to carry out an act requested or proposed by other.","Disagree with proposition expressed by previous speaker.",0
+"RD","QN","Refuse to carry out an act requested or proposed by other.","Ask a product-question (wh-question)",1
+"RD","SS","Refuse to carry out an act requested or proposed by other.","Signal to start performing an act such as running or rolling a ball",1
+"RD","YQ","Refuse to carry out an act requested or proposed by other.","Ask a yes/no question.",1
+"RD","OO","Refuse to carry out an act requested or proposed by other.","Unintelligible vocalization.",0
+"RD","PF","Refuse to carry out an act requested or proposed by other.","Prohibit/forbid/protest hearer's performance of an act",0
+"RP","DW","Request propose or suggest an action for hearer or for hearer and speaker.","Disagree with proposition expressed by previous speaker.",1
+"RP","AC","Request propose or suggest an action for hearer or for hearer and speaker.","Answer calls/ show attentiveness to communications.",0
+"RP","EI","Request propose or suggest an action for hearer or for hearer and speaker.","Elicit imitation of word or sentence by modelling or by explicit command",0
+"RP","EM","Request propose or suggest an action for hearer or for hearer and speaker.","Exclaim in distress pain.",1
+"RP","PM","Request propose or suggest an action for hearer or for hearer and speaker.","Praise for motor acts i.e for nonverbal behavior.",0
+"RP","ET","Request propose or suggest an action for hearer or for hearer and speaker.","Express enthusiasm for hearer's performance.",0
+"RP","FP","Request propose or suggest an action for hearer or for hearer and speaker.","Ask for permission to carry out act.",0
+"RP","CR","Request propose or suggest an action for hearer or for hearer and speaker.","Criticize or point out error in nonverbal act.",0
+"RP","RR","Request propose or suggest an action for hearer or for hearer and speaker.","Request to repeat utterance.",1
+"RP","SA","Request propose or suggest an action for hearer or for hearer and speaker.","Answer a wh-question with a statement.",0
+"RP","SI","Request propose or suggest an action for hearer or for hearer and speaker.","State intent to carry out act by speaker.",1
+"RP","SS","Request propose or suggest an action for hearer or for hearer and speaker.","Signal to start performing an act such as running or rolling a ball",1
+"RP","YQ","Request propose or suggest an action for hearer or for hearer and speaker.","Ask a yes/no question.",1
+"RP","EC","Request propose or suggest an action for hearer or for hearer and speaker.","Elicit completion of word or sentence.",0
+"RP","YY","Request propose or suggest an action for hearer or for hearer and speaker.","Make a word-like utterance without clear function.",0
+"RP","DC","Request propose or suggest an action for hearer or for hearer and speaker.","Create a new state of affairs by declaration",0
+"RP","CN","Request propose or suggest an action for hearer or for hearer and speaker.","Count.",0
+"RP","AA","Request propose or suggest an action for hearer or for hearer and speaker.","Answer in the affirmative to yes/no question.",0
+"RP","AN","Request propose or suggest an action for hearer or for hearer and speaker.","Answer in the negative to yes/no question",0
+"RP","ST","Request propose or suggest an action for hearer or for hearer and speaker.","Make a declarative statement.",0
+"RP","RT","Request propose or suggest an action for hearer or for hearer and speaker.","Repeat or imitate other's utterance.",0
+"RP","RP","Request propose or suggest an action for hearer or for hearer and speaker.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"RP","RD","Request propose or suggest an action for hearer or for hearer and speaker.","Refuse to carry out an act requested or proposed by other.",1
+"RP","TO","Request propose or suggest an action for hearer or for hearer and speaker.","Mark transfer of object to hearer",0
+"RP","PR","Request propose or suggest an action for hearer or for hearer and speaker.","Perform verbal move in game.",0
+"RP","PD","Request propose or suggest an action for hearer or for hearer and speaker.","Promise.",0
+"RP","AB","Request propose or suggest an action for hearer or for hearer and speaker.","Approve of appropriate behavior.",0
+"RP","QN","Request propose or suggest an action for hearer or for hearer and speaker.","Ask a product-question (wh-question)",1
+"RP","RQ","Request propose or suggest an action for hearer or for hearer and speaker.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"RP","NA","Request propose or suggest an action for hearer or for hearer and speaker.","Intentionally nonsatisfying answer to question",1
+"RP","WD","Request propose or suggest an action for hearer or for hearer and speaker.","Warn of danger.",1
+"RP","GR","Request propose or suggest an action for hearer or for hearer and speaker.","Give reason/ justify a request for an action refusal or prohibition",0
+"RP","AD","Request propose or suggest an action for hearer or for hearer and speaker.","Agree to carry out an act requested or proposed by other.",1
+"RP","ED","Request propose or suggest an action for hearer or for hearer and speaker.","Exclaim in disapproval.",1
+"RP","CS","Request propose or suggest an action for hearer or for hearer and speaker.","Counter-suggestion/ an indirect refusal.",1
+"RP","MK","Request propose or suggest an action for hearer or for hearer and speaker.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"RP","OO","Request propose or suggest an action for hearer or for hearer and speaker.","Unintelligible vocalization.",0
+"RP","PF","Request propose or suggest an action for hearer or for hearer and speaker.","Prohibit/forbid/protest hearer's performance of an act",0
+"RP","CL","Request propose or suggest an action for hearer or for hearer and speaker.","Call attention to hearer by name or by substitute exclamations",0
+"RQ","DP","Yes/no question or suggestion about hearer's wishes and intentions","Declare make-believe reality.",0
+"RQ","GR","Yes/no question or suggestion about hearer's wishes and intentions","Give reason/ justify a request for an action refusal or prohibition",0
+"RQ","TQ","Yes/no question or suggestion about hearer's wishes and intentions","Ask a limited-alternative yes/no question.",0
+"RQ","RQ","Yes/no question or suggestion about hearer's wishes and intentions","Yes/no question or suggestion about hearer's wishes and intentions",0
+"RQ","PR","Yes/no question or suggestion about hearer's wishes and intentions","Perform verbal move in game.",0
+"RQ","FP","Yes/no question or suggestion about hearer's wishes and intentions","Ask for permission to carry out act.",0
+"RQ","MK","Yes/no question or suggestion about hearer's wishes and intentions","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"RQ","TA","Yes/no question or suggestion about hearer's wishes and intentions","Answer a limited-alternative question.",0
+"RQ","AD","Yes/no question or suggestion about hearer's wishes and intentions","Agree to carry out an act requested or proposed by other.",1
+"RQ","TX","Yes/no question or suggestion about hearer's wishes and intentions","Read or recite written text aloud.",0
+"RQ","OO","Yes/no question or suggestion about hearer's wishes and intentions","Unintelligible vocalization.",0
+"RQ","CS","Yes/no question or suggestion about hearer's wishes and intentions","Counter-suggestion/ an indirect refusal.",0
+"RQ","CL","Yes/no question or suggestion about hearer's wishes and intentions","Call attention to hearer by name or by substitute exclamations",0
+"RQ","SS","Yes/no question or suggestion about hearer's wishes and intentions","Signal to start performing an act such as running or rolling a ball",0
+"RQ","SI","Yes/no question or suggestion about hearer's wishes and intentions","State intent to carry out act by speaker.",0
+"RQ","AA","Yes/no question or suggestion about hearer's wishes and intentions","Answer in the affirmative to yes/no question.",1
+"RQ","SA","Yes/no question or suggestion about hearer's wishes and intentions","Answer a wh-question with a statement.",0
+"RQ","AC","Yes/no question or suggestion about hearer's wishes and intentions","Answer calls/ show attentiveness to communications.",0
+"RQ","AN","Yes/no question or suggestion about hearer's wishes and intentions","Answer in the negative to yes/no question",1
+"RQ","RR","Yes/no question or suggestion about hearer's wishes and intentions","Request to repeat utterance.",1
+"RQ","DC","Yes/no question or suggestion about hearer's wishes and intentions","Create a new state of affairs by declaration",0
+"RQ","EM","Yes/no question or suggestion about hearer's wishes and intentions","Exclaim in distress pain.",1
+"RQ","PF","Yes/no question or suggestion about hearer's wishes and intentions","Prohibit/forbid/protest hearer's performance of an act",0
+"RQ","AP","Yes/no question or suggestion about hearer's wishes and intentions","Agree with proposition or proposal expressed by previous speaker",1
+"RQ","TO","Yes/no question or suggestion about hearer's wishes and intentions","Mark transfer of object to hearer",0
+"RQ","YY","Yes/no question or suggestion about hearer's wishes and intentions","Make a word-like utterance without clear function.",0
+"RQ","YA","Yes/no question or suggestion about hearer's wishes and intentions","Answer a question with a yes/no question.",1
+"RQ","YD","Yes/no question or suggestion about hearer's wishes and intentions","Agree to a declaration.",0
+"RQ","YQ","Yes/no question or suggestion about hearer's wishes and intentions","Ask a yes/no question.",0
+"RQ","ET","Yes/no question or suggestion about hearer's wishes and intentions","Express enthusiasm for hearer's performance.",0
+"RQ","RT","Yes/no question or suggestion about hearer's wishes and intentions","Repeat or imitate other's utterance.",0
+"RQ","ED","Yes/no question or suggestion about hearer's wishes and intentions","Exclaim in disapproval.",1
+"RQ","ST","Yes/no question or suggestion about hearer's wishes and intentions","Make a declarative statement.",0
+"RQ","QN","Yes/no question or suggestion about hearer's wishes and intentions","Ask a product-question (wh-question)",0
+"RQ","RP","Yes/no question or suggestion about hearer's wishes and intentions","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"RQ","RD","Yes/no question or suggestion about hearer's wishes and intentions","Refuse to carry out an act requested or proposed by other.",1
+"RR","ST","Request to repeat utterance.","Make a declarative statement.",0
+"RR","PR","Request to repeat utterance.","Perform verbal move in game.",0
+"RR","NA","Request to repeat utterance.","Intentionally nonsatisfying answer to question",1
+"RR","DC","Request to repeat utterance.","Create a new state of affairs by declaration",0
+"RR","RQ","Request to repeat utterance.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"RR","YQ","Request to repeat utterance.","Ask a yes/no question.",0
+"RR","TO","Request to repeat utterance.","Mark transfer of object to hearer",0
+"RR","OO","Request to repeat utterance.","Unintelligible vocalization.",0
+"RR","EI","Request to repeat utterance.","Elicit imitation of word or sentence by modelling or by explicit command",0
+"RR","YY","Request to repeat utterance.","Make a word-like utterance without clear function.",0
+"RR","FP","Request to repeat utterance.","Ask for permission to carry out act.",0
+"RR","SS","Request to repeat utterance.","Signal to start performing an act such as running or rolling a ball",0
+"RR","SI","Request to repeat utterance.","State intent to carry out act by speaker.",0
+"RR","SA","Request to repeat utterance.","Answer a wh-question with a statement.",1
+"RR","AD","Request to repeat utterance.","Agree to carry out an act requested or proposed by other.",0
+"RR","RR","Request to repeat utterance.","Request to repeat utterance.",1
+"RR","AN","Request to repeat utterance.","Answer in the negative to yes/no question",0
+"RR","MK","Request to repeat utterance.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"RR","AA","Request to repeat utterance.","Answer in the affirmative to yes/no question.",0
+"RR","RP","Request to repeat utterance.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"RR","QN","Request to repeat utterance.","Ask a product-question (wh-question)",1
+"RR","RD","Request to repeat utterance.","Refuse to carry out an act requested or proposed by other.",1
+"RR","AP","Request to repeat utterance.","Agree with proposition or proposal expressed by previous speaker",1
+"RR","AC","Request to repeat utterance.","Answer calls/ show attentiveness to communications.",0
+"RR","ED","Request to repeat utterance.","Exclaim in disapproval.",0
+"RT","PR","Repeat or imitate other's utterance.","Perform verbal move in game.",1
+"RT","RT","Repeat or imitate other's utterance.","Repeat or imitate other's utterance.",1
+"RT","OO","Repeat or imitate other's utterance.","Unintelligible vocalization.",0
+"RT","ED","Repeat or imitate other's utterance.","Exclaim in disapproval.",1
+"RT","RR","Repeat or imitate other's utterance.","Request to repeat utterance.",1
+"RT","AA","Repeat or imitate other's utterance.","Answer in the affirmative to yes/no question.",0
+"RT","AP","Repeat or imitate other's utterance.","Agree with proposition or proposal expressed by previous speaker",0
+"RT","CR","Repeat or imitate other's utterance.","Criticize or point out error in nonverbal act.",1
+"RT","RQ","Repeat or imitate other's utterance.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"RT","MK","Repeat or imitate other's utterance.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"RT","TO","Repeat or imitate other's utterance.","Mark transfer of object to hearer",1
+"RT","ST","Repeat or imitate other's utterance.","Make a declarative statement.",1
+"RT","AC","Repeat or imitate other's utterance.","Answer calls/ show attentiveness to communications.",0
+"RT","RP","Repeat or imitate other's utterance.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"RT","SI","Repeat or imitate other's utterance.","State intent to carry out act by speaker.",1
+"RT","YQ","Repeat or imitate other's utterance.","Ask a yes/no question.",1
+"RT","QN","Repeat or imitate other's utterance.","Ask a product-question (wh-question)",1
+"RT","AD","Repeat or imitate other's utterance.","Agree to carry out an act requested or proposed by other.",0
+"RT","SA","Repeat or imitate other's utterance.","Answer a wh-question with a statement.",0
+"RT","RD","Repeat or imitate other's utterance.","Refuse to carry out an act requested or proposed by other.",0
+"RT","DC","Repeat or imitate other's utterance.","Create a new state of affairs by declaration",1
+"RT","EM","Repeat or imitate other's utterance.","Exclaim in distress pain.",1
+"RT","YY","Repeat or imitate other's utterance.","Make a word-like utterance without clear function.",0
+"SA","CT","Answer a wh-question with a statement.","Correct provide correct verbal form in place of erroneous one.",1
+"SA","AN","Answer a wh-question with a statement.","Answer in the negative to yes/no question",0
+"SA","ET","Answer a wh-question with a statement.","Express enthusiasm for hearer's performance.",1
+"SA","PF","Answer a wh-question with a statement.","Prohibit/forbid/protest hearer's performance of an act",1
+"SA","ED","Answer a wh-question with a statement.","Exclaim in disapproval.",1
+"SA","RD","Answer a wh-question with a statement.","Refuse to carry out an act requested or proposed by other.",0
+"SA","MK","Answer a wh-question with a statement.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"SA","CL","Answer a wh-question with a statement.","Call attention to hearer by name or by substitute exclamations",1
+"SA","AP","Answer a wh-question with a statement.","Agree with proposition or proposal expressed by previous speaker",0
+"SA","AC","Answer a wh-question with a statement.","Answer calls/ show attentiveness to communications.",0
+"SA","OO","Answer a wh-question with a statement.","Unintelligible vocalization.",0
+"SA","PR","Answer a wh-question with a statement.","Perform verbal move in game.",1
+"SA","RP","Answer a wh-question with a statement.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"SA","ST","Answer a wh-question with a statement.","Make a declarative statement.",1
+"SA","YY","Answer a wh-question with a statement.","Make a word-like utterance without clear function.",0
+"SA","SS","Answer a wh-question with a statement.","Signal to start performing an act such as running or rolling a ball",1
+"SA","DC","Answer a wh-question with a statement.","Create a new state of affairs by declaration",1
+"SA","TO","Answer a wh-question with a statement.","Mark transfer of object to hearer",1
+"SA","RT","Answer a wh-question with a statement.","Repeat or imitate other's utterance.",1
+"SA","QN","Answer a wh-question with a statement.","Ask a product-question (wh-question)",1
+"SA","RR","Answer a wh-question with a statement.","Request to repeat utterance.",1
+"SA","DW","Answer a wh-question with a statement.","Disagree with proposition expressed by previous speaker.",1
+"SA","CS","Answer a wh-question with a statement.","Counter-suggestion/ an indirect refusal.",0
+"SA","AD","Answer a wh-question with a statement.","Agree to carry out an act requested or proposed by other.",0
+"SA","FP","Answer a wh-question with a statement.","Ask for permission to carry out act.",1
+"SA","AA","Answer a wh-question with a statement.","Answer in the affirmative to yes/no question.",0
+"SA","YQ","Answer a wh-question with a statement.","Ask a yes/no question.",1
+"SA","SA","Answer a wh-question with a statement.","Answer a wh-question with a statement.",0
+"SA","SI","Answer a wh-question with a statement.","State intent to carry out act by speaker.",1
+"SC","RP","Complete statement or other utterance in compliance with request.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"SC","QN","Complete statement or other utterance in compliance with request.","Ask a product-question (wh-question)",1
+"SC","YY","Complete statement or other utterance in compliance with request.","Make a word-like utterance without clear function.",0
+"SI","AP","State intent to carry out act by speaker.","Agree with proposition or proposal expressed by previous speaker",0
+"SI","DW","State intent to carry out act by speaker.","Disagree with proposition expressed by previous speaker.",0
+"SI","PR","State intent to carry out act by speaker.","Perform verbal move in game.",1
+"SI","XA","State intent to carry out act by speaker.","Exhibit attentiveness to hearer.",1
+"SI","YQ","State intent to carry out act by speaker.","Ask a yes/no question.",1
+"SI","YY","State intent to carry out act by speaker.","Make a word-like utterance without clear function.",0
+"SI","AD","State intent to carry out act by speaker.","Agree to carry out an act requested or proposed by other.",0
+"SI","TO","State intent to carry out act by speaker.","Mark transfer of object to hearer",1
+"SI","OO","State intent to carry out act by speaker.","Unintelligible vocalization.",0
+"SI","RP","State intent to carry out act by speaker.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"SI","ST","State intent to carry out act by speaker.","Make a declarative statement.",1
+"SI","CL","State intent to carry out act by speaker.","Call attention to hearer by name or by substitute exclamations",1
+"SI","ED","State intent to carry out act by speaker.","Exclaim in disapproval.",1
+"SI","MK","State intent to carry out act by speaker.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"SI","CS","State intent to carry out act by speaker.","Counter-suggestion/ an indirect refusal.",0
+"SI","RQ","State intent to carry out act by speaker.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"SI","PA","State intent to carry out act by speaker.","Permit hearer to perform act.",1
+"SI","FP","State intent to carry out act by speaker.","Ask for permission to carry out act.",1
+"SI","AC","State intent to carry out act by speaker.","Answer calls/ show attentiveness to communications.",0
+"SI","SI","State intent to carry out act by speaker.","State intent to carry out act by speaker.",1
+"SI","PF","State intent to carry out act by speaker.","Prohibit/forbid/protest hearer's performance of an act",1
+"SI","RT","State intent to carry out act by speaker.","Repeat or imitate other's utterance.",1
+"SI","QN","State intent to carry out act by speaker.","Ask a product-question (wh-question)",1
+"SI","RD","State intent to carry out act by speaker.","Refuse to carry out an act requested or proposed by other.",0
+"SI","ET","State intent to carry out act by speaker.","Express enthusiasm for hearer's performance.",1
+"SI","RR","State intent to carry out act by speaker.","Request to repeat utterance.",1
+"SS","PR","Signal to start performing an act such as running or rolling a ball","Perform verbal move in game.",1
+"SS","TO","Signal to start performing an act such as running or rolling a ball","Mark transfer of object to hearer",1
+"SS","ST","Signal to start performing an act such as running or rolling a ball","Make a declarative statement.",1
+"SS","YY","Signal to start performing an act such as running or rolling a ball","Make a word-like utterance without clear function.",0
+"SS","RQ","Signal to start performing an act such as running or rolling a ball","Yes/no question or suggestion about hearer's wishes and intentions",1
+"SS","ED","Signal to start performing an act such as running or rolling a ball","Exclaim in disapproval.",1
+"SS","ET","Signal to start performing an act such as running or rolling a ball","Express enthusiasm for hearer's performance.",1
+"SS","EM","Signal to start performing an act such as running or rolling a ball","Exclaim in distress pain.",1
+"SS","AD","Signal to start performing an act such as running or rolling a ball","Agree to carry out an act requested or proposed by other.",0
+"SS","OO","Signal to start performing an act such as running or rolling a ball","Unintelligible vocalization.",0
+"SS","RD","Signal to start performing an act such as running or rolling a ball","Refuse to carry out an act requested or proposed by other.",0
+"SS","QN","Signal to start performing an act such as running or rolling a ball","Ask a product-question (wh-question)",1
+"SS","PM","Signal to start performing an act such as running or rolling a ball","Praise for motor acts i.e for nonverbal behavior.",1
+"SS","YQ","Signal to start performing an act such as running or rolling a ball","Ask a yes/no question.",1
+"SS","MK","Signal to start performing an act such as running or rolling a ball","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"SS","AC","Signal to start performing an act such as running or rolling a ball","Answer calls/ show attentiveness to communications.",0
+"SS","SS","Signal to start performing an act such as running or rolling a ball","Signal to start performing an act such as running or rolling a ball",1
+"SS","RR","Signal to start performing an act such as running or rolling a ball","Request to repeat utterance.",1
+"SS","RP","Signal to start performing an act such as running or rolling a ball","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"SS","AA","Signal to start performing an act such as running or rolling a ball","Answer in the affirmative to yes/no question.",0
+"SS","SI","Signal to start performing an act such as running or rolling a ball","State intent to carry out act by speaker.",1
+"ST","TD","Make a declarative statement.","Threaten to do.",1
+"ST","TX","Make a declarative statement.","Read or recite written text aloud.",1
+"ST","FP","Make a declarative statement.","Ask for permission to carry out act.",1
+"ST","PM","Make a declarative statement.","Praise for motor acts i.e for nonverbal behavior.",1
+"ST","SC","Make a declarative statement.","Complete statement or other utterance in compliance with request.",0
+"ST","XA","Make a declarative statement.","Exhibit attentiveness to hearer.",1
+"ST","AP","Make a declarative statement.","Agree with proposition or proposal expressed by previous speaker",0
+"ST","MK","Make a declarative statement.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"ST","OO","Make a declarative statement.","Unintelligible vocalization.",0
+"ST","YQ","Make a declarative statement.","Ask a yes/no question.",1
+"ST","PF","Make a declarative statement.","Prohibit/forbid/protest hearer's performance of an act",0
+"ST","PR","Make a declarative statement.","Perform verbal move in game.",1
+"ST","QN","Make a declarative statement.","Ask a product-question (wh-question)",1
+"ST","RP","Make a declarative statement.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"ST","RT","Make a declarative statement.","Repeat or imitate other's utterance.",1
+"ST","CL","Make a declarative statement.","Call attention to hearer by name or by substitute exclamations",1
+"ST","SI","Make a declarative statement.","State intent to carry out act by speaker.",1
+"ST","TO","Make a declarative statement.","Mark transfer of object to hearer",1
+"ST","SA","Make a declarative statement.","Answer a wh-question with a statement.",0
+"ST","RR","Make a declarative statement.","Request to repeat utterance.",1
+"ST","YY","Make a declarative statement.","Make a word-like utterance without clear function.",0
+"ST","TQ","Make a declarative statement.","Ask a limited-alternative yes/no question.",1
+"ST","PD","Make a declarative statement.","Promise.",1
+"ST","PA","Make a declarative statement.","Permit hearer to perform act.",0
+"ST","GI","Make a declarative statement.","Give in/ accept other's insistence or refusal.",0
+"ST","EN","Make a declarative statement.","Express positive emotion.",1
+"ST","DS","Make a declarative statement.","Disapprove scold protest disruptive behavior.",1
+"ST","RD","Make a declarative statement.","Refuse to carry out an act requested or proposed by other.",0
+"ST","DW","Make a declarative statement.","Disagree with proposition expressed by previous speaker.",0
+"ST","DC","Make a declarative statement.","Create a new state of affairs by declaration",1
+"ST","CS","Make a declarative statement.","Counter-suggestion/ an indirect refusal.",0
+"ST","ST","Make a declarative statement.","Make a declarative statement.",1
+"ST","ET","Make a declarative statement.","Express enthusiasm for hearer's performance.",1
+"ST","RQ","Make a declarative statement.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"ST","AN","Make a declarative statement.","Answer in the negative to yes/no question",0
+"ST","AA","Make a declarative statement.","Answer in the affirmative to yes/no question.",0
+"ST","EA","Make a declarative statement.","Elicit onomatopoeic or animal sounds.",1
+"ST","AC","Make a declarative statement.","Answer calls/ show attentiveness to communications.",0
+"ST","AD","Make a declarative statement.","Agree to carry out an act requested or proposed by other.",0
+"ST","CT","Make a declarative statement.","Correct provide correct verbal form in place of erroneous one.",1
+"ST","EI","Make a declarative statement.","Elicit imitation of word or sentence by modelling or by explicit command",1
+"ST","ED","Make a declarative statement.","Exclaim in disapproval.",1
+"ST","EC","Make a declarative statement.","Elicit completion of word or sentence.",1
+"ST","EM","Make a declarative statement.","Exclaim in distress pain.",1
+"ST","CN","Make a declarative statement.","Count.",1
+"TD","YY","Threaten to do.","Make a word-like utterance without clear function.",0
+"TO","PR","Mark transfer of object to hearer","Perform verbal move in game.",1
+"TO","RD","Mark transfer of object to hearer","Refuse to carry out an act requested or proposed by other.",0
+"TO","YQ","Mark transfer of object to hearer","Ask a yes/no question.",1
+"TO","SI","Mark transfer of object to hearer","State intent to carry out act by speaker.",1
+"TO","RP","Mark transfer of object to hearer","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"TO","AD","Mark transfer of object to hearer","Agree to carry out an act requested or proposed by other.",0
+"TO","ST","Mark transfer of object to hearer","Make a declarative statement.",1
+"TO","OO","Mark transfer of object to hearer","Unintelligible vocalization.",0
+"TO","YY","Mark transfer of object to hearer","Make a word-like utterance without clear function.",0
+"TO","TO","Mark transfer of object to hearer","Mark transfer of object to hearer",1
+"TO","CS","Mark transfer of object to hearer","Counter-suggestion/ an indirect refusal.",0
+"TO","MK","Mark transfer of object to hearer","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"TO","RT","Mark transfer of object to hearer","Repeat or imitate other's utterance.",1
+"TO","QN","Mark transfer of object to hearer","Ask a product-question (wh-question)",1
+"TO","DC","Mark transfer of object to hearer","Create a new state of affairs by declaration",1
+"TQ","YY","Ask a limited-alternative yes/no question.","Make a word-like utterance without clear function.",0
+"TQ","RP","Ask a limited-alternative yes/no question.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"TQ","RT","Ask a limited-alternative yes/no question.","Repeat or imitate other's utterance.",1
+"TQ","NA","Ask a limited-alternative yes/no question.","Intentionally nonsatisfying answer to question",1
+"TQ","AN","Ask a limited-alternative yes/no question.","Answer in the negative to yes/no question",1
+"TQ","SI","Ask a limited-alternative yes/no question.","State intent to carry out act by speaker.",0
+"TQ","PR","Ask a limited-alternative yes/no question.","Perform verbal move in game.",0
+"TQ","TO","Ask a limited-alternative yes/no question.","Mark transfer of object to hearer",0
+"TQ","ET","Ask a limited-alternative yes/no question.","Express enthusiasm for hearer's performance.",0
+"TQ","TQ","Ask a limited-alternative yes/no question.","Ask a limited-alternative yes/no question.",0
+"TQ","AA","Ask a limited-alternative yes/no question.","Answer in the affirmative to yes/no question.",1
+"TQ","TA","Ask a limited-alternative yes/no question.","Answer a limited-alternative question.",1
+"TQ","ST","Ask a limited-alternative yes/no question.","Make a declarative statement.",0
+"TQ","OO","Ask a limited-alternative yes/no question.","Unintelligible vocalization.",0
+"TQ","RD","Ask a limited-alternative yes/no question.","Refuse to carry out an act requested or proposed by other.",0
+"TX","PF","Read or recite written text aloud.","Prohibit/forbid/protest hearer's performance of an act",0
+"TX","MK","Read or recite written text aloud.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"TX","QN","Read or recite written text aloud.","Ask a product-question (wh-question)",1
+"TX","AA","Read or recite written text aloud.","Answer in the affirmative to yes/no question.",0
+"TX","YQ","Read or recite written text aloud.","Ask a yes/no question.",1
+"TX","CL","Read or recite written text aloud.","Call attention to hearer by name or by substitute exclamations",1
+"TX","ST","Read or recite written text aloud.","Make a declarative statement.",1
+"TX","XA","Read or recite written text aloud.","Exhibit attentiveness to hearer.",1
+"TX","SI","Read or recite written text aloud.","State intent to carry out act by speaker.",1
+"TX","TX","Read or recite written text aloud.","Read or recite written text aloud.",1
+"TX","OO","Read or recite written text aloud.","Unintelligible vocalization.",0
+"TX","YY","Read or recite written text aloud.","Make a word-like utterance without clear function.",0
+"TX","TO","Read or recite written text aloud.","Mark transfer of object to hearer",1
+"TX","RD","Read or recite written text aloud.","Refuse to carry out an act requested or proposed by other.",0
+"TX","AC","Read or recite written text aloud.","Answer calls/ show attentiveness to communications.",0
+"TX","RP","Read or recite written text aloud.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"TX","PR","Read or recite written text aloud.","Perform verbal move in game.",1
+"TX","RT","Read or recite written text aloud.","Repeat or imitate other's utterance.",1
+"TX","RQ","Read or recite written text aloud.","Yes/no question or suggestion about hearer's wishes and intentions",1
+"WD","DW","Warn of danger.","Disagree with proposition expressed by previous speaker.",0
+"WD","RT","Warn of danger.","Repeat or imitate other's utterance.",1
+"WD","RP","Warn of danger.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"WD","DC","Warn of danger.","Create a new state of affairs by declaration",1
+"WD","ST","Warn of danger.","Make a declarative statement.",1
+"WD","SI","Warn of danger.","State intent to carry out act by speaker.",1
+"WD","ED","Warn of danger.","Exclaim in disapproval.",1
+"WD","CL","Warn of danger.","Call attention to hearer by name or by substitute exclamations",1
+"WD","MK","Warn of danger.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"WD","YY","Warn of danger.","Make a word-like utterance without clear function.",0
+"WD","OO","Warn of danger.","Unintelligible vocalization.",0
+"WD","WD","Warn of danger.","Warn of danger.",1
+"WD","RD","Warn of danger.","Refuse to carry out an act requested or proposed by other.",0
+"XA","CL","Exhibit attentiveness to hearer.","Call attention to hearer by name or by substitute exclamations",0
+"XA","RT","Exhibit attentiveness to hearer.","Repeat or imitate other's utterance.",1
+"XA","RD","Exhibit attentiveness to hearer.","Refuse to carry out an act requested or proposed by other.",0
+"XA","OO","Exhibit attentiveness to hearer.","Unintelligible vocalization.",0
+"XA","MK","Exhibit attentiveness to hearer.","Mark occurrence of event (thank greet apologize congratulate etc.).",1
+"XA","ST","Exhibit attentiveness to hearer.","Make a declarative statement.",1
+"XA","QN","Exhibit attentiveness to hearer.","Ask a product-question (wh-question)",1
+"XA","TO","Exhibit attentiveness to hearer.","Mark transfer of object to hearer",1
+"XA","SI","Exhibit attentiveness to hearer.","State intent to carry out act by speaker.",1
+"XA","CS","Exhibit attentiveness to hearer.","Counter-suggestion/ an indirect refusal.",0
+"XA","ED","Exhibit attentiveness to hearer.","Exclaim in disapproval.",1
+"XA","FP","Exhibit attentiveness to hearer.","Ask for permission to carry out act.",1
+"XA","XA","Exhibit attentiveness to hearer.","Exhibit attentiveness to hearer.",0
+"XA","PR","Exhibit attentiveness to hearer.","Perform verbal move in game.",1
+"XA","YY","Exhibit attentiveness to hearer.","Make a word-like utterance without clear function.",0
+"XA","RP","Exhibit attentiveness to hearer.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"XA","YQ","Exhibit attentiveness to hearer.","Ask a yes/no question.",1
+"YA","YQ","Answer a question with a yes/no question.","Ask a yes/no question.",0
+"YA","QN","Answer a question with a yes/no question.","Ask a product-question (wh-question)",0
+"YA","MK","Answer a question with a yes/no question.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"YA","YD","Answer a question with a yes/no question.","Agree to a declaration.",0
+"YA","SA","Answer a question with a yes/no question.","Answer a wh-question with a statement.",0
+"YA","ST","Answer a question with a yes/no question.","Make a declarative statement.",0
+"YA","RD","Answer a question with a yes/no question.","Refuse to carry out an act requested or proposed by other.",0
+"YA","PR","Answer a question with a yes/no question.","Perform verbal move in game.",0
+"YA","AP","Answer a question with a yes/no question.","Agree with proposition or proposal expressed by previous speaker",0
+"YA","AC","Answer a question with a yes/no question.","Answer calls/ show attentiveness to communications.",0
+"YA","TO","Answer a question with a yes/no question.","Mark transfer of object to hearer",0
+"YA","RP","Answer a question with a yes/no question.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"YA","DC","Answer a question with a yes/no question.","Create a new state of affairs by declaration",0
+"YA","AN","Answer a question with a yes/no question.","Answer in the negative to yes/no question",1
+"YA","AA","Answer a question with a yes/no question.","Answer in the affirmative to yes/no question.",1
+"YA","RT","Answer a question with a yes/no question.","Repeat or imitate other's utterance.",0
+"YA","OO","Answer a question with a yes/no question.","Unintelligible vocalization.",0
+"YA","YY","Answer a question with a yes/no question.","Make a word-like utterance without clear function.",0
+"YA","RR","Answer a question with a yes/no question.","Request to repeat utterance.",1
+"YD","YY","Agree to a declaration.","Make a word-like utterance without clear function.",0
+"YD","SI","Agree to a declaration.","State intent to carry out act by speaker.",1
+"YD","RP","Agree to a declaration.","Request propose or suggest an action for hearer or for hearer and speaker.",1
+"YQ","PA","Ask a yes/no question.","Permit hearer to perform act.",0
+"YQ","SA","Ask a yes/no question.","Answer a wh-question with a statement.",0
+"YQ","AP","Ask a yes/no question.","Agree with proposition or proposal expressed by previous speaker",0
+"YQ","YQ","Ask a yes/no question.","Ask a yes/no question.",0
+"YQ","RR","Ask a yes/no question.","Request to repeat utterance.",1
+"YQ","YD","Ask a yes/no question.","Agree to a declaration.",0
+"YQ","AN","Ask a yes/no question.","Answer in the negative to yes/no question",1
+"YQ","TO","Ask a yes/no question.","Mark transfer of object to hearer",0
+"YQ","CS","Ask a yes/no question.","Counter-suggestion/ an indirect refusal.",0
+"YQ","TQ","Ask a yes/no question.","Ask a limited-alternative yes/no question.",0
+"YQ","DC","Ask a yes/no question.","Create a new state of affairs by declaration",0
+"YQ","GR","Ask a yes/no question.","Give reason/ justify a request for an action refusal or prohibition",0
+"YQ","EI","Ask a yes/no question.","Elicit imitation of word or sentence by modelling or by explicit command",0
+"YQ","DW","Ask a yes/no question.","Disagree with proposition expressed by previous speaker.",0
+"YQ","RT","Ask a yes/no question.","Repeat or imitate other's utterance.",0
+"YQ","RP","Ask a yes/no question.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"YQ","TX","Ask a yes/no question.","Read or recite written text aloud.",0
+"YQ","RD","Ask a yes/no question.","Refuse to carry out an act requested or proposed by other.",0
+"YQ","PR","Ask a yes/no question.","Perform verbal move in game.",0
+"YQ","PF","Ask a yes/no question.","Prohibit/forbid/protest hearer's performance of an act",0
+"YQ","RQ","Ask a yes/no question.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"YQ","XA","Ask a yes/no question.","Exhibit attentiveness to hearer.",0
+"YQ","YA","Ask a yes/no question.","Answer a question with a yes/no question.",1
+"YQ","MK","Ask a yes/no question.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"YQ","ED","Ask a yes/no question.","Exclaim in disapproval.",0
+"YQ","QN","Ask a yes/no question.","Ask a product-question (wh-question)",0
+"YQ","WD","Ask a yes/no question.","Warn of danger.",1
+"YQ","PD","Ask a yes/no question.","Promise.",0
+"YQ","OO","Ask a yes/no question.","Unintelligible vocalization.",0
+"YQ","NA","Ask a yes/no question.","Intentionally nonsatisfying answer to question",1
+"YQ","AC","Ask a yes/no question.","Answer calls/ show attentiveness to communications.",0
+"YQ","EN","Ask a yes/no question.","Express positive emotion.",0
+"YQ","CT","Ask a yes/no question.","Correct provide correct verbal form in place of erroneous one.",1
+"YQ","YY","Ask a yes/no question.","Make a word-like utterance without clear function.",0
+"YQ","AD","Ask a yes/no question.","Agree to carry out an act requested or proposed by other.",0
+"YQ","FP","Ask a yes/no question.","Ask for permission to carry out act.",0
+"YQ","CL","Ask a yes/no question.","Call attention to hearer by name or by substitute exclamations",0
+"YQ","ST","Ask a yes/no question.","Make a declarative statement.",0
+"YQ","SI","Ask a yes/no question.","State intent to carry out act by speaker.",0
+"YQ","AA","Ask a yes/no question.","Answer in the affirmative to yes/no question.",1
+"YQ","ET","Ask a yes/no question.","Express enthusiasm for hearer's performance.",0
+"YY","OO","Make a word-like utterance without clear function.","Unintelligible vocalization.",0
+"YY","RT","Make a word-like utterance without clear function.","Repeat or imitate other's utterance.",0
+"YY","AC","Make a word-like utterance without clear function.","Answer calls/ show attentiveness to communications.",0
+"YY","YY","Make a word-like utterance without clear function.","Make a word-like utterance without clear function.",0
+"YY","MK","Make a word-like utterance without clear function.","Mark occurrence of event (thank greet apologize congratulate etc.).",0
+"YY","CL","Make a word-like utterance without clear function.","Call attention to hearer by name or by substitute exclamations",0
+"YY","RP","Make a word-like utterance without clear function.","Request propose or suggest an action for hearer or for hearer and speaker.",0
+"YY","RQ","Make a word-like utterance without clear function.","Yes/no question or suggestion about hearer's wishes and intentions",0
+"YY","TO","Make a word-like utterance without clear function.","Mark transfer of object to hearer",0
+"YY","ST","Make a word-like utterance without clear function.","Make a declarative statement.",0
+"YY","SI","Make a word-like utterance without clear function.","State intent to carry out act by speaker.",0
+"YY","RD","Make a word-like utterance without clear function.","Refuse to carry out an act requested or proposed by other.",0
+"YY","PR","Make a word-like utterance without clear function.","Perform verbal move in game.",0
+"YY","SA","Make a word-like utterance without clear function.","Answer a wh-question with a statement.",0
+"YY","PF","Make a word-like utterance without clear function.","Prohibit/forbid/protest hearer's performance of an act",0
+"YY","QN","Make a word-like utterance without clear function.","Ask a product-question (wh-question)",0
+"YY","ED","Make a word-like utterance without clear function.","Exclaim in disapproval.",0

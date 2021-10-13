@@ -10,12 +10,15 @@ from tqdm import tqdm
 
 import pandas as pd
 
-DB_ARGS = {
-    "hostname": "localhost",
-    "user": "childesdb",
-    "password": "tmp",
-    "db_name": "childes-db-version-0.1.2",
-}
+from utils import PATH_CHILDES_UTTERANCES
+
+DB_ARGS = None
+# {
+#     "hostname": "localhost",
+#     "user": "childesdb",
+#     "password": "tmp",
+#     "db_name": "childes-db-version-0.1.2",
+# }
 
 TYPES_QUESTION = {
     "question",
@@ -106,7 +109,7 @@ if __name__ == "__main__":
     data = load_utts()
 
     # Store utterances for future re-use
-    data_path = f"data/utterances.h5"
+    data_path = PATH_CHILDES_UTTERANCES
 
     data.rename(columns={'child_age': 'age_months'}, inplace=True)
     data.to_hdf(data_path, key="utterances")

@@ -11,8 +11,7 @@ from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import KFold
 
-from preprocess import SPEECH_ACT
-from utils import TRAIN_TEST_SPLIT_RANDOM_STATE
+from utils import TRAIN_TEST_SPLIT_RANDOM_STATE, SPEECH_ACT, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -271,4 +270,4 @@ if __name__ == "__main__":
     result_dataframe = result_dataframes[0]
     for df in result_dataframes[1:]:
         result_dataframe = result_dataframe.append(df)
-    pickle.dump(result_dataframe, open("data/new_england_reproduced_crf.p", "wb"))
+    pickle.dump(result_dataframe, open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "wb"))

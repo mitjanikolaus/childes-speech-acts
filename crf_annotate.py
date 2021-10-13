@@ -12,7 +12,7 @@ import pycrfsuite
 
 from crf_test import crf_predict, load_training_args
 from crf_train import get_features_from_row, add_feature_columns
-from preprocess import CHILD, ADULT
+from utils import CHILD, ADULT
 from utils import calculate_frequencies
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     print(args)
 
     # Loading data
-    data = pd.read_csv(args.data)
+    data = pd.read_hdf(args.data)
 
     # Loading model
     model_path = args.model + os.sep + "model.pycrfsuite"
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     data_filtered = data[["file_id", "child_id", "age_months", "tokens", "pos", "speaker", "y_pred"]]
 
     Path(args.out).mkdir(parents=True, exist_ok=True)
-    data_filtered.to_csv(os.path.join(args.out, "speech_acts.csv"), index_label="index")
+    data_filtered.to_csv(os.path.join(args.out, "childes_utterances_annotated.csv"), index_label="index")
 
     if args.compare:
         data_children = data_filtered[data.speaker == CHILD]

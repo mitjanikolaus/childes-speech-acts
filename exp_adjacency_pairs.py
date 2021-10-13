@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import matplotlib
 from sklearn.preprocessing import OrdinalEncoder
@@ -11,15 +9,15 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 
-from preprocess import SPEECH_ACT, CHILD, ADULT
-from utils import SPEECH_ACT_DESCRIPTIONS
+from utils import SOURCE_SNOW, SOURCE_CRF, SPEECH_ACT, CHILD, ADULT, SPEECH_ACT_DESCRIPTIONS, \
+    PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, PATH_NEW_ENGLAND_UTTERANCES
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-###### Information
 ds_list = {
-    "New England": "data/new_england_preprocessed.p",
+    SOURCE_SNOW: PATH_NEW_ENGLAND_UTTERANCES,
+    SOURCE_CRF: PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED,
 }
 
 # Colors
@@ -91,13 +89,84 @@ def plot_sankey(
 
     return fig
 
+SPEAKER_SOURCE = "source"
+SPEAKER_TARGET = "target"
 
-def gen_seq_data(data, age: int = None):
+
+def get_adj_pairs_frac_data(data, age, source: str = ADULT,
+    target: str = CHILD,
+    min_percent: float = 0.0,
+    min_percent_recipient: float = 0.0,
+    data_source = SOURCE_SNOW):
+
+    if data_source == SOURCE_SNOW:
+        column_name_speech_act = SPEECH_ACT
+    elif data_source == SOURCE_CRF:
+        column_name_speech_act = "y_pred"
+    else:
+        raise ValueError("Unknown data source: ", data_source)
+
+    spa_seq = gen_seq_data(data, age=age, column_name_speech_act=column_name_speech_act)
+
+    # for now source = 1 and target = 0
+    spa_seq.rename(
+        {"speaker_1": "source", "speaker_0": "target"}, axis="columns", inplace=True
+    )
+
+    spa_source = column_name_speech_act +"_1"
+    spa_target = column_name_speech_act +"_0"
+
+    # 1. Choose illocutionary or interchange, remove unused sequences, remove NAs, select direction (MOT => CHI or CHI => MOT)
+    spa_seq.dropna(how="any", inplace=True)
+    if source is not None and source in [CHILD, ADULT]:
+        spa_seq = spa_seq[(spa_seq[SPEAKER_TARGET] == target)]
+    if target is not None and target in [CHILD, ADULT]:
+        spa_seq = spa_seq[(spa_seq[SPEAKER_SOURCE] == source)]
+    # 2. Groupby, unstack and orderby
+    spa_gp = (
+        spa_seq.groupby(by=[spa_target, spa_source])
+            .agg({SPEAKER_TARGET: "count"})
+            .reset_index(drop=False)
+    )
+    # 3. Filter out infrequent sequences
+    spa_gp["v_percent"] = spa_gp[SPEAKER_TARGET] / spa_gp[SPEAKER_TARGET].sum()
+    spa_gp = spa_gp[spa_gp["v_percent"] >= min_percent].reset_index(drop=True)
+
+    percentages = []
+    # Save frequency data
+    for speech_act_source in spa_gp[spa_source].unique():
+        speech_acts_target = spa_gp[spa_gp[spa_source] == speech_act_source]
+        for speech_act_target in speech_acts_target[spa_target]:
+            count = speech_acts_target[
+                speech_acts_target[spa_target] == speech_act_target
+                ][SPEAKER_TARGET].values[0]
+            fraction = count / speech_acts_target[SPEAKER_TARGET].sum()
+            percentages.append(
+                {
+                    SPEAKER_SOURCE: speech_act_source,
+                    SPEAKER_TARGET: speech_act_target,
+                    "fraction": fraction,
+                }
+            )
+    percentages = pd.DataFrame(percentages)
+    percentages["source_description"] = percentages["source"].apply(
+        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
+    )
+    percentages["target_description"] = percentages["target"].apply(
+        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
+    )
+
+    percentages = percentages[percentages["fraction"] > min_percent_recipient]
+
+    return percentages, spa_gp
+
+
+def gen_seq_data(data, age: int = None, column_name_speech_act = "speech_act"):
     # 0. Choose age
     if age is not None:
         data_age = data[data["age_months"] == age]
     # 1. Sequence extraction & columns names
-    spa_shifted = {0: data_age[[SPEECH_ACT, "speaker", "file_id"]]}
+    spa_shifted = {0: data_age[[column_name_speech_act, "speaker", "file_id"]]}
     spa_shifted[1] = (
         spa_shifted[0]
         .shift(periods=1, fill_value=None)
@@ -110,72 +179,20 @@ def gen_seq_data(data, age: int = None):
     spa_compare = pd.concat(spa_shifted.values(), axis=1)
     # 3. Add empty slots for file changes
     spa_compare.loc[
-        (spa_compare["file_id_0"] != spa_compare["file_id_1"]), [f"{SPEECH_ACT}_1"]
+        (spa_compare["file_id_0"] != spa_compare["file_id_1"]), [f"{column_name_speech_act}_1"]
     ] = None
     return spa_compare[[col for col in spa_compare.columns if "file_id" not in col]]
 
 
-def create_2_sankey(
-    spa_sequences,
+def create_sankey_diagram(
+    spa_gp,
     age,
     source: str = ADULT,
     target: str = CHILD,
-    min_percent: float = 0.1,
+    column_name_speech_act = "speech_act"
 ):
-    # for now source = 1 and target = 0
-    spa_sequences.rename(
-        {"speaker_1": "source", "speaker_0": "target"}, axis="columns", inplace=True
-    )
-    speaker_source = "source"
-    speaker_target = "target"
-    spa_source = "speech_act_1"
-    spa_target = "speech_act_0"
-
-    # 1. Choose illocutionary or interchange, remove unused sequences, remove NAs, select direction (MOT => CHI or CHI => MOT)
-    spa_sequences.dropna(how="any", inplace=True)
-    if source is not None and source in [CHILD, ADULT]:
-        spa_sequences = spa_sequences[(spa_sequences[speaker_target] == target)]
-    if target is not None and target in [CHILD, ADULT]:
-        spa_sequences = spa_sequences[(spa_sequences[speaker_source] == source)]
-    # 2. Groupby, unstack and orderby
-    spa_gp = (
-        spa_sequences.groupby(by=[spa_target, spa_source])
-        .agg({speaker_target: "count"})
-        .reset_index(drop=False)
-    )
-    # 3. Filter out infrequent sequences
-    # TODO by source or target?
-    spa_gp["v_percent"] = spa_gp[speaker_target] / spa_gp[speaker_target].sum()
-    spa_gp = spa_gp[spa_gp["v_percent"] >= min_percent].reset_index(drop=True)
-
-    percentages = []
-    # Save frequency data
-    for speech_act_source in spa_gp[spa_source].unique():
-        speech_acts_target = spa_gp[spa_gp[spa_source] == speech_act_source]
-        for speech_act_target in speech_acts_target[spa_target]:
-            count = speech_acts_target[
-                speech_acts_target[spa_target] == speech_act_target
-            ][speaker_target].values[0]
-            fraction = count / speech_acts_target[speaker_target].sum()
-            percentages.append(
-                {
-                    speaker_source: speech_act_source,
-                    speaker_target: speech_act_target,
-                    "fraction": fraction,
-                }
-            )
-    percentages = pd.DataFrame(percentages)
-    percentages["source_description"] = percentages["source"].apply(
-        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
-    )
-    percentages["target_description"] = percentages["target"].apply(
-        lambda sp: SPEECH_ACT_DESCRIPTIONS.loc[sp].Description
-    )
-
-    out_dir = "adjacency_pairs"
-    os.makedirs(out_dir, exist_ok=True)
-    percentages = percentages[percentages["fraction"] > 0.05]
-    percentages.to_csv(os.path.join(out_dir, f"{source}-{target}_age_{age}.csv"))
+    spa_source = column_name_speech_act + "_1"
+    spa_target = column_name_speech_act + "_0"
 
     # 5.1 Apply encoder to get labels as numbers => idx in sankey (source, target)
     enc = OrdinalEncoder()
@@ -187,7 +204,7 @@ def create_2_sankey(
         col: list(ar) for col, ar in zip([spa_target, spa_source], enc.categories_)
     }
 
-    trf_spa[["value", "v_percent"]] = spa_gp[[speaker_target, "v_percent"]]
+    trf_spa[["value", "v_percent"]] = spa_gp[[SPEAKER_TARGET, "v_percent"]]
     # 5.2 Add link colors
     # 5.3 Update categories for target columns
     n = len(enc_cat[spa_target])
@@ -218,11 +235,11 @@ app.layout = html.Div(
             [
                 html.Div(
                     children=[
-                        "Pick a dataset:",
+                        "Pick a data source:",
                         dcc.Dropdown(
                             id="dataset-choice",
                             options=[{"label": i, "value": i} for i in ds_list.keys()],
-                            value="New England",
+                            value=SOURCE_SNOW,
                         ),
                     ],
                     style={"width": "48%", "display": "inline-block"},
@@ -293,10 +310,16 @@ def update_graph(dataset, source, target, age_months, percentage):
         lambda age: min(match_age, key=lambda x: abs(x - age))
     )
     # Filter data
-    spa_seq = gen_seq_data(data, age=age_months)
-    fig = create_2_sankey(
-        spa_seq, age=age_months, min_percent=percentage, source=source, target=target
-    )
+    _, spa_gp = get_adj_pairs_frac_data(data, age_months, source, target, min_percent=percentage, data_source=dataset)
+
+    if dataset == SOURCE_SNOW:
+        column_name_speech_act = SPEECH_ACT
+    elif dataset == SOURCE_CRF:
+        column_name_speech_act = "y_pred"
+    else:
+        raise ValueError("Unknown data source: ", dataset)
+
+    fig = create_sankey_diagram(spa_gp, age_months, source, target, column_name_speech_act)
 
     return fig
 
