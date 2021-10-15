@@ -27,7 +27,7 @@ from utils import (
     SPEECH_ACT_UNINTELLIGIBLE,
     SPEECH_ACT_NO_FUNCTION,
     make_train_test_splits,
-    SPEECH_ACT_DESCRIPTIONS,
+    SPEECH_ACT_DESCRIPTIONS, calculate_frequencies,
 )
 
 
@@ -263,30 +263,31 @@ if __name__ == "__main__":
         use_pos=args.use_pos,
     )
 
-    _, data_test = make_train_test_splits(data, args.test_ratio)
+    data_train, data_test = make_train_test_splits(data, args.test_ratio)
     print(f"Testing on {len(data_test)} utterances")
 
     # Loading features
     with open(features_path, "rb") as pickle_file:
         feature_vocabs = pickle.load(pickle_file)
 
-    data_test["features"] = data_test.apply(
-        lambda x: get_features_from_row(
-            feature_vocabs,
-            x.tokens,
-            x["speaker"],
-            x["prev_speaker"],
-            x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
-            repetitions=None
-            if not args.use_repetitions
-            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
-            pos_tags=None if not args.use_pos else x.pos,
-        ),
-        axis=1,
+    data_test = data_test.assign(features = data_test.apply(
+            lambda x: get_features_from_row(
+                feature_vocabs,
+                x.tokens,
+                x["speaker"],
+                x["prev_speaker"],
+                x.turn_length,
+                use_bi_grams=args.use_bi_grams,
+                action_tokens=None if not args.use_action else x.action_tokens,
+                repetitions=None
+                if not args.use_repetitions
+                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                past_tokens=None if not args.use_past else x.past,
+                pastact_tokens=None if not args.use_past_actions else x.past_act,
+                pos_tags=None if not args.use_pos else x.pos,
+            ),
+            axis=1,
+        )
     )
 
     # Predictions
@@ -302,10 +303,10 @@ if __name__ == "__main__":
         grouped_test.sort_values("index", ascending=True)["features"],
         mode=args.prediction_mode,
     )
-    data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+    data_test = data_test.assign(y_pred = [y for x in y_pred for y in x])  # flatten
 
     # Filter for important columns
-    data_test["speech_act_predicted"] = data_test["y_pred"]
+    data_test = data_test.assign(speech_act_predicted=data_test["y_pred"])
     data_filtered = data_test[["file_id", "utterance_id", "child", "age_months", "tokens", "pos",
                               "speaker", "speech_act", "speech_act_predicted"]]
     data_filtered.to_csv(os.path.join("checkpoints", "crf", "speech_acts.csv"), index_label="index")
@@ -385,9 +386,14 @@ if __name__ == "__main__":
 
     report_dict = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3, output_dict=True)
     report_df = pd.DataFrame(report_dict).T
-    corr, p_value = spearmanr(report_df["f1-score"].to_list(), report_df["support"].to_list())
 
-    print(f"Spearman correlation between support and f-score: {corr} (p = {p_value})")
+    # Get training data label frequencies:
+    freqs = dict(calculate_frequencies(data_train[SPEECH_ACT]))
+    filtered_freqs = [freqs[speech_act] for speech_act in report_df.index if speech_act in freqs]
+    filtered_f1 = [f1 for speech_act, f1 in report_df["f1-score"].items() if speech_act in freqs]
+    corr, p_value = spearmanr(filtered_f1, filtered_freqs)
+
+    print(f"Spearman correlation between freq and f-score: {corr:.2f} (p = {p_value})")
 
     # Write excel with all reports
     report_to_file(report_d, report_path)
