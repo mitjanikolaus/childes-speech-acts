@@ -27,7 +27,7 @@ TARGET_COMPREHENSION = "comprehension"
 
 SPEECH_ACT_DESCRIPTIONS = pd.read_csv(
     "illocutionary_force_codes.csv", sep=" ", header=0, keep_default_na=False
-).set_index("Code")
+).set_index("Code").sort_index()
 
 PUNCTUATION = {
     "p": ".",
