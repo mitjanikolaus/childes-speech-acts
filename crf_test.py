@@ -384,8 +384,10 @@ if __name__ == "__main__":
     )
     print(report)
 
-    report_dict = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3, output_dict=True)
+    report_dict = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), labels=sorted(data_crf[SPEECH_ACT].unique()), digits=3, output_dict=True)
     report_df = pd.DataFrame(report_dict).T
+    pd.set_option('display.float_format', lambda x: '%.3f' % x)
+    print(report_df.to_latex())
 
     # Get training data label frequencies:
     freqs = dict(calculate_frequencies(data_train[SPEECH_ACT]))

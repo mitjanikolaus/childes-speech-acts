@@ -10,7 +10,7 @@ from scipy.spatial.distance import jensenshannon
 
 from age_of_acquisition import calc_ages_of_acquisition, COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES, MAX_AGE
 from utils import age_bin, calculate_frequencies, SOURCE_CRF, SOURCE_SNOW, TARGET_PRODUCTION, TARGET_COMPREHENSION, \
-    AGES, load_whole_childes_data, SPEECH_ACT, CHILD, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED
+    AGES, load_whole_childes_data, SPEECH_ACT, CHILD, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, AGES_LONG
 
 SOURCE_SNOW_LABEL = "Data from Snow et al. (1996)"
 SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL = "Automatically Annotated Data (New England)"
@@ -365,6 +365,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         threshold_speech_act_observed_production=0,
     )
 
+    # observed_speech_acts = list(data_whole_childes["y_pred"].dropna().unique())
     # ages_of_acquisition_childes_long = calc_ages_of_acquisition(
     #     target_measure,
     #     data_whole_childes,
@@ -387,7 +388,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
                 # "childes (long)": ages_of_acquisition_childes_long[speech_act],
             }
         )
-    aoa_data = pd.DataFrame(aoa_data)
+    aoa_data = pd.DataFrame(aoa_data).sort_values(by=["speech_act"], axis=0)
     print(aoa_data)
     print(aoa_data.to_latex(float_format="%.1f", index=False))
 
@@ -404,8 +405,6 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         list(ages_of_acquisition_childes.values()),
     )
     print("Spearman snow vs. childes: ", corr_childes)
-    # corr_childes_dense = spearmanr(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_long.values()))
-    # print("Spearman snow vs. childes (long): ", corr_childes_dense)
 
     # Plot correlations
     fig, (axes) = plt.subplots(1, 2, sharex="all", sharey="all", figsize=(6, 3))
@@ -440,10 +439,6 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
                 ages_of_acquisition_childes[speech_act],
             ),
         )
-
-    # axes[2].scatter(list(ages_of_acquisition_snow.values()), list(ages_of_acquisition_childes_dense.values()))
-    # axes[2].set_ylabel("CRF (CHILDES, dense)")
-    # axes[2].set_title(f"r={corr_childes_dense.correlation:.2f}")
 
     for i, ax in enumerate(axes):
         ax.set_xlabel("")
@@ -498,6 +493,6 @@ if __name__ == "__main__":
 
     reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
 
-    # reproduce_speech_act_distribution(data, data_whole_childes)
+    reproduce_speech_act_distribution(data, data_whole_childes)
 
-    # reproduce_num_speech_acts(data, data_whole_childes)
+    reproduce_num_speech_acts(data, data_whole_childes)
