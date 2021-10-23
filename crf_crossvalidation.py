@@ -329,4 +329,4 @@ if __name__ == "__main__":
             meta_file.write("{0}:\t{1}\n".format(arg, getattr(args, arg)))
         meta_file.write("{0}:\t{1}\n".format("Experiment", "Datasets"))
 
-    print("Average accuracy over all splits: ", np.average(list(logger.values())))
+    print(f"Average accuracy over all splits: {np.mean(list(logger.values())):.5f} (+-{np.std(list(logger.values())):.5f})")
