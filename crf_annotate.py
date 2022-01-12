@@ -124,12 +124,11 @@ if __name__ == "__main__":
             "nb_repwords",
             "ratio_repwords",
             "features",
-            "speech_act",
         ]
     )
 
     Path(args.out).mkdir(parents=True, exist_ok=True)
-    data_filtered.to_csv(os.path.join(args.out, "childes_utterances_annotated.csv"))
+    data_filtered.to_pickle(os.path.join(args.out, "utterances_annotated_with_speech_acts.p"))
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]

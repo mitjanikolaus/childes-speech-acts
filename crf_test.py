@@ -281,10 +281,8 @@ if __name__ == "__main__":
     )
 
     y_pred = crf_predict(tagger, grouped_test["features"], mode=args.prediction_mode,)
-    data_test = data_test.assign(y_pred=[y for x in y_pred for y in x])  # flatten
+    data_test = data_test.assign(speech_act_predicted=[y for x in y_pred for y in x])  # flatten
 
-    # Filter for important columns
-    data_test = data_test.assign(speech_act_predicted=data_test["y_pred"])
     data_filtered = data_test.drop(
         columns=[
             "prev_tokens",
@@ -292,10 +290,9 @@ if __name__ == "__main__":
             "nb_repwords",
             "ratio_repwords",
             "features",
-            "y_pred",
         ]
     )
-    data_filtered.to_csv(os.path.join("checkpoints", "crf", "speech_acts.csv"))
+    data_filtered.to_pickle(os.path.join("checkpoints", "crf", "speech_acts.p"))
 
     data_test["pred_OK"] = data_test.apply(
         lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
