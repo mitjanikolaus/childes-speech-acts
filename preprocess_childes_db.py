@@ -109,7 +109,5 @@ if __name__ == "__main__":
     data = load_utts()
 
     # Store utterances for future re-use
-    data_path = PATH_CHILDES_UTTERANCES
-
     data.rename(columns={'child_age': 'age_months'}, inplace=True)
-    data.to_hdf(data_path, key="utterances")
+    data.to_pickle(PATH_CHILDES_UTTERANCES)

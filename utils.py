@@ -1,11 +1,9 @@
 import os
 import pickle
 
-import xmltodict
-from collections import Counter, OrderedDict
+from collections import Counter
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from torchtext import vocab
 import re
 from bidict import (
     bidict,
@@ -42,30 +40,14 @@ PUNCTUATION = {
     "comma": ",",
     "broken for coding": "",
     "self interruption": "-",
+    "other_1": "+\"/.",
+    "other_2": "+...",
+    "other_3": "++/.",
+    "other_4": "+/.",
 }
 
 SPEECH_ACT_UNINTELLIGIBLE = "OO"
 SPEECH_ACT_NO_FUNCTION = "YY"
-
-SPEECH_ACTS_MIN_PERCENT_CHILDREN = [
-    "YY",
-    "OO",
-    "RD",
-    "RT",
-    "TO",
-    "PF",
-    "SA",
-    "RP",
-    "MK",
-    "AA",
-    "ST",
-    "PR",
-    "AC",
-    "AD",
-    "SI",
-    "QN",
-    "YQ",
-]
 
 PADDING = "<pad>"
 UNKNOWN = "<unk>"
@@ -255,7 +237,7 @@ TRANSCRIPTS_NEW_ENGLAND = [
     3757,
 ]
 
-PATH_CHILDES_UTTERANCES = os.path.expanduser("~/data/speech_acts/data/childes_utterances.h5")
+PATH_CHILDES_UTTERANCES = os.path.expanduser("~/data/speech_acts/data/childes_utterances.p")
 PATH_CHILDES_UTTERANCES_ANNOTATED = os.path.expanduser("~/data/speech_acts/data/childes_utterances_annotated.csv")
 
 PATH_NEW_ENGLAND_UTTERANCES = os.path.expanduser("~/data/speech_acts/data/new_england_preprocessed.p")
@@ -273,7 +255,7 @@ def load_whole_childes_data():
     min_num_utterances = {}
     for age in AGES:
         data_age = data[(data.age_months == age) & (data.speaker == CHILD)]
-        lengths = data_age.groupby(by=["file_id"]).agg(
+        lengths = data_age.groupby(by=["transcript_file"]).agg(
             length=("utterance_id", lambda x: len(x))
         )
         min_num_utterances[age] = lengths.length.min()
@@ -285,7 +267,7 @@ def load_whole_childes_data():
 
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[
-        ~data_whole_childes.file_id.isin(TRANSCRIPTS_NEW_ENGLAND)
+        ~data_whole_childes.transcript_file.isin(TRANSCRIPTS_NEW_ENGLAND)
     ]
 
     # Filter for children's utterances
@@ -295,8 +277,8 @@ def load_whole_childes_data():
     for age in AGES:
         lengths = (
             data_whole_childes_children[data_whole_childes_children.age_months == age]
-                .groupby(by=["file_id"])
-                .agg(length=("file_id", lambda x: len(x)))
+                .groupby(by=["transcript_file"])
+                .agg(length=("transcript_file", lambda x: len(x)))
         )
         transcripts_too_short = lengths[
             lengths.length < min_num_utterances[age]
@@ -306,7 +288,7 @@ def load_whole_childes_data():
             f"Filtering out {len(transcripts_too_short)} transcripts that are too short (age {age} months)"
         )
         data_whole_childes = data_whole_childes[
-            ~data_whole_childes.file_id.isin(transcripts_too_short)
+            ~data_whole_childes.transcript_file.isin(transcripts_too_short)
         ]
 
     return data_whole_childes
@@ -314,34 +296,15 @@ def load_whole_childes_data():
 
 def make_train_test_splits(data, test_split_ratio):
     data_train_ids, data_test_ids = train_test_split(
-        data["file_id"].unique(),
+        data["transcript_file"].unique(),
         test_size=test_split_ratio,
         shuffle=True,
         random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
     )
-    data_train = data[data["file_id"].isin(data_train_ids.tolist())]
-    data_test = data[data["file_id"].isin(data_test_ids.tolist())]
+    data_train = data[data["transcript_file"].isin(data_train_ids.tolist())]
+    data_test = data[data["transcript_file"].isin(data_test_ids.tolist())]
 
     return data_train, data_test
-
-
-def build_vocabulary(data, max_vocab_size):
-    word_counter = Counter()
-    for tokens in data:
-        word_counter.update(tokens)
-    print(f"Total number of words: {len(word_counter)}")
-    print(f"Vocab: {word_counter.most_common(100)}")
-    vocabulary = vocab.Vocab(
-        word_counter,
-        max_size=max_vocab_size,
-        specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
-    )
-
-    return vocabulary
-
-
-def get_words(indices, vocab):
-    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
 
 
 def preprend_speaker_token(tokens, speaker):
@@ -354,88 +317,6 @@ def preprend_speaker_token(tokens, speaker):
         raise RuntimeError("Unknown speaker code: ", speaker)
 
     return tokens
-
-
-def get_xml_as_dict(filepath: str):
-    with open(filepath) as in_file:
-        xml = in_file.read()
-        d = xmltodict.parse(xml)
-    return d
-
-
-def parse_w(d: dict, replace_name=False):
-    """
-    Input:
-    -------
-    d: dict
-        data inside a text tag (w)
-
-    replace_name: bool
-        whether to replace parent/child name with specific tag (default False)
-
-    Output:
-    -------
-    loc: int
-
-    word: str
-
-    is_shortened: bool
-    """
-    kys = list(d.keys())
-    word = d["#text"]
-    lemma = ""
-    pos = ""
-    if "@untranscribed" in kys:  # currently not taken into account
-        loc = 0
-    elif "mor" in kys:  # @index starts at 1
-        loc = int(d["mor"]["gra"]["@index"]) - 1
-        # if "mw" in d["mor"].keys():
-        try:
-            lemma = d["mor"]["mw"]["stem"]
-            pos = "_".join(list(d["mor"]["mw"]["pos"].values()))
-        except KeyError as e:
-            if (
-                str(e) == "'mw'"
-            ):  # sometimes mw is a list - compound words such as "butterfly", "raincoat"...
-                # in this case, mwc only contains whole pos, but mw is a list with individual pos and stem
-                lemma = "".join([x["stem"] for x in d["mor"]["mwc"]["mw"]])
-                pos = "_".join(list(d["mor"]["mwc"]["pos"].values()))
-        if "mor-post" in d["mor"].keys():  # can be a list too
-            if isinstance(d["mor"]["mor-post"], list):
-                lemma += " " + " ".join(
-                    [mp_x["mw"]["stem"] for mp_x in d["mor"]["mor-post"]]
-                )
-                pos += " " + " ".join(
-                    [
-                        "_".join(list(mp_x["mw"]["pos"].values()))
-                        for mp_x in d["mor"]["mor-post"]
-                    ]
-                )
-            else:  # OrderedDict
-                lemma += " " + d["mor"]["mor-post"]["mw"]["stem"]
-                pos += " " + "_".join(list(d["mor"]["mor-post"]["mw"]["pos"].values()))
-    elif "@type" in kys and d["@type"] == "fragment":
-        # TODO: see u327 # cannot be taken into account
-        loc = None
-    elif "@type" in kys and d["@type"] == "filler":
-        loc = None
-    else:
-        # print(d)
-        # raise Exception
-        loc = None
-    is_shortened = "shortening" in kys
-    return loc, word, lemma, pos, is_shortened
-
-
-def missing_position(d: dict):  # TODO: see u258
-    # min is supposed to be 0 and max is supposed to be len(d) - 1
-    if len(d) == 0:
-        return [0]
-    else:
-        mx = max(d.keys())
-        return sorted(list(set(range(0, mx + 1)) - set(d.keys()))) + [
-            mx + 1
-        ]  # same as "0" above if no difference
 
 
 def age_months(s: str) -> int:
@@ -486,249 +367,6 @@ def age_bin(age):
         return age
 
 
-def parse_xml(d: dict):
-    """
-    Input:
-    -------
-    d: dict
-        JSON data read from XML file from childes interaction
-
-    Output:
-    -------
-    new_shape: dict
-        JSON structure similar to Datcha JSON
-
-    lines: list of dict
-        main data to be written
-
-    errors: list
-        list of utterances generating errors (unsolved patterns with parse_w)
-    """
-
-    transcript = {"header": {}, "annotation": {}, "documents": []}  # JSON
-    lines = []
-    errors = []
-
-    # for k,v in d["CHAT"].items():
-    #     if k[0] == '@':
-    #         new_shape["header"][k] = v
-
-    # storing participant
-    for interlocutor in d["CHAT"]["Participants"]["participant"]:
-        if interlocutor["@id"] == "CHI":
-            transcript["header"]["target_child"] = {
-                "name": interlocutor["@name"]
-                if "@name" in interlocutor.keys()
-                else "Unknown",
-                "age": age_months(interlocutor["@age"])
-                if "@age" in interlocutor.keys()
-                else 0,
-            }
-            if "@language" in interlocutor.keys():
-                transcript["header"]["language"] = interlocutor["@language"]
-    # storing annotator
-    # for cmt in (d["CHAT"]["comment"] if isinstance(d["CHAT"]["comment"], list) else [d["CHAT"]["comment"]]):
-    #     if cmt["@type"] == "Transcriber":
-    #         new_shape["header"]["transcriber"] = cmt["#text"]
-    # counter for names
-    # n_prop = []
-
-    if "u" not in d["CHAT"]:
-        raise ValueError("No utterances found.")
-
-    for utterance in d["CHAT"]["u"]:
-        # print(utterance["@uID"])
-        doc = {
-            "speaker": utterance["@who"],
-            "id": utterance["@uID"][1:],
-            "tokens": [],
-            "segments": {},
-        }
-        # words
-        l_words = {}
-        l_lemmas = {}
-        l_pos = {}
-
-        ut_keys = utterance.keys()
-        for key in ut_keys:
-            if key == "w":
-                for w_word in (
-                    utterance["w"] if type(utterance["w"]) == list else [utterance["w"]]
-                ):  # str or dict/OrderedDict transformed
-                    if isinstance(w_word, str):
-                        loc = 1 if (len(l_words) == 0) else (max(l_words.keys()) + 1)
-                        l_words[loc] = w_word
-                    elif isinstance(w_word, dict) or isinstance(w_word, OrderedDict):
-                        # if the word has a location, it can replace words with _no_ location.
-                        loc, word, lemma, pos, _ = parse_w(
-                            w_word
-                        )  # is_shortened not used rn
-                        if loc is not None:
-                            l_words[loc] = word
-                            l_lemmas[loc] = lemma
-                            l_pos[loc] = pos
-                        else:
-                            errors.append(utterance["@uID"])
-
-            if key == "g":
-                l_g = (
-                    utterance["g"]
-                    if isinstance(utterance["g"], list)
-                    else [utterance["g"]]
-                )
-                for utter_g in l_g:
-                    # no respect of order
-                    if "g" in utter_g.keys():  # nested g ==> take into account later
-                        l_g += (
-                            utter_g["g"]
-                            if isinstance(utter_g["g"], list)
-                            else [utter_g["g"]]
-                        )
-                    if "w" in utter_g.keys():  # nested w
-                        utter_gw = (
-                            utter_g["w"]
-                            if isinstance(utter_g["w"], list)
-                            else [utter_g["w"]]
-                        )
-                        for w_word in utter_gw:
-                            if isinstance(
-                                w_word, str
-                            ):  # TODO: check place in sentence (could be overwritten)
-                                loc = (
-                                    1
-                                    if (len(l_words) == 0)
-                                    else (max(l_words.keys()) + 1)
-                                )
-                                l_words[loc] = w_word
-                            else:
-                                loc, word, lemma, pos, _ = parse_w(
-                                    w_word
-                                )  # is_shortened not used rn
-                                if loc is not None:
-                                    l_words[loc] = word
-                                    l_lemmas[loc] = lemma
-                                    l_pos[loc] = pos
-                                else:
-                                    errors.append(utterance["@uID"])
-
-            if key == "a":  # either dict, list of non existent
-                for l in (
-                    utterance["a"] if type(utterance["a"]) == list else [utterance["a"]]
-                ):
-                    if l["@type"] == "speech act":
-                        # warning: l["#text"] == TAG is not necessary clean
-                        try:
-                            tag = (
-                                l["#text"]
-                                .upper()
-                                .strip()
-                                .replace("0", "O")
-                                .replace(";", ":")
-                                .replace("-", ":")
-                            )
-                            tag = tag.replace("|", "")  # extra pipe found
-                        except:
-                            print("\tTag Error:", l["#text"], utterance["@uID"])
-                        if tag[:2] == "$ ":
-                            tag = tag[2:]
-                        doc["segments"]["label"] = tag
-                    elif l["@type"] == "gesture":
-                        doc["segments"]["action"] = l["#text"]
-                    elif l["@type"] == "action":
-                        doc["segments"]["action"] = l["#text"]
-                    elif l["@type"] == "actions":  # same as previous :|
-                        doc["segments"]["action"] = l["#text"]
-
-            if key == "t" or key == "tagMarker":
-                # either punctuation location is specified or is added when it appears in the sentence
-                pct = PUNCTUATION[utterance["t"]["@type"]]
-                if (
-                    ("mor" in utterance["t"].keys())
-                    and ("gra" in utterance["t"]["mor"].keys())
-                    and (utterance["t"]["mor"]["gra"]["@relation"] == "PUNCT")
-                ):
-                    loc = int(utterance["t"]["mor"]["gra"]["@index"]) - 1
-                    l_words[loc] = pct
-                    l_lemmas[loc] = pct
-                else:
-                    # TODO append to rest of the sentence
-                    loc = 1 if (len(l_words) == 0) else (max(l_words.keys()) + 1)
-                    l_words[loc] = pct
-
-        # Once the utterance has been cleared: create list of tokens
-        # TODO: before doing that check that all ranks are accounted for
-        for i, k in enumerate(sorted(list(l_words.keys()))):
-            doc["tokens"].append(
-                {
-                    "id": i,
-                    "word": l_words[k],
-                    "lemma": None if k not in l_lemmas.keys() else l_lemmas[k],
-                    "pos": None if k not in l_pos.keys() else l_pos[k],
-                    # "shortened": False
-                }
-            )
-        tokens = [x["word"].lower() for x in doc["tokens"]]
-        doc["segments"]["end"] = len(tokens)
-        doc["segments"]["tokens"] = tokens
-        doc["segments"]["lemmas"] = " ".join(
-            [x["lemma"] for x in doc["tokens"] if x["lemma"] is not None]
-        )
-        doc["segments"]["pos"] = " ".join(
-            [x["pos"] for x in doc["tokens"] if x["pos"] is not None]
-        )
-
-        # split tags
-        if "label" in doc["segments"].keys():
-            doc["segments"]["label_illoc"] = select_tag(doc["segments"]["label"])
-        else:
-            doc["segments"]["label_illoc"] = None
-        # add to json
-        transcript["documents"].append(doc)
-        # add to tsv output
-        line = format_line(doc)
-        lines.append(line)
-
-    df = pd.DataFrame(lines)
-    df["child"] = transcript["header"]["target_child"]["name"].lower()
-    df["age_months"] = transcript["header"]["target_child"]["age"]
-
-    return df
-
-
-def format_line(document):
-    return {
-        "utterance_id": document["id"],
-        "speech_act": document["segments"]["label_illoc"],
-        "speaker": document["speaker"],
-        "tokens": document["segments"]["tokens"],
-        "lemmas": document["segments"]["lemmas"],
-        "pos": document["segments"]["pos"],
-        "action": None
-        if "action" not in document["segments"].keys()
-        else document["segments"]["action"],
-    }
-
-
-### Tag modification
-def select_tag(s: str):
-    if s[:2] == "$ ":  # some tags have errors
-        s = s[2:]
-    # tag must start by '$'; otherwise remore space.
-    # split on ' ' if more than one tag - keep the first
-    s = s.strip().replace("$", "").split(" ")[0]
-    if len(s) == 5:
-        s = s[:3] + ":" + s[3:]  # a few instances in Gaeltacht of unsplitted tags
-    l = s.split(":")
-    return None if len(l) < 2 else check_illocutionary(l[1])
-
-
-def check_illocutionary(tag: str):
-    il_errors = {"AS": "SA", "CTP": "CT"}
-    if tag in il_errors.keys():
-        return il_errors[tag]
-    return tag
-
-
 def dataset_labels(add_empty_labels: bool = False) -> bidict:
     """Return all possible labels; order will be used to index labels in data
 
@@ -742,171 +380,12 @@ def dataset_labels(add_empty_labels: bool = False) -> bidict:
     b: `bidict`
         dictionary `{label: index}` to be used to transform data
     """
-    labels = [
-        "AC",
-        "AD",
-        "AL",
-        "CL",
-        "CS",
-        "DR",
-        "GI",
-        "GR",
-        "RD",
-        "RP",
-        "RQ",
-        "SS",
-        "WD",
-        "CX",
-        "EA",
-        "EI",
-        "EC",
-        "EX",
-        "RT",
-        "SC",
-        "FP",
-        "PA",
-        "PD",
-        "PF",
-        "SI",
-        "TD",
-        "DC",
-        "DP",
-        "ND",
-        "YD",
-        "CM",
-        "EM",
-        "EN",
-        "ES",
-        "MK",
-        "TO",
-        "XA",
-        "AP",
-        "CN",
-        "DW",
-        "ST",
-        "WS",
-        "AQ",
-        "AA",
-        "AN",
-        "EQ",
-        "NA",
-        "QA",
-        "QN",
-        "RA",
-        "SA",
-        "TA",
-        "TQ",
-        "YQ",
-        "YA",
-        "PR",
-        "TX",
-        "AB",
-        "CR",
-        "DS",
-        "ED",
-        "ET",
-        "PM",
-        "RR",
-        "CT",
-        "YY",
-        "OO",
-    ]
+    labels = SPEECH_ACT_DESCRIPTIONS.index.to_list()
     if add_empty_labels:
         labels.append("NOL")  # No label for this sentence
         labels.append("NAT")  # Not a valid tag
         labels.append("NEE")  # Not enough examples
     return bidict({label: i for i, label in enumerate(labels)})
-
-
-#### name_change
-def replace_pnoun(word):
-    parents = ["Mommy", "Mom", "Daddy", "Mama", "Momma", "Ma", "Mummy", "Papa"]
-    children = [
-        "Sarah",
-        "Bryce",
-        "James",
-        "Colin",
-        "Liam",
-        "Christina",
-        "Elena",
-        "Christopher",
-        "Matthew",
-        "Margaret",
-        "Corrina",
-        "Michael",
-        "Erin",
-        "Kate",
-        "Zachary",
-        "Andrew",
-        "John",
-        "David",
-        "Jamie",
-        "Erica",
-        "Nathan",
-        "Max",
-        "Abigail",
-        "Sara",
-        "Jenessa",
-        "Benjamin",
-        "Rory",
-        "Amanda",
-        "Alexandra",
-        "Daniel",
-        "Norman",
-        "Lindsay",
-        "Rachel",
-        "Paula",
-        "Zackary",
-        "Kristen",
-        "Joanna",
-        "Laura",
-        "Meghan",
-        "Krystal",
-        "Elana",
-        "Anne",
-        "Elizabeth",
-        "Chi",
-        "Corinna",
-        "Eleanora",
-        "John",
-        "Laurie",
-    ]  # firstnames - full
-    children += [
-        "Maggie",
-        "Zack",
-        "Brycie",
-        "Chrissie",
-        "Zach",
-        "Annie",
-        "El",
-        "Dan",
-        "Matt",
-        "Matty",
-        "Johnny",
-        "Mika",
-        "Elly",
-        "Micha",
-        "Mikey",
-        "Mickey",
-        "Chrissy",
-        "Chris",
-        "Abbie",
-        "Lexy",
-        "Meg",
-        "Andy",
-        "Liz",
-        "Mike",
-        "Abby",
-        "Danny",
-        "Col",
-        "Kryst",
-        "Ben",
-    ]  # nicknames
-    if word in parents:
-        return "__MOT__"
-    if word in children:
-        return "__CHI__"
-    return word
 
 
 COLORS_PLOT_CATEGORICAL = [

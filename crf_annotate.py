@@ -12,7 +12,7 @@ import pycrfsuite
 
 from crf_test import crf_predict, load_training_args
 from crf_train import get_features_from_row, add_feature_columns
-from utils import CHILD, ADULT
+from utils import CHILD
 from utils import calculate_frequencies
 
 
@@ -27,7 +27,10 @@ def parse_args():
         help="folder containing model, features and metadata",
     )
     argparser.add_argument(
-        "--data", type=str, required=True, help="Path to CSV with preprocessed data to annotate"
+        "--data",
+        type=str,
+        required=True,
+        help="Path to CSV with preprocessed data to annotate",
     )
     argparser.add_argument(
         "--out", type=str, required=True, help="Directory to store output files."
@@ -68,18 +71,11 @@ if __name__ == "__main__":
     print(args)
 
     # Loading data
-    data = pd.read_hdf(args.data)
+    data = pd.read_pickle(args.data)
 
     # Loading model
-    model_path = args.model + os.sep + "model.pycrfsuite"
-    features_path = args.model + os.sep + "feature_vocabs.p"
-
-    data = data.reset_index(drop=False)
-
-    # Replace speaker column values
-    data["speaker"] = data["speaker"].apply(
-        lambda x: CHILD if x == "Target_Child" else ADULT
-    )
+    model_path = os.path.join(args.model, "model.pycrfsuite")
+    features_path = os.path.join(args.model, "feature_vocabs.p")
 
     # Loading features
     with open(features_path, "rb") as pickle_file:
@@ -87,28 +83,23 @@ if __name__ == "__main__":
 
     data = add_feature_columns(
         data,
-        use_action=args.use_action,
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
-        use_pastact=args.use_past_actions,
-        use_pos=args.use_pos,
-        split_tokens=True
+        split_tokens=True,
     )
 
     data["features"] = data.apply(
         lambda x: get_features_from_row(
             feature_vocabs,
             x.tokens,
-            x["speaker"],
-            x["prev_speaker"],
+            x["speaker_code"],
+            x["prev_speaker_code"],
             x.turn_length,
             use_bi_grams=args.use_bi_grams,
-            action_tokens=None if not args.use_action else x.action_tokens,
             repetitions=None
             if not args.use_repetitions
             else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            past_tokens=None if not args.use_past else x.past,
-            pastact_tokens=None if not args.use_past_actions else x.past_act,
+            prev_tokens=None if not args.use_past else x.past,
             pos_tags=None if not args.use_pos else x.pos,
         ),
         axis=1,
@@ -119,22 +110,28 @@ if __name__ == "__main__":
     tagger.open(model_path)
 
     # creating data
-    X_dev = data.groupby(by=["file_id"]).agg(
-        {"features": lambda x: [y for y in x], "index": min}
+    X_dev = data.groupby(by=["transcript_file"]).agg(
+        {"features": lambda x: [y for y in x]}
     )
-    y_pred = crf_predict(
-        tagger,
-        X_dev.sort_values("index", ascending=True)["features"],
-    )
-    data["y_pred"] = [y for x in y_pred for y in x]
+    y_pred = crf_predict(tagger, X_dev["features"],)
+    data["speech_act"] = [y for x in y_pred for y in x]
 
     # Filter for important columns
-    data_filtered = data[["file_id", "child_id", "age_months", "tokens", "pos", "speaker", "y_pred"]]
+    data_filtered = data.drop(
+        columns=[
+            "prev_tokens",
+            "repeated_words",
+            "nb_repwords",
+            "ratio_repwords",
+            "features",
+            "speech_act",
+        ]
+    )
 
     Path(args.out).mkdir(parents=True, exist_ok=True)
-    data_filtered.to_csv(os.path.join(args.out, "childes_utterances_annotated.csv"), index_label="index")
+    data_filtered.to_csv(os.path.join(args.out, "childes_utterances_annotated.csv"))
 
     if args.compare:
-        data_children = data_filtered[data.speaker == CHILD]
+        data_children = data_filtered[data.speaker_code == CHILD]
         frequencies_children = calculate_frequencies(data_children["y_pred"].tolist())
         compare_frequencies(frequencies_children, args)

@@ -12,13 +12,12 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from nn_dataset import SpeechActsDataset
-from nn_models import SpeechActLSTM, SpeechActDistilBERT, SpeechActBERTLSTM
+from nn_models import SpeechActLSTM, SpeechActBERTLSTM
+from nn_utils import build_vocabulary
 from preprocess import SPEECH_ACT
 from utils import (
-    build_vocabulary,
     dataset_labels,
     preprend_speaker_token,
-    get_words,
     TRAIN_TEST_SPLIT_RANDOM_STATE,
     make_train_test_splits,
 )

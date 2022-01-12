@@ -23,38 +23,36 @@ conda activate speech-acts
 
 # Preprocessing data for supervised training of classifiers
 
-Data for supervised training is taken from the [New England corpus](https://childes.talkbank.org/access/Eng-NA/NewEngland.html) of [CHILDES](https://childes.talkbank.org/access/) and then converted to XML:
+Data for supervised training is taken from the [New England corpus](https://childes.talkbank.org/access/Eng-NA/NewEngland.html) of [CHILDES](https://childes.talkbank.org/access/).
 
-1. Download the [New England Corpus data](https://childes.talkbank.org/data/Eng-NA/NewEngland.zip).
-2. Convert the data using the [chatter java app](https://talkbank.org/software/chatter.html):
+1. Download the [New England Corpus data](https://childes.talkbank.org/data/Eng-NA/NewEngland.zip),
+then extract and save it to `~/data/CHILDES/`.
+
+2. Preprocess data
     ```
-    $ java -cp chatter.jar org.talkbank.chatter.App [location_of_downloaded_corpus] -inputFormat cha -outputFormat xml -tree -outputDir java_out 
-    ```
-3. Preprocess data
-    ```
-    python preprocess.py --input-dir java_out/ --output-path data/new_england_preprocessed.p --drop-untagged
+    python preprocess.py --corpora NewEngland --drop-untagged
    ```
   
-# CRF  
+# CRF
 ## Train CRF classifier
 
 To train the CRF with the features as described in the paper:
 ```
-python crf_train.py data/new_england_preprocessed.p --use-pos --use-bi-grams --use-repetitions
+python crf_train.py --use-pos --use-bi-grams --use-repetitions
 ```
 
 ## Test CRF classifier
 
 Test the classifier on the same corpus:
 ```
-python crf_test.py data/new_england_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
+python crf_test.py -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
 ```
 
 Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/Eng-NA/Rollins.html):
 1. Use the steps described above to download the corpus and preprocess it.
 2. Test the classifier on the corpus.
    ```
-   python crf_test.py data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
+   python crf_test.py --data data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
    ```
    
 ## Apply the CRF classifier
@@ -63,12 +61,11 @@ We provide a [trained checkpoint](checkpoint) of the CRF classifier. It can be a
 
 The data should be stored in a CSV file, containing the following columns 
 (see also [example.csv](examples/example.csv)).:
-- `file_id`: transcript ID  
-- `child_id`: ID of the target child of the transcript
-- `age_months`: child age in months
-- `tokens`: A string containing the tokens of the utterance (separated by spaces)
-- `pos`: part-of-speech tags for each token
-- `speaker`: A value of `Target_Child` if the current speaker is the child, any other value is treated as adult speaker. 
+- `transcript_file`: the file name of the transcript  
+- `age`: child age in months
+- `tokens`: a list of the tokens of the utterance
+- `pos`: a lift of part-of-speech tags for each token
+- `speaker_code`: A value of `CHI` if the current speaker is the child, any other value is treated as adult speaker. 
  
 An example for the creation of CSVs from
 childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.).
