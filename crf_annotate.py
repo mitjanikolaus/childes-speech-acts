@@ -130,12 +130,8 @@ if __name__ == "__main__":
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
 
-    # creating data
-    X_dev = data.groupby(by=["transcript_file"]).agg(
-        {"features": lambda x: [y for y in x]}
-    )
-    y_pred = crf_predict(tagger, X_dev["features"],)
-    data = data.assign(speech_act=[y for x in y_pred for y in x])  # flatten
+    y_pred = crf_predict(tagger, data)
+    data = data.assign(speech_act=y_pred)
 
     # Filter for important columns
     data_filtered = data.drop(

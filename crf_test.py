@@ -243,12 +243,8 @@ if __name__ == "__main__":
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
 
-    grouped_test = data_test.groupby(by=["transcript_file"]).agg(
-        {"features": lambda x: [y for y in x]}
-    )
-
-    y_pred = crf_predict(tagger, grouped_test["features"], mode=args.prediction_mode,)
-    data_test = data_test.assign(speech_act_predicted=[y for x in y_pred for y in x])  # flatten
+    y_pred = crf_predict(tagger, data_test, mode=args.prediction_mode,)
+    data_test = data_test.assign(speech_act_predicted=y_pred)
 
     data_filtered = data_test.drop(
         columns=[

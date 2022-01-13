@@ -209,12 +209,7 @@ if __name__ == "__main__":
             )
         )
 
-        data_test.dropna(subset=[SPEECH_ACT], inplace=True)
-        X_dev = data_test.groupby(by=["transcript_file"]).agg(
-            {"features": lambda x: [y for y in x]}
-        )
-        y_pred = crf_predict(tagger, X_dev["features"], mode=args.prediction_mode,)
-        data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+        data_test["y_pred"] = crf_predict(tagger, data_test, mode=args.prediction_mode)
         data_test["pred_OK"] = data_test.apply(
             lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
         )

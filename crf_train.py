@@ -108,16 +108,18 @@ def add_feature_columns(
 
     data["turn_length"] = data.tokens.apply(len)
 
-    data["prev_speaker_code"] = data["speaker_code"].shift(
-        1, fill_value=data.speaker_code.iloc[0]
+    data["prev_file"] = data.transcript_file.shift(
+        1, fill_value=data.transcript_file.iloc[0]
     )
+
+    data["prev_speaker_code"] = data["speaker_code"].shift(1)
+    data.loc[data.transcript_file != data.prev_file, "prev_speaker_code"] = None
 
     # repetition features
     if check_repetition or use_past:
-        data["prev_file"] = data.transcript_file.shift(
-            1, fill_value=data.transcript_file.iloc[0]
-        )
-        data["prev_tokens"] = data.tokens.shift(1, fill_value=(data.tokens.iloc[0],))
+        data["prev_tokens"] = data.tokens.shift(1)
+        data.loc[data.transcript_file != data.prev_file, "prev_tokens"] = None
+        data["prev_tokens"] = data["prev_tokens"].fillna("").apply(list)
 
     if check_repetition:
         data["repeated_words"] = data.apply(
@@ -127,7 +129,6 @@ def add_feature_columns(
                 if w in x.prev_tokens and w not in PUNCTUATION.values()
             ]
             if (x.prev_speaker_code != x.speaker_code)
-            and (x.transcript_file == x.prev_file)
             else [],
             axis=1,
         )
@@ -135,7 +136,7 @@ def add_feature_columns(
         data["ratio_repwords"] = data.nb_repwords / data.turn_length
 
     # remove helper columns
-    data = data.drop(columns=["prev_file"], errors="ignore")
+    data = data.drop(columns=["prev_file"])
 
     # return Dataframe
     return data
@@ -361,48 +362,48 @@ def plot_training(trainer, file_name):
 
 def crf_predict(
     tagger: pycrfsuite.Tagger,
-    gp_data: list,
+    data: pd.DataFrame,
     mode: str = "raw",
     exclude_labels: list = ["NOL", "NAT", "NEE"],
 ) -> Union[list, Tuple[list, pd.DataFrame]]:
     """Return predictions for the test data, grouped by file. 3 modes for return:
             * Return raw predictions (raw)
             * Return predictions with only valid tags (exclude_ool)
-            * Return predictions (valid tags) and probabilities for each class (rt_proba)
 
     Predictions are returned unflattened
 
     https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html
     """
-    if mode not in ["raw", "exclude_ool", "rt_proba"]:
+    grouped_data = data.groupby(by=["transcript_file"], sort=False).agg(
+        {"features": lambda x: [y for y in x]}
+    )["features"]
+
+    if mode not in ["raw", "exclude_ool"]:
         raise ValueError(
             f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}"
         )
     if mode == "raw":
-        return [tagger.tag(xseq) for xseq in gp_data]
-    labels = tagger.labels()
+        y_pred = [tagger.tag(xseq) for xseq in grouped_data]
+    else:
+        labels = tagger.labels()
 
-    res = []
-    y_pred = []
-    for fi, xseq in enumerate(gp_data):
-        tagger.set(xseq)
-        file_proba = pd.DataFrame(
-            {
-                label: [tagger.marginal(label, i) for i in range(len(xseq))]
-                for label in labels
-            }
-        )
-        y_pred.append(
-            file_proba[[col for col in file_proba.columns if col not in exclude_labels]]
-            .idxmax(axis=1)
-            .tolist()
-        )
-        file_proba["transcript_file"] = fi
-        res.append(file_proba)
+        y_pred = []
+        for fi, xseq in enumerate(grouped_data):
+            tagger.set(xseq)
+            file_proba = pd.DataFrame(
+                {
+                    label: [tagger.marginal(label, i) for i in range(len(xseq))]
+                    for label in labels
+                }
+            )
+            y_pred.append(
+                file_proba[[col for col in file_proba.columns if col not in exclude_labels]]
+                .idxmax(axis=1)
+                .tolist()
+            )
+            file_proba["transcript_file"] = fi
 
-    if mode == "rt_proba":
-        return y_pred, pd.concat(res, axis=0)
-    return y_pred  # else
+    return [y for x in y_pred for y in x]  # flatten
 
 
 def bio_classification_report(y_true, y_pred):
@@ -562,14 +563,7 @@ def train(
         )
     )
 
-    # Once the features are done, groupby name and extract a list of lists
-    # The list contains transcripts, which each contain a list of utterances
-    grouped_test = data_test.groupby(by=["transcript_file"]).agg(
-        {"features": lambda x: [y for y in x]}
-    )
-
-    y_pred = crf_predict(tagger, grouped_test["features"], mode="raw",)
-    data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+    data_test["y_pred"] = crf_predict(tagger, data_test)
 
     # Remove uninformative tags before doing analysis
     data_crf = data_test[
