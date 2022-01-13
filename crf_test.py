@@ -16,7 +16,7 @@ from scipy.stats import spearmanr
 
 import pycrfsuite
 
-from preprocess import SPEECH_ACT, ADULT
+from preprocess import SPEECH_ACT
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -29,31 +29,8 @@ from utils import (
     make_train_test_splits,
     SPEECH_ACT_DESCRIPTIONS,
     calculate_frequencies,
-    PATH_NEW_ENGLAND_UTTERANCES,
+    PATH_NEW_ENGLAND_UTTERANCES, ADULT,
 )
-
-
-def load_training_args(args):
-    # Load training arguments from metadata file
-    text_file = open(os.path.join(args.model, "metadata.txt"), "r")
-    lines = text_file.readlines()  # lines ending with "\n"
-    for line in lines:
-        arg_name, value = line[:-1].split(":\t")
-        if arg_name in [
-            "use_bi_grams",
-            "use_past",
-            "use_repetitions",
-            "use_pos",
-            "match_age",
-        ]:
-            try:
-                setattr(args, arg_name, ast.literal_eval(value))
-            except ValueError as e:
-                if "malformed node or string" in str(e):
-                    setattr(args, arg_name, value)
-            except Exception as e:
-                raise e
-    return args
 
 
 def parse_args():
@@ -90,7 +67,7 @@ def parse_args():
         required=True,
         type=str,
         default=None,
-        help="folder containing model, features and metadata",
+        help="folder containing model and features",
     )
     # parameters for training/testing:
     argparser.add_argument(
@@ -102,7 +79,7 @@ def parse_args():
     argparser.add_argument(
         "--prediction_mode",
         choices=["raw", "exclude_ool"],
-        default="exclude_ool",
+        default="raw",
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
@@ -219,25 +196,16 @@ def report_to_file(dfs: dict, file_location: str):
 #### MAIN
 if __name__ == "__main__":
     args = parse_args()
-    args = load_training_args(args)
     print(args)
 
     # Loading model
-    model_dir = args.model
-    if os.path.isdir(model_dir):
-        if model_dir[-1] == "/":
-            model_dir = model_dir[:-1]
-    else:
-        raise FileNotFoundError(f"Cannot find model {model_dir}.")
-    # update paths for input/output
-    features_path = model_dir + os.path.sep + "feature_vocabs.p"
-    model_path = model_dir + os.path.sep + "model.pycrfsuite"
-    report_path = model_dir + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
-    plot_path = model_dir + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
-    classification_scores_path = model_dir + os.path.sep + "classification_scores.p"
-    classification_scores_adult_path = (
-        model_dir + os.path.sep + "classification_scores_adult.p"
-    )
+    model_path = os.path.join(args.model, "model.pycrfsuite")
+    features_path = os.path.join(args.model, "feature_vocabs.p")
+
+    report_path = os.path.join(args.model, args.data.replace("/", "_") + "_report.xlsx")
+    plot_path = os.path.join(args.model, args.data.split("/")[-1] + "_agesevol.png")
+    classification_scores_path = os.path.join(args.model, "classification_scores.p")
+    classification_scores_adult_path = os.path.join(args.model, "classification_scores_adult.p")
 
     # Loading data
     data = pd.read_pickle(args.data)
@@ -295,7 +263,7 @@ if __name__ == "__main__":
     data_filtered.to_pickle(os.path.join("checkpoints", "crf", "speech_acts.p"))
 
     data_test["pred_OK"] = data_test.apply(
-        lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
+        lambda x: (x.speech_act_predicted == x[SPEECH_ACT]), axis=1
     )
     # Remove uninformative tags before doing analysis
     data_crf = data_test[
@@ -305,7 +273,7 @@ if __name__ == "__main__":
     ]
     # reports
     report, confusion_matrix, acc, cks = bio_classification_report(
-        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
+        data_crf[SPEECH_ACT].tolist(), data_crf["speech_act_predicted"].tolist()
     )
     states, transitions = features_report(tagger)
 
@@ -313,7 +281,7 @@ if __name__ == "__main__":
         ["transcript_file", "speaker_code"]
         + ([args.col_ages] if args.col_ages is not None else [])
         + [x for x in data_test.columns if "spa_" in x]
-        + [SPEECH_ACT, "y_pred", "pred_OK"]
+        + [SPEECH_ACT, "speech_act_predicted", "pred_OK"]
     )
 
     report_d = {
@@ -332,7 +300,7 @@ if __name__ == "__main__":
 
     cr_adult = classification_report(
         data_crf_adult[SPEECH_ACT].tolist(),
-        data_crf_adult["y_pred"].tolist(),
+        data_crf_adult["speech_act_predicted"].tolist(),
         digits=3,
         output_dict=True,
         zero_division=0,
@@ -364,7 +332,7 @@ if __name__ == "__main__":
 
     report = classification_report(
         data_crf[SPEECH_ACT].tolist(),
-        data_crf["y_pred"].tolist(),
+        data_crf["speech_act_predicted"].tolist(),
         digits=3,
         zero_division=0,
     )
@@ -372,7 +340,7 @@ if __name__ == "__main__":
 
     report_dict = classification_report(
         data_crf[SPEECH_ACT].tolist(),
-        data_crf["y_pred"].tolist(),
+        data_crf["speech_act_predicted"].tolist(),
         labels=sorted(data_crf[SPEECH_ACT].unique()),
         digits=3,
         output_dict=True,

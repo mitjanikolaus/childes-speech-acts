@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import entropy
 import pycrfsuite
 
-from crf_test import crf_predict, load_training_args
+from crf_test import crf_predict
 from crf_train import get_features_from_row, add_feature_columns
 from utils import CHILD
 from utils import calculate_frequencies
@@ -24,7 +24,7 @@ def parse_args():
         required=True,
         type=str,
         default=None,
-        help="folder containing model, features and metadata",
+        help="folder containing model and features",
     )
     argparser.add_argument(
         "--data",
@@ -37,6 +37,30 @@ def parse_args():
     )
     argparser.add_argument(
         "--compare", type=str, help="Path to frequencies to compare to"
+    )
+    argparser.add_argument(
+        "--use-bi-grams",
+        "-bi",
+        action="store_true",
+        help="whether to use bi-gram features to train the algorithm",
+    )
+    argparser.add_argument(
+        "--use-pos",
+        "-pos",
+        action="store_true",
+        help="whether to add POS tags to features",
+    )
+    argparser.add_argument(
+        "--use-past",
+        "-past",
+        action="store_true",
+        help="whether to add previous sentence as features",
+    )
+    argparser.add_argument(
+        "--use-repetitions",
+        "-rep",
+        action="store_true",
+        help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
 
     args = argparser.parse_args()
@@ -67,7 +91,6 @@ def compare_frequencies(frequencies, args):
 
 if __name__ == "__main__":
     args = parse_args()
-    args = load_training_args(args)
     print(args)
 
     # Loading data
@@ -82,27 +105,26 @@ if __name__ == "__main__":
         feature_vocabs = pickle.load(pickle_file)
 
     data = add_feature_columns(
-        data,
-        check_repetition=args.use_repetitions,
-        use_past=args.use_past,
-        split_tokens=True,
+        data, check_repetition=args.use_repetitions, use_past=args.use_past,
     )
 
-    data["features"] = data.apply(
-        lambda x: get_features_from_row(
-            feature_vocabs,
-            x.tokens,
-            x["speaker_code"],
-            x["prev_speaker_code"],
-            x.turn_length,
-            use_bi_grams=args.use_bi_grams,
-            repetitions=None
-            if not args.use_repetitions
-            else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-            prev_tokens=None if not args.use_past else x.past,
-            pos_tags=None if not args.use_pos else x.pos,
-        ),
-        axis=1,
+    data = data.assign(
+        features=data.apply(
+            lambda x: get_features_from_row(
+                feature_vocabs,
+                x.tokens,
+                x.speaker_code,
+                x.prev_speaker_code,
+                x.turn_length,
+                use_bi_grams=args.use_bi_grams,
+                repetitions=None
+                if not args.use_repetitions
+                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                prev_tokens=None if not args.use_past else x.past,
+                pos_tags=None if not args.use_pos else x.pos,
+            ),
+            axis=1,
+        )
     )
 
     # Predictions
@@ -114,7 +136,7 @@ if __name__ == "__main__":
         {"features": lambda x: [y for y in x]}
     )
     y_pred = crf_predict(tagger, X_dev["features"],)
-    data["speech_act"] = [y for x in y_pred for y in x]
+    data = data.assign(speech_act=[y for x in y_pred for y in x])  # flatten
 
     # Filter for important columns
     data_filtered = data.drop(
@@ -128,7 +150,9 @@ if __name__ == "__main__":
     )
 
     Path(args.out).mkdir(parents=True, exist_ok=True)
-    data_filtered.to_pickle(os.path.join(args.out, "utterances_annotated_with_speech_acts.p"))
+    data_filtered.to_pickle(
+        os.path.join(args.out, "utterances_annotated_with_speech_acts.p")
+    )
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]

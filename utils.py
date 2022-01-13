@@ -46,6 +46,9 @@ PUNCTUATION = {
     "other_4": "+/.",
 }
 
+POS_PUNCTUATION = [".", "?", "...", "!", "+/", "+/?", "" "...?", ",", "-", "+\"/.", "+...", "++/.", "+/."]
+
+
 SPEECH_ACT_UNINTELLIGIBLE = "OO"
 SPEECH_ACT_NO_FUNCTION = "YY"
 

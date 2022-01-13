@@ -4,8 +4,13 @@ import os
 import pandas as pd
 import pylangacq
 
-from utils import PATH_NEW_ENGLAND_UTTERANCES, SPEECH_ACT, CHILD, ADULT, PUNCTUATION, calculate_frequencies, \
-    SPEECH_ACT_DESCRIPTIONS
+from utils import (
+    PATH_NEW_ENGLAND_UTTERANCES,
+    SPEECH_ACT,
+    CHILD,
+    SPEECH_ACT_DESCRIPTIONS,
+    POS_PUNCTUATION,
+)
 
 CODING_ERRORS = {"AS": "SA", "CTP": "CT", "00": "OO"}
 
@@ -38,7 +43,7 @@ def get_pos_tag(tag):
     return tag
 
 
-def preprocess_utterances(corpus, transcripts, args):
+def preprocess_utterances(corpus, transcripts):
     file_paths = transcripts.file_paths()
 
     ages = transcripts.ages(months=True)
@@ -53,9 +58,7 @@ def preprocess_utterances(corpus, transcripts, args):
         for header in transcripts.headers()
     ]
 
-    utts_by_file = transcripts.utterances(
-        by_files=True,
-    )
+    utts_by_file = transcripts.utterances(by_files=True,)
 
     all_utts = []
 
@@ -79,15 +82,19 @@ def preprocess_utterances(corpus, transcripts, args):
                 {
                     "utterance_id": id,
                     "speaker_code": utt.participant,
-                    "tokens": [t.word.lower() for t in utt.tokens if t.word != "CLITIC"],
-                    "pos": [get_pos_tag(t.pos) for t in utt.tokens if t.pos not in PUNCTUATION.values()],
-                    "start_time": utt.time_marks[0] if utt.time_marks else None,
-                    "end_time": utt.time_marks[1] if utt.time_marks else None,
+                    "tokens": [
+                        t.word.lower() for t in utt.tokens if t.word != "CLITIC"
+                    ],
+                    "pos": [
+                        get_pos_tag(t.pos)
+                        for t in utt.tokens
+                        if t.pos not in POS_PUNCTUATION
+                    ],
                     "age": round(age),
                     "corpus": corpus,
                     "transcript_file": file,
                     "child_name": child_name,
-                    "speech_act": get_speech_act(utt)
+                    "speech_act": get_speech_act(utt),
                 }
                 for id, utt in enumerate(utts_transcript)
             ]
@@ -113,7 +120,7 @@ def preprocess_transcripts(args):
         print("done.")
 
         print(f"Preprocessing utterances.. ", end="")
-        utterances_corpus = preprocess_utterances(corpus, transcripts, args)
+        utterances_corpus = preprocess_utterances(corpus, transcripts)
         print("done.")
 
         all_utterances.append(utterances_corpus)
@@ -127,7 +134,9 @@ def parse_args():
     argparser = argparse.ArgumentParser()
     # Data files
     argparser.add_argument("--corpora", type=str, nargs="+", default=["NewEngland"])
-    argparser.add_argument("--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES)
+    argparser.add_argument(
+        "--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES
+    )
 
     argparser.add_argument(
         "--drop-untagged",

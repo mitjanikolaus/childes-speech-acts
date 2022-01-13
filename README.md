@@ -50,7 +50,8 @@ python crf_test.py -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetition
 
 Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/Eng-NA/Rollins.html):
 1. Use the steps described above to download the corpus and preprocess it.
-2. Test the classifier on the corpus.
+2. Test the classifier on the corpus. Always make sure that you use the same feature selection args
+(e.g. `--use-pos`) as during training!
    ```
    python crf_test.py --data data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
    ```
@@ -61,7 +62,8 @@ We provide a [trained checkpoint](checkpoint) of the CRF classifier. It can be a
 
 The data should be stored in a CSV file, containing the following columns 
 (see also [example.csv](examples/example.csv)).:
-- `transcript_file`: the file name of the transcript  
+- `transcript_file`: the file name of the transcript
+- `utterance_id`: unique id of the utterance within the transcript  
 - `age`: child age in months
 - `tokens`: a list of the tokens of the utterance
 - `pos`: a lift of part-of-speech tags for each token
@@ -72,8 +74,10 @@ childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.)
 
 Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
 ```
-python crf_annotate.py --model checkpoint --data examples/example.csv --out data_annotated
+python crf_annotate.py --model checkpoint --data examples/example.csv --out data_annotated --use-pos --use-bi-grams --use-repetitions
 ```
+Always make sure that you use the same feature selection args
+(e.g. `--use-pos`) as during training!
 
 An output CSV is stored to the indicated directory (`data_annotated`). It contains an additional column `y_pred` 
 in which the predicted speech act is stored.

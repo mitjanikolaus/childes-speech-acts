@@ -76,7 +76,7 @@ def argparser():
     argparser.add_argument(
         "--prediction-mode",
         choices=["raw", "exclude_ool"],
-        default="exclude_ool",
+        default="raw",
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
@@ -239,8 +239,8 @@ if __name__ == "__main__":
             ]
         )
 
-    print("mean accuracy over all splits: ", np.average(accuracies))
-    print("std accuracy over all splits: ", np.std(accuracies))
+    print(f"mean accuracy over all splits: {np.average(accuracies):.3f}")
+    print(f"std accuracy over all splits: {np.std(accuracies):.3f}")
 
     result_dataframe = result_dataframes[0]
     for df in result_dataframes[1:]:

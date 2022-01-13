@@ -17,7 +17,7 @@ from sklearn.metrics import (
 import numpy as np
 import pycrfsuite
 
-from preprocess import SPEECH_ACT, ADULT
+from preprocess import SPEECH_ACT
 from utils import (
     SPEECH_ACT_UNINTELLIGIBLE,
     SPEECH_ACT_NO_FUNCTION,
@@ -25,7 +25,7 @@ from utils import (
     PUNCTUATION,
     UNKNOWN,
     PATH_NEW_ENGLAND_UTTERANCES,
-    CHILD,
+    CHILD, ADULT,
 )
 
 
@@ -98,7 +98,6 @@ def add_feature_columns(
     data: pd.DataFrame,
     use_past: bool = False,
     check_repetition: bool = False,
-    split_tokens: bool = False,
 ):
     """Function adding features to the data:
     * turn_length
@@ -108,8 +107,6 @@ def add_feature_columns(
     * ratio of words that were repeated from previous sentence over sentence length
     """
     data["tokens"] = data.tokens
-    if split_tokens:
-        data["tokens"] = data.tokens.apply(lambda x: str(x).lower().split(" "))
 
     data["turn_length"] = data.tokens.apply(len)
 
@@ -490,6 +487,8 @@ def train(
     )
 
     data_train, data_test = make_train_test_splits(data, test_ratio)
+    print("Number of samples in train split: ", len(data_train))
+    print("Number of samples in test split: ", len(data_test))
 
     if cut_train_set < 1.0:
         train_files = data_train["transcript_file"].unique().tolist()
@@ -593,7 +592,7 @@ def train(
         {"features": lambda x: [y for y in x]}
     )
 
-    y_pred = crf_predict(tagger, grouped_test["features"], mode="exclude_ool",)
+    y_pred = crf_predict(tagger, grouped_test["features"], mode="raw",)
     data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
 
     # Remove uninformative tags before doing analysis
