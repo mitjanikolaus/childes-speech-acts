@@ -23,7 +23,6 @@ def parse_args():
         "-m",
         required=True,
         type=str,
-        default=None,
         help="folder containing model and features",
     )
     argparser.add_argument(
@@ -119,7 +118,7 @@ if __name__ == "__main__":
                 use_bi_grams=args.use_bi_grams,
                 repetitions=None
                 if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                else (x.repeated_words, x.ratio_repwords),
                 prev_tokens=None if not args.use_past else x.past,
                 pos_tags=None if not args.use_pos else x.pos,
             ),
@@ -142,6 +141,7 @@ if __name__ == "__main__":
     data_filtered = data.drop(
         columns=[
             "prev_tokens",
+            "prev_speaker_code",
             "repeated_words",
             "nb_repwords",
             "ratio_repwords",

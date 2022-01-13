@@ -25,7 +25,7 @@ from utils import (
     PUNCTUATION,
     UNKNOWN,
     PATH_NEW_ENGLAND_UTTERANCES,
-    CHILD, ADULT,
+    CHILD,
 )
 
 
@@ -95,9 +95,7 @@ def parse_args():
 
 #### Features functions
 def add_feature_columns(
-    data: pd.DataFrame,
-    use_past: bool = False,
-    check_repetition: bool = False,
+    data: pd.DataFrame, use_past: bool = False, check_repetition: bool = False,
 ):
     """Function adding features to the data:
     * turn_length
@@ -109,11 +107,6 @@ def add_feature_columns(
     data["tokens"] = data.tokens
 
     data["turn_length"] = data.tokens.apply(len)
-
-    # Treat all speaker codes that are not 'CHI' as adult
-    data["speaker_code"] = data["speaker_code"].apply(
-        lambda x: x if x == CHILD else ADULT
-    )
 
     data["prev_speaker_code"] = data["speaker_code"].shift(
         1, fill_value=data.speaker_code.iloc[0]
@@ -192,12 +185,13 @@ def get_features_from_row(
         [w if w in features["words"].keys() else UNKNOWN for w in tokens]
     )
 
-    feat_glob["speaker_code"] = 1.0 if speaker == ADULT else 0.0
-    feat_glob["speaker_changed"] = 1.0 if speaker != prev_speaker else 0.0
+    feat_glob["speaker_code"] = 1 if speaker == CHILD else 0
+    feat_glob["speaker_changed"] = 1 if speaker != prev_speaker else 0
 
     feat_glob["length"] = {
-        k: (1 if float(k.split("-")[1]) > ln >= float(k.split("-")[0]) else 0)
+        k: 1
         for k in features["length_bins"].keys()
+        if float(k.split("-")[1]) > ln >= float(k.split("-")[0])
     }
 
     if use_bi_grams:
@@ -209,21 +203,14 @@ def get_features_from_row(
         feat_glob["bigrams"] = Counter(bi_grams)
 
     if ("repetitions" in kwargs) and (kwargs["repetitions"] is not None):
-        (rep_words, len_rep, ratio_rep) = kwargs["repetitions"]
+        (rep_words, ratio_rep) = kwargs["repetitions"]
         feat_glob["repeated_words"] = Counter(
             [w for w in rep_words if (w in features["words"].keys())]
         )
-        feat_glob["rep_length"] = {
-            k: (1 if float(k.split("-")[1]) >= len_rep >= float(k.split("-")[0]) else 0)
-            for k in features["rep_length_bins"].keys()
-        }
         feat_glob["rep_ratio"] = {
-            k: (
-                1
-                if float(k.split("-")[1]) >= ratio_rep >= float(k.split("-")[0])
-                else 0
-            )
+            k: 1
             for k in features["rep_ratio_bins"].keys()
+            if float(k.split("-")[1]) >= ratio_rep >= float(k.split("-")[0])
         }
     if ("prev_tokens" in kwargs) and (kwargs["prev_tokens"] is not None):
         feat_glob["prev_tokens"] = Counter(
@@ -317,17 +304,6 @@ def generate_features_vocabs(
         nb_feat = max([max(v.values()) for v in feature_vocabs.values()])
         # features esp for length & ratio - repeated words can use previously defined features
         # lengths
-        _, bins = pd.qcut(
-            data.nb_repwords,
-            q=num_bins_rep,
-            duplicates="drop",
-            labels=False,
-            retbins=True,
-        )
-        feature_vocabs["rep_length_bins"] = {
-            "{}-{}".format(k, bins[i + 1]): (nb_feat + i)
-            for i, k in enumerate(bins[:-1])
-        }
         # ratios
         _, bins = pd.cut(
             data.ratio_repwords,
@@ -515,7 +491,7 @@ def train(
                 use_bi_grams=use_bi_grams,
                 repetitions=None
                 if not use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                else (x.repeated_words, x.ratio_repwords),
                 prev_tokens=None if not use_past else x.prev_tokens,
                 pos_tags=None if not use_pos else x.pos,
             ),
@@ -578,7 +554,7 @@ def train(
                 use_bi_grams=use_bi_grams,
                 repetitions=None
                 if not use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                else (x.repeated_words, x.ratio_repwords),
                 prev_tokens=None if not use_past else x.prev_tokens,
                 pos_tags=None if not use_pos else x.pos,
             ),
