@@ -104,6 +104,8 @@ def add_feature_columns(
     * number of repeated words
     * ratio of words that were repeated from previous sentence over sentence length
     """
+    data = data.sort_values(["transcript_file", "utterance_id"])
+
     data["tokens"] = data.tokens
 
     data["turn_length"] = data.tokens.apply(len)
