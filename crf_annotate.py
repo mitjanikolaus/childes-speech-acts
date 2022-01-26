@@ -1,7 +1,6 @@
 import os
 import pickle
 import argparse
-from pathlib import Path
 
 import seaborn as sns
 
@@ -32,7 +31,7 @@ def parse_args():
         help="Path to CSV with preprocessed data to annotate",
     )
     argparser.add_argument(
-        "--out", type=str, required=True, help="Directory to store output files."
+        "--out", type=str, required=True, help="Path to store output file."
     )
     argparser.add_argument(
         "--compare", type=str, help="Path to frequencies to compare to"
@@ -146,10 +145,8 @@ if __name__ == "__main__":
         ]
     )
 
-    Path(args.out).mkdir(parents=True, exist_ok=True)
-    data_filtered.to_pickle(
-        os.path.join(args.out, "utterances_annotated_with_speech_acts.p")
-    )
+    os.makedirs(os.path.dirname(args.out), exist_ok=True)
+    data_filtered.to_pickle(args.out)
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]
