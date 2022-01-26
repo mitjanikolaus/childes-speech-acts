@@ -140,7 +140,7 @@ if __name__ == "__main__":
             "repeated_words",
             "nb_repwords",
             "ratio_repwords",
-            "turn_length"
+            "turn_length",
             "features",
         ]
     )
