@@ -16,6 +16,7 @@ from sklearn.metrics import (
 )
 import numpy as np
 import pycrfsuite
+from tqdm import tqdm
 
 from preprocess import SPEECH_ACT
 from utils import (
@@ -385,7 +386,7 @@ def crf_predict(
             f"mode must be one of raw|exclude_ool|rt_proba; currently {mode}"
         )
     if mode == "raw":
-        y_pred = [tagger.tag(xseq) for xseq in grouped_data]
+        y_pred = [tagger.tag(xseq) for xseq in tqdm(grouped_data)]
     else:
         labels = tagger.labels()
 
