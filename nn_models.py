@@ -1,12 +1,49 @@
+from collections import Counter
+
 import torch
 import torch.nn as nn
 from torch import cuda
 from torch.nn.modules.rnn import LSTM
 from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 from torchcrf import CRF
+from torchtext import vocab
 from transformers import DistilBertModel
 
+from utils import PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN
+
 device = "cuda" if cuda.is_available() else "cpu"
+
+
+def build_vocabulary(data, max_vocab_size):
+    word_counter = Counter()
+    for tokens in data:
+        word_counter.update(tokens)
+    print(f"Total number of words: {len(word_counter)}")
+    print(f"Vocab: {word_counter.most_common(100)}")
+    vocabulary = vocab.Vocab(
+        word_counter,
+        max_size=max_vocab_size,
+        specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
+    )
+
+    return vocabulary
+
+
+def get_words(indices, vocab):
+    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
+
+
+def preprend_speaker_token(tokens, speaker):
+    """Prepend speaker special token"""
+    if speaker in ["MOT", "FAT", "INV", "ADU"]:
+        tokens = [SPEAKER_ADULT] + tokens
+    elif speaker in ["CHI", "AMY"]:
+        tokens = [SPEAKER_CHILD] + tokens
+    else:
+        raise RuntimeError("Unknown speaker code: ", speaker)
+
+    return tokens
+
 
 
 class SpeechActLSTM(nn.Module):

@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from nn_dataset import SpeechActsTestDataset
-from utils import PADDING, preprend_speaker_token, SPEAKER_CHILD
+from nn_models import preprend_speaker_token
+from utils import PADDING, SPEAKER_CHILD
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

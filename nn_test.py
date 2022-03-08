@@ -15,8 +15,9 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 from nn_dataset import SpeechActsDataset
+from nn_models import get_words
 from nn_train import prepare_data
-from utils import make_train_test_splits, get_words, PATH_NEW_ENGLAND_UTTERANCES
+from utils import make_train_test_splits, PATH_NEW_ENGLAND_UTTERANCES
 from utils import SPEECH_ACT_DESCRIPTIONS, SPEAKER_CHILD
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

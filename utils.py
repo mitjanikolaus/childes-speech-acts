@@ -5,7 +5,6 @@ import xmltodict
 from collections import Counter, OrderedDict
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from torchtext import vocab
 import re
 from bidict import (
     bidict,
@@ -323,37 +322,6 @@ def make_train_test_splits(data, test_split_ratio):
     data_test = data[data["file_id"].isin(data_test_ids.tolist())]
 
     return data_train, data_test
-
-
-def build_vocabulary(data, max_vocab_size):
-    word_counter = Counter()
-    for tokens in data:
-        word_counter.update(tokens)
-    print(f"Total number of words: {len(word_counter)}")
-    print(f"Vocab: {word_counter.most_common(100)}")
-    vocabulary = vocab.Vocab(
-        word_counter,
-        max_size=max_vocab_size,
-        specials=[PADDING, SPEAKER_CHILD, SPEAKER_ADULT, UNKNOWN],
-    )
-
-    return vocabulary
-
-
-def get_words(indices, vocab):
-    return " ".join([vocab.itos[i] for i in indices if not vocab.itos[i] == PADDING])
-
-
-def preprend_speaker_token(tokens, speaker):
-    """Prepend speaker special token"""
-    if speaker in ["MOT", "FAT", "INV", "ADU"]:
-        tokens = [SPEAKER_ADULT] + tokens
-    elif speaker in ["CHI", "AMY"]:
-        tokens = [SPEAKER_CHILD] + tokens
-    else:
-        raise RuntimeError("Unknown speaker code: ", speaker)
-
-    return tokens
 
 
 def get_xml_as_dict(filepath: str):

@@ -126,7 +126,7 @@ if __name__ == "__main__":
         os.makedirs(checkpoint_path)
 
     # Split data
-    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
+    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE, shuffle=True)
 
     accuracies = []
     result_dataframes = []
