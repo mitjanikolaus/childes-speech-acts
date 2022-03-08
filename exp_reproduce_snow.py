@@ -101,7 +101,7 @@ def calculate_num_speech_act_types(data, column_name_speech_act):
 
             results_age[num_produced_speech_act_types] += 1
 
-        # Normalize children counts to get fractions
+        # Normalize children counts to get proportions
         for num_speech_act_types in results_age.keys():
             results_age[num_speech_act_types] = results_age[num_speech_act_types] / len(
                 children_ids
@@ -192,7 +192,7 @@ def reproduce_num_speech_acts(data, data_whole_childes):
         if age > 14:
             axes[i].set_ylim(0, 0.23)
 
-    axes[1].set_ylabel("fraction of children")
+    axes[1].set_ylabel("proportion of children")
     plt.xlabel("number of different speech acts produced")
     plt.tight_layout()
     plt.show()
@@ -444,7 +444,10 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         ax.set_xlabel("")
 
         axes[i].set_ylim(14, 60)
-        axes[i].set_xlim(14, 60)
+        if target_measure == TARGET_COMPREHENSION:
+            axes[i].set_xlim(14, 40)
+        else:
+            axes[i].set_xlim(14, 60)
 
     fig.text(0.5, 0.04, "Data from Snow et al. (1996)", ha="center")
     plt.subplots_adjust(bottom=0.15)
