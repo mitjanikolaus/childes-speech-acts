@@ -71,7 +71,7 @@ The data should be stored in a CSV file, containing the following columns
 - `speaker`: A value of `Target_Child` if the current speaker is the child, any other value is treated as adult speaker. 
  
 An example for the creation of CSVs from
-childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.).
+childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py).
 
 Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
 ```
