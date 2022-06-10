@@ -58,7 +58,7 @@ Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/
    
 ## Apply the CRF classifier
 
-We provide a [trained checkpoint](checkpoint) of the CRF classifier. It can be applied to annotate new data.
+We provide a [trained checkpoint](checkpoint_full_train) of the CRF classifier. It can be applied to annotate new data.
 
 The data should be stored in a CSV file, containing the following columns 
 (see also [example.csv](examples/example.csv)).:
@@ -74,16 +74,18 @@ childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.)
 
 Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
 ```
-python crf_annotate.py --model checkpoint --data examples/example.csv --out data_annotated --use-pos --use-bi-grams --use-repetitions
+python crf_annotate.py --model checkpoint_full_train --data examples/example.csv --out data_annotated/example.csv --use-pos --use-bi-grams --use-repetitions
 ```
 Always make sure that you use the same feature selection args
 (e.g. `--use-pos`) as during training!
 
-An output CSV is stored to the indicated directory (`data_annotated`). It contains an additional column `y_pred` 
-in which the predicted speech act is stored.
+An output CSV is stored to the indicated output file (`data_annotated/example.csv`). It contains an additional column
+`y_pred` in which the predicted speech act is stored.
 
 # Neural Networks
 (The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)
+
+To run the neural networks you will also have to install Pytorch (>=1.4.0) in your environment.
 
 ## LSTM classifier
 ### Training:
