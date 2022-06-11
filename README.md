@@ -52,9 +52,9 @@ Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/
 1. Use the steps described above to download the corpus and preprocess it.
 2. Test the classifier on the corpus. Always make sure that you use the same feature selection args
 (e.g. `--use-pos`) as during training!
-   ```
-   python crf_test.py --data data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
-   ```
+```
+python crf_test.py --data data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
+```
    
 ## Apply the CRF classifier
 
@@ -80,7 +80,7 @@ Always make sure that you use the same feature selection args
 (e.g. `--use-pos`) as during training!
 
 An output CSV is stored to the indicated output file (`data_annotated/example.csv`). It contains an additional column
-`y_pred` in which the predicted speech act is stored.
+`speech_act` in which the predicted speech act is stored.
 
 # Neural Networks
 (The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)
