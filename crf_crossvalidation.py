@@ -11,19 +11,17 @@ from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import KFold
 
-from utils import TRAIN_TEST_SPLIT_RANDOM_STATE, SPEECH_ACT, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED
+from utils import (
+    TRAIN_TEST_SPLIT_RANDOM_STATE,
+    SPEECH_ACT,
+    PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED,
+)
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
     generate_features_vocabs,
     crf_predict,
 )
-
-AGE_MONTHS_GROUPS = {
-    14: [13, 14, 15],
-    20: [18, 19, 20, 21],
-    32: [27, 28, 29, 30, 31, 32, 33],
-}
 
 
 def argparser():
@@ -59,12 +57,6 @@ def argparser():
         help="whether to add POS tags to features",
     )
     argparser.add_argument(
-        "--use-action",
-        "-act",
-        action="store_true",
-        help="whether to use action features to train the algorithm, if they are in the data",
-    )
-    argparser.add_argument(
         "--use-past",
         "-past",
         action="store_true",
@@ -77,12 +69,6 @@ def argparser():
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
     argparser.add_argument(
-        "--use-past-actions",
-        "-pa",
-        action="store_true",
-        help="whether to add actions from the previous sentence to features",
-    )
-    argparser.add_argument(
         "--verbose",
         action="store_true",
         help="Whether to display training iterations output.",
@@ -90,7 +76,7 @@ def argparser():
     argparser.add_argument(
         "--prediction-mode",
         choices=["raw", "exclude_ool"],
-        default="exclude_ool",
+        default="raw",
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
@@ -103,20 +89,12 @@ if __name__ == "__main__":
     args = argparser()
     print(args)
 
-    # Definitions
-    number_segments_length_feature = 10
-
     print("### Loading data:".upper())
 
     data = pd.read_pickle(args.data)
 
     data = add_feature_columns(
-        data,
-        use_action=args.use_action,
-        check_repetition=args.use_repetitions,
-        use_past=args.use_past,
-        use_pastact=args.use_past_actions,
-        use_pos=args.use_pos,
+        data, check_repetition=args.use_repetitions, use_past=args.use_past,
     )
 
     # Location for weight save
@@ -126,18 +104,22 @@ if __name__ == "__main__":
         os.makedirs(checkpoint_path)
 
     # Split data
-    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE, shuffle=True)
+    kf = KFold(
+        n_splits=args.num_splits,
+        shuffle=True,
+        random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
+    )
 
     accuracies = []
     result_dataframes = []
 
-    file_names = data["file_id"].unique().tolist()
+    file_names = data["transcript_file"].unique().tolist()
     for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):
         train_files = [file_names[i] for i in train_indices]
         test_files = [file_names[i] for i in test_indices]
 
-        data_train = data[data["file_id"].isin(train_files)]
-        data_test = data[data["file_id"].isin(test_files)]
+        data_train = data[data["transcript_file"].isin(train_files)]
+        data_test = data[data["transcript_file"].isin(test_files)]
 
         print(
             f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
@@ -149,38 +131,35 @@ if __name__ == "__main__":
             data_train,
             args.nb_occurrences,
             args.use_bi_grams,
-            args.use_action,
             args.use_repetitions,
             args.use_pos,
-            bin_cut=number_segments_length_feature,
         )
 
         # creating crf features set for train
-        data_train["features"] = data_train.apply(
-            lambda x: get_features_from_row(
-                features_idx,
-                x.tokens,
-                x["speaker"],
-                x["prev_speaker"],
-                x.turn_length,
-                use_bi_grams=args.use_bi_grams,
-                action_tokens=None if not args.use_action else x.action_tokens,
-                repetitions=None
-                if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-                past_tokens=None if not args.use_past else x.past,
-                pastact_tokens=None if not args.use_past_actions else x.past_act,
-                pos_tags=None if not args.use_pos else x.pos,
-            ),
-            axis=1,
+        data_train = data_train.assign(
+            features=data_train.apply(
+                lambda x: get_features_from_row(
+                    features_idx,
+                    x.tokens,
+                    x["speaker_code"],
+                    x["prev_speaker_code"],
+                    x.turn_length,
+                    use_bi_grams=args.use_bi_grams,
+                    repetitions=None
+                    if not args.use_repetitions
+                    else (x.repeated_words, x.ratio_repwords),
+                    prev_tokens=None if not args.use_past else x.past,
+                    pos_tags=None if not args.use_pos else x.pos,
+                ),
+                axis=1,
+            )
         )
 
         # Once the features are done, groupby name and extract a list of lists
-        grouped_train = data_train.groupby(by=["file_id"]).agg(
+        grouped_train = data_train.groupby(by=["transcript_file"]).agg(
             {
                 "features": lambda x: [y for y in x],
                 SPEECH_ACT: lambda x: [y for y in x],
-                "index": min,
             }
         )  # listed by apparition order
         grouped_train = sklearn.utils.shuffle(grouped_train)
@@ -211,35 +190,26 @@ if __name__ == "__main__":
         tagger = pycrfsuite.Tagger()
         tagger.open(nm + "_model.pycrfsuite")
 
-        data_test["features"] = data_test.apply(
-            lambda x: get_features_from_row(
-                features_idx,
-                x.tokens,
-                x["speaker"],
-                x["prev_speaker"],
-                x.turn_length,
-                use_bi_grams=args.use_bi_grams,
-                action_tokens=None if not args.use_action else x.action_tokens,
-                repetitions=None
-                if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-                past_tokens=None if not args.use_past else x.past,
-                pastact_tokens=None if not args.use_past_actions else x.past_act,
-                pos_tags=None if not args.use_pos else x.pos,
-            ),
-            axis=1,
+        data_test = data_test.assign(
+            features=data_test.apply(
+                lambda x: get_features_from_row(
+                    features_idx,
+                    x.tokens,
+                    x["speaker_code"],
+                    x["prev_speaker_code"],
+                    x.turn_length,
+                    use_bi_grams=args.use_bi_grams,
+                    repetitions=None
+                    if not args.use_repetitions
+                    else (x.repeated_words, x.ratio_repwords),
+                    prev_tokens=None if not args.use_past else x.past,
+                    pos_tags=None if not args.use_pos else x.pos,
+                ),
+                axis=1,
+            )
         )
 
-        data_test.dropna(subset=[SPEECH_ACT], inplace=True)
-        X_dev = data_test.groupby(by=["file_id"]).agg(
-            {"features": lambda x: [y for y in x], "index": min}
-        )
-        y_pred = crf_predict(
-            tagger,
-            X_dev.sort_values("index", ascending=True)["features"],
-            mode=args.prediction_mode,
-        )
-        data_test["y_pred"] = [y for x in y_pred for y in x]  # flatten
+        data_test["y_pred"] = crf_predict(tagger, data_test, mode=args.prediction_mode)
         data_test["pred_OK"] = data_test.apply(
             lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
         )
@@ -254,9 +224,9 @@ if __name__ == "__main__":
             data_crf[
                 [
                     "utterance_id",
-                    "file_id",
-                    "speaker",
-                    "age_months",
+                    "transcript_file",
+                    "speaker_code",
+                    "age",
                     "tokens",
                     SPEECH_ACT,
                     "y_pred",
@@ -264,8 +234,8 @@ if __name__ == "__main__":
             ]
         )
 
-    print("mean accuracy over all splits: ", np.average(accuracies))
-    print("std accuracy over all splits: ", np.std(accuracies))
+    print(f"mean accuracy over all splits: {np.average(accuracies):.3f}")
+    print(f"std accuracy over all splits: {np.std(accuracies):.3f}")
 
     result_dataframe = result_dataframes[0]
     for df in result_dataframes[1:]:

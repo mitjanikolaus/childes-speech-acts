@@ -1,130 +1,166 @@
-import os, sys
-import pandas as pd
 import argparse
+import os
 
-from nltk import word_tokenize
+import pandas as pd
+import pylangacq
 
 from utils import (
-    parse_xml,
-    get_xml_as_dict,
-    calculate_frequencies,
-    CHILD, ADULT, SPEECH_ACT, PATH_NEW_ENGLAND_UTTERANCES,
+    PATH_NEW_ENGLAND_UTTERANCES,
+    SPEECH_ACT,
+    CHILD,
+    SPEECH_ACT_DESCRIPTIONS,
+    POS_PUNCTUATION,
 )
 
-
-def read_files(input_dir, input_format="xml"):
-    """
-    Function looping over transcript files and extracting information using utils.parse_xml
-
-    Input:
-    -------
-    input_dir: `str`
-        path to folder with data
-    output_dir: `str`
-        path to folder to write data to
-
-    output_function: function name
-        which function to use depending on the data format
-
-    input_format: `str`
-        ('xml', 'json')
-
-    Output:
-    -------
-    df: `pd.DataFrame`
-    """
-    # create a df to store all data
-    df = []
-
-    for root, dirs, files in os.walk(input_dir):
-        for file_name in files:
-            in_file = os.path.join(root, file_name)
-            print(in_file)
-            if input_format in file_name:
-                d = get_xml_as_dict(in_file)
-                try:
-                    df_transcript = parse_xml(d)
-                    df_transcript["file_id"] = in_file
-                    df.append(df_transcript)
-
-                except ValueError:
-                    print("Dummy file: ", in_file)
-                    pass
-                except:  # raise other exceptions
-                    print("Unexpected error:", sys.exc_info()[0])
-                    raise
-
-    df = pd.concat(df, ignore_index=True)
-
-    return df
+CODING_ERRORS = {"AS": "SA", "CTP": "CT", "00": "OO"}
 
 
-if __name__ == "__main__":
+def get_speech_act(utt):
+    if "%spa" not in utt.tiers:
+        return None
+    tag = utt.tiers["%spa"].strip()
+
+    if tag.startswith("$ "):
+        tag = tag[2:]
+
+    # if more than one tag keep the first
+    if " " in tag:
+        tag = tag.split(" ")[0]
+
+    if len(tag.split(":")) > 1:
+        tag = tag.split(":")[1].upper()
+        if tag in CODING_ERRORS.keys():
+            tag = CODING_ERRORS[tag]
+        if tag not in SPEECH_ACT_DESCRIPTIONS.index:
+            print("Unknown speech act:", tag)
+        return tag
+    else:
+        return None
+
+
+def get_pos_tag(tag):
+    tag = str(tag).lower()
+    return tag
+
+
+def preprocess_utterances(corpus, transcripts):
+    file_paths = transcripts.file_paths()
+
+    ages = transcripts.ages(months=True)
+
+    # Get target child names (prepend corpus name to make the names unique)
+    child_names = [
+        header["Participants"][CHILD]["corpus"]
+        + "_"
+        + header["Participants"][CHILD]["name"]
+        if CHILD in header["Participants"]
+        else None
+        for header in transcripts.headers()
+    ]
+
+    utts_by_file = transcripts.utterances(by_files=True,)
+
+    all_utts = []
+
+    for file, age, child_name, utts_transcript in zip(
+        file_paths, ages, child_names, utts_by_file
+    ):
+        # Filter out empty transcripts and transcripts without age or child information
+        if len(utts_transcript) == 0:
+            # print("Empty transcript: ", file)
+            continue
+        if age is None or age == 0:
+            print("Missing age information: ", file)
+            continue
+        if child_name is None:
+            print("Missing child name information: ", file)
+            continue
+
+        # Make a dataframe
+        utts_transcript = pd.DataFrame(
+            [
+                {
+                    "utterance_id": id,
+                    "speaker_code": utt.participant,
+                    "tokens": [
+                        t.word.lower() for t in utt.tokens if t.word != "CLITIC"
+                    ],
+                    "pos": [
+                        get_pos_tag(t.pos)
+                        for t in utt.tokens
+                        if t.pos not in POS_PUNCTUATION
+                    ],
+                    "age": round(age),
+                    "corpus": corpus,
+                    "transcript_file": file,
+                    "child_name": child_name,
+                    "speech_act": get_speech_act(utt),
+                }
+                for id, utt in enumerate(utts_transcript)
+            ]
+        )
+
+        if len(utts_transcript) == 0:
+            continue
+
+        all_utts.append(utts_transcript)
+
+    utterances = pd.concat(all_utts, ignore_index=True)
+
+    return utterances
+
+
+def preprocess_transcripts(args):
+    all_utterances = []
+    for corpus in args.corpora:
+        print(f"Reading transcripts of {corpus} corpus.. ", end="")
+        transcripts = pylangacq.read_chat(
+            os.path.expanduser(f"~/data/CHILDES/{corpus}/"),
+        )
+        print("done.")
+
+        print(f"Preprocessing utterances.. ", end="")
+        utterances_corpus = preprocess_utterances(corpus, transcripts)
+        print("done.")
+
+        all_utterances.append(utterances_corpus)
+
+    all_utterances = pd.concat(all_utterances, ignore_index=True)
+
+    return all_utterances
+
+
+def parse_args():
     argparser = argparse.ArgumentParser()
     # Data files
-    argparser.add_argument("--input-dir", "-i", type=str, required=True)
-    argparser.add_argument("--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES)
+    argparser.add_argument("--corpora", type=str, nargs="+", default=["NewEngland"])
+    argparser.add_argument(
+        "--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES
+    )
 
     argparser.add_argument(
         "--drop-untagged",
         action="store_true",
         help="Drop utterances that have not been annotated",
     )
+
     args = argparser.parse_args()
 
-    data = read_files(args.input_dir)
+    return args
 
-    columns = [
-        "utterance_id",
-        "speech_act",
-        "speaker",
-        "tokens",
-        "lemmas",
-        "pos",
-        "action",
-        "file_id",
-        "age_months",
-    ]
 
-    data[SPEECH_ACT] = data[SPEECH_ACT].fillna("NOL")
+if __name__ == "__main__":
+    args = parse_args()
+
+    data = preprocess_transcripts(args)
 
     if args.drop_untagged:
+        data.dropna(subset=[SPEECH_ACT], inplace=True)
         data.drop(
             data[data[SPEECH_ACT].isin(["NOL", "NAT", "NEE"])].index, inplace=True
         )
 
-    frequencies = calculate_frequencies(data[SPEECH_ACT])
-    print(f"Speech act frequencies:")
-    print({k: round(v, 2) for k, v in frequencies.items()})
-
-    speech_acts_relevant = [k for k, v in frequencies.items() if v >= 0.005]
-    print(
-        f"Speech acts that form at least .5% of the data ({len(speech_acts_relevant)}): {speech_acts_relevant}"
-    )
-
-    data_child = data[data["speaker"] == "CHI"]
-    frequencies_child = calculate_frequencies(data_child[SPEECH_ACT])
-    speech_acts_relevant_child = [k for k, v in frequencies_child.items() if v >= 0.005]
-    print(
-        f"Speech acts that form at least .5% of the data of children's utterances ({len(speech_acts_relevant_child)}): {speech_acts_relevant_child}"
-    )
-
-    # Clean single-token utterances (these are only punctuation)
-    data.loc[data.tokens.map(len) == 1, "tokens"] = ""
-
-    # Use nltk tokenizer instead of just splitting on space
-    data.tokens = data.tokens.apply(lambda tokens: word_tokenize(" ".join(tokens)))
-
-    # If no tokens and no action and no translation: data is removed
-    drop_subset = [col for col in ["tokens", "action"] if col in columns]
-    data = data[
-        (pd.concat([data[col] != "" for col in drop_subset], axis=1)).any(axis=1)
-    ]
-
-    data["speaker"] = data["speaker"].apply(lambda x: x if x == CHILD else ADULT)
-
-    data["index"] = range(len(data))
-    data.set_index("index")
-
     print(f"Preprocessed {len(data)} utterances.")
+
+    os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     data.to_pickle(args.output_path)

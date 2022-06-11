@@ -16,7 +16,7 @@ from scipy.stats import spearmanr
 
 import pycrfsuite
 
-from preprocess import SPEECH_ACT, ADULT
+from preprocess import SPEECH_ACT
 from crf_train import (
     add_feature_columns,
     get_features_from_row,
@@ -27,38 +27,20 @@ from utils import (
     SPEECH_ACT_UNINTELLIGIBLE,
     SPEECH_ACT_NO_FUNCTION,
     make_train_test_splits,
-    SPEECH_ACT_DESCRIPTIONS, calculate_frequencies,
+    SPEECH_ACT_DESCRIPTIONS,
+    calculate_frequencies,
+    PATH_NEW_ENGLAND_UTTERANCES, ADULT,
 )
-
-
-def load_training_args(args):
-    # Load training arguments from metadata file
-    text_file = open(os.path.join(args.model, "metadata.txt"), "r")
-    lines = text_file.readlines()  # lines ending with "\n"
-    for line in lines:
-        arg_name, value = line[:-1].split(":\t")
-        if arg_name in [
-            "use_bi_grams",
-            "use_action",
-            "use_past",
-            "use_repetitions",
-            "use_past_actions",
-            "use_pos",
-            "match_age",
-        ]:
-            try:
-                setattr(args, arg_name, ast.literal_eval(value))
-            except ValueError as e:
-                if "malformed node or string" in str(e):
-                    setattr(args, arg_name, value)
-            except Exception as e:
-                raise e
-    return args
 
 
 def parse_args():
     argparser = argparse.ArgumentParser(description="Test a previously trained CRF")
-    argparser.add_argument("data", type=str, help="file listing all dialogs")
+    argparser.add_argument(
+        "--data",
+        default=PATH_NEW_ENGLAND_UTTERANCES,
+        type=str,
+        help="file listing all dialogs",
+    )
     argparser.add_argument(
         "--test-ratio",
         type=float,
@@ -84,8 +66,7 @@ def parse_args():
         "-m",
         required=True,
         type=str,
-        default=None,
-        help="folder containing model, features and metadata",
+        help="folder containing model and features",
     )
     # parameters for training/testing:
     argparser.add_argument(
@@ -95,14 +76,9 @@ def parse_args():
         help="if not None, plot evolution of accuracy over age groups",
     )
     argparser.add_argument(
-        "--consistency_check",
-        action="store_true",
-        help="whether 'child' column matters in testing data.",
-    )
-    argparser.add_argument(
         "--prediction_mode",
         choices=["raw", "exclude_ool"],
-        default="exclude_ool",
+        default="raw",
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
@@ -111,12 +87,6 @@ def parse_args():
         "-bi",
         action="store_true",
         help="whether to use bi-gram features to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use-action",
-        "-act",
-        action="store_true",
-        help="whether to use action features to train the algorithm, if they are in the data",
     )
     argparser.add_argument(
         "--use-pos",
@@ -135,12 +105,6 @@ def parse_args():
         "-rep",
         action="store_true",
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use-past-actions",
-        "-pa",
-        action="store_true",
-        help="whether to add actions from the previous sentence to features",
     )
 
     args = argparser.parse_args()
@@ -187,11 +151,11 @@ def features_report(tagg):
 def plot_testing(test_df: pd.DataFrame, file_location: str, col_ages):
     """Separating CHI/MOT and ages to plot accuracy, annotator agreement and number of categories over age."""
     tmp = []
-    speakers = test_df["speaker"].unique().tolist()
+    speakers = test_df["speaker_code"].unique().tolist()
     for age in sorted(test_df[col_ages].unique().tolist()):  # remove < 1Y?
         for spks in [[x] for x in speakers] + [speakers]:
             age_loc_sub = test_df[
-                (test_df[col_ages] == age) & (test_df.speaker.isin(spks))
+                (test_df[col_ages] == age) & (test_df.speaker_code.isin(spks))
             ]
             acc = accuracy_score(age_loc_sub.y_true, age_loc_sub.y_pred, normalize=True)
             cks = cohen_kappa_score(age_loc_sub.y_true, age_loc_sub.y_pred)
@@ -231,36 +195,22 @@ def report_to_file(dfs: dict, file_location: str):
 #### MAIN
 if __name__ == "__main__":
     args = parse_args()
-    args = load_training_args(args)
     print(args)
 
     # Loading model
-    model_dir = args.model
-    if os.path.isdir(model_dir):
-        if model_dir[-1] == "/":
-            model_dir = model_dir[:-1]
-    else:
-        raise FileNotFoundError(f"Cannot find model {model_dir}.")
-    # update paths for input/output
-    features_path = model_dir + os.path.sep + "feature_vocabs.p"
-    model_path = model_dir + os.path.sep + "model.pycrfsuite"
-    report_path = model_dir + os.path.sep + args.data.replace("/", "_") + "_report.xlsx"
-    plot_path = model_dir + os.path.sep + args.data.split("/")[-1] + "_agesevol.png"
-    classification_scores_path = model_dir + os.path.sep + "classification_scores.p"
-    classification_scores_adult_path = (
-        model_dir + os.path.sep + "classification_scores_adult.p"
-    )
+    model_path = os.path.join(args.model, "model.pycrfsuite")
+    features_path = os.path.join(args.model, "feature_vocabs.p")
+
+    report_path = os.path.join(args.model, args.data.replace("/", "_") + "_report.xlsx")
+    plot_path = os.path.join(args.model, args.data.split("/")[-1] + "_agesevol.png")
+    classification_scores_path = os.path.join(args.model, "classification_scores.p")
+    classification_scores_adult_path = os.path.join(args.model, "classification_scores_adult.p")
 
     # Loading data
     data = pd.read_pickle(args.data)
 
     data = add_feature_columns(
-        data,
-        use_action=args.use_action,
-        check_repetition=args.use_repetitions,
-        use_past=args.use_past,
-        use_pastact=args.use_past_actions,
-        use_pos=args.use_pos,
+        data, check_repetition=args.use_repetitions, use_past=args.use_past,
     )
 
     data_train, data_test = make_train_test_splits(data, args.test_ratio)
@@ -270,20 +220,19 @@ if __name__ == "__main__":
     with open(features_path, "rb") as pickle_file:
         feature_vocabs = pickle.load(pickle_file)
 
-    data_test = data_test.assign(features = data_test.apply(
+    data_test = data_test.assign(
+        features=data_test.apply(
             lambda x: get_features_from_row(
                 feature_vocabs,
                 x.tokens,
-                x["speaker"],
-                x["prev_speaker"],
+                x.speaker_code,
+                x.prev_speaker_code,
                 x.turn_length,
                 use_bi_grams=args.use_bi_grams,
-                action_tokens=None if not args.use_action else x.action_tokens,
                 repetitions=None
                 if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
-                past_tokens=None if not args.use_past else x.past,
-                pastact_tokens=None if not args.use_past_actions else x.past_act,
+                else (x.repeated_words, x.ratio_repwords),
+                prev_tokens=None if not args.use_past else x.past,
                 pos_tags=None if not args.use_pos else x.pos,
             ),
             axis=1,
@@ -294,25 +243,23 @@ if __name__ == "__main__":
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
 
-    grouped_test = data_test.groupby(by=["file_id"]).agg(
-        {"features": lambda x: [y for y in x], "index": min}
-    )
+    y_pred = crf_predict(tagger, data_test, mode=args.prediction_mode,)
+    data_test = data_test.assign(speech_act_predicted=y_pred)
 
-    y_pred = crf_predict(
-        tagger,
-        grouped_test.sort_values("index", ascending=True)["features"],
-        mode=args.prediction_mode,
+    data_filtered = data_test.drop(
+        columns=[
+            "prev_tokens",
+            "prev_speaker_code",
+            "repeated_words",
+            "nb_repwords",
+            "ratio_repwords",
+            "features",
+        ]
     )
-    data_test = data_test.assign(y_pred = [y for x in y_pred for y in x])  # flatten
-
-    # Filter for important columns
-    data_test = data_test.assign(speech_act_predicted=data_test["y_pred"])
-    data_filtered = data_test[["file_id", "utterance_id", "child", "age_months", "tokens", "pos",
-                              "speaker", "speech_act", "speech_act_predicted"]]
-    data_filtered.to_csv(os.path.join("checkpoints", "crf", "speech_acts.csv"), index_label="index")
+    data_filtered.to_pickle(os.path.join("checkpoints", "crf", "speech_acts.p"))
 
     data_test["pred_OK"] = data_test.apply(
-        lambda x: (x.y_pred == x[SPEECH_ACT]), axis=1
+        lambda x: (x.speech_act_predicted == x[SPEECH_ACT]), axis=1
     )
     # Remove uninformative tags before doing analysis
     data_crf = data_test[
@@ -322,16 +269,15 @@ if __name__ == "__main__":
     ]
     # reports
     report, confusion_matrix, acc, cks = bio_classification_report(
-        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist()
+        data_crf[SPEECH_ACT].tolist(), data_crf["speech_act_predicted"].tolist()
     )
     states, transitions = features_report(tagger)
 
     int_cols = (
-        ["file_id", "speaker"]
+        ["transcript_file", "speaker_code"]
         + ([args.col_ages] if args.col_ages is not None else [])
         + [x for x in data_test.columns if "spa_" in x]
-        + (["child"] if args.consistency_check else [])
-        + [SPEECH_ACT, "y_pred", "pred_OK"]
+        + [SPEECH_ACT, "speech_act_predicted", "pred_OK"]
     )
 
     report_d = {
@@ -346,13 +292,14 @@ if __name__ == "__main__":
 
     pickle.dump(report.T, open(classification_scores_path, "wb"))
 
-    data_crf_adult = data_crf[data_crf.speaker == ADULT]
+    data_crf_adult = data_crf[data_crf.speaker_code == ADULT]
 
     cr_adult = classification_report(
         data_crf_adult[SPEECH_ACT].tolist(),
-        data_crf_adult["y_pred"].tolist(),
+        data_crf_adult["speech_act_predicted"].tolist(),
         digits=3,
         output_dict=True,
+        zero_division=0,
     )
     pickle.dump(pd.DataFrame(cr_adult).T, open(classification_scores_adult_path, "wb"))
 
@@ -368,7 +315,7 @@ if __name__ == "__main__":
         #     if label_category == confused_label_category:
         #         genuine_confusions.append(confusion)
 
-        if len(confusions) > 0:
+        if len(confusions) > 0 and label in SPEECH_ACT_DESCRIPTIONS.Description:
             print(
                 f"{label} ({SPEECH_ACT_DESCRIPTIONS.Description[label]}) is confused with:"
             )
@@ -380,19 +327,33 @@ if __name__ == "__main__":
         plot_testing(data_test, plot_path, args.col_ages)
 
     report = classification_report(
-        data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), digits=3
+        data_crf[SPEECH_ACT].tolist(),
+        data_crf["speech_act_predicted"].tolist(),
+        digits=3,
+        zero_division=0,
     )
     print(report)
 
-    report_dict = classification_report(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist(), labels=sorted(data_crf[SPEECH_ACT].unique()), digits=3, output_dict=True)
+    report_dict = classification_report(
+        data_crf[SPEECH_ACT].tolist(),
+        data_crf["speech_act_predicted"].tolist(),
+        labels=sorted(data_crf[SPEECH_ACT].unique()),
+        digits=3,
+        output_dict=True,
+        zero_division=0,
+    )
     report_df = pd.DataFrame(report_dict).T
-    pd.set_option('display.float_format', lambda x: '%.3f' % x)
+    pd.set_option("display.float_format", lambda x: "%.3f" % x)
     print(report_df.to_latex())
 
     # Get training data label frequencies:
     freqs = dict(calculate_frequencies(data_train[SPEECH_ACT]))
-    filtered_freqs = [freqs[speech_act] for speech_act in report_df.index if speech_act in freqs]
-    filtered_f1 = [f1 for speech_act, f1 in report_df["f1-score"].items() if speech_act in freqs]
+    filtered_freqs = [
+        freqs[speech_act] for speech_act in report_df.index if speech_act in freqs
+    ]
+    filtered_f1 = [
+        f1 for speech_act, f1 in report_df["f1-score"].items() if speech_act in freqs
+    ]
     corr, p_value = spearmanr(filtered_f1, filtered_freqs)
 
     print(f"Spearman correlation between freq and f-score: {corr:.2f} (p = {p_value})")

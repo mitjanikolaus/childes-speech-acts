@@ -22,16 +22,16 @@ from utils import (
     SPEECH_ACT_NO_FUNCTION,
     TRAIN_TEST_SPLIT_RANDOM_STATE,
     make_train_test_splits,
-    dataset_labels,
+    dataset_labels, PATH_NEW_ENGLAND_UTTERANCES,
 )
 
 
-def argparser():
+def parse_args():
     argparser = argparse.ArgumentParser(
         description="Train a Baseline model and test it.",
     )
     # Data files
-    argparser.add_argument("data", type=str, help="file listing train dialogs")
+    argparser.add_argument("--data", type=str, default=PATH_NEW_ENGLAND_UTTERANCES, help="file listing train dialogs")
     # Operations on data
     argparser.add_argument(
         "--model",
@@ -68,12 +68,6 @@ def argparser():
         help="whether to use bi-gram features to train the algorithm",
     )
     argparser.add_argument(
-        "--use-action",
-        "-act",
-        action="store_true",
-        help="whether to use action features to train the algorithm, if they are in the data",
-    )
-    argparser.add_argument(
         "--use-pos",
         "-pos",
         action="store_true",
@@ -90,12 +84,6 @@ def argparser():
         "-rep",
         action="store_true",
         help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use-past-actions",
-        "-pa",
-        action="store_true",
-        help="whether to add actions from the previous sentence to features",
     )
     argparser.add_argument(
         "--verbose",
@@ -133,8 +121,8 @@ def baseline_model(name: str, weights: dict, balance: bool):
 def get_baseline_features_from_row(
     features: dict,
     tokens: list,
-    speaker: str,
-    prev_speaker: str,
+    speaker_code: str,
+    prev_speaker_code: str,
     ln: int,
     use_bi_grams,
     **kwargs,
@@ -147,8 +135,8 @@ def get_baseline_features_from_row(
     features_sparse = [
         features["words"][w] for w in tokens if w in features["words"].keys()
     ]  # words
-    features_sparse.append(1 if speaker == ADULT else 0)
-    features_sparse.append(1 if prev_speaker == ADULT else 0)
+    features_sparse.append(1 if speaker_code == ADULT else 0)
+    features_sparse.append(1 if prev_speaker_code == ADULT else 0)
 
     for k in features["length_bins"].keys():  # length
         if ln <= float(k.split("-")[1]) and ln >= float(k.split("-")[0]):
@@ -164,14 +152,6 @@ def get_baseline_features_from_row(
             features["bi_grams"][b] for b in bi_grams if b in features["bigrams"].keys()
         ]  # words
 
-    if ("action_tokens" in kwargs) and (
-        kwargs["action_tokens"] is not None
-    ):  # actions are descriptions just like 'words'
-        features_sparse += [
-            features["action"][w]
-            for w in kwargs["action_tokens"]
-            if w in features["action"].keys()
-        ]
     if ("repetitions" in kwargs) and (
         kwargs["repetitions"] is not None
     ):  # not using words, only ratio+len
@@ -185,7 +165,7 @@ def get_baseline_features_from_row(
 
     if ("pos_tags" in kwargs) and (
         kwargs["pos_tags"] is not None
-    ):  # actions are descriptions just like 'words'
+    ):
         features_sparse += [
             features["pos"][w]
             for w in kwargs["pos_tags"]
@@ -200,11 +180,8 @@ def get_baseline_features_from_row(
 
 #### MAIN
 if __name__ == "__main__":
-    args = argparser()
+    args = parse_args()
     print(args)
-
-    # Definitions
-    number_segments_length_feature = 10
 
     print("### Loading data:".upper())
 
@@ -212,26 +189,22 @@ if __name__ == "__main__":
 
     data = add_feature_columns(
         data,
-        use_action=args.use_action,
-        match_age=args.match_age,
         check_repetition=args.use_repetitions,
         use_past=args.use_past,
-        use_pastact=args.use_past_actions,
-        use_pos=args.use_pos,
     )
 
     accuracies = []
 
     # Split data
-    kf = KFold(n_splits=args.num_splits, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
+    kf = KFold(n_splits=args.num_splits, shuffle=True, random_state=TRAIN_TEST_SPLIT_RANDOM_STATE)
 
-    file_names = data["file_id"].unique().tolist()
+    file_names = data["transcript_file"].unique().tolist()
     for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):
         train_files = [file_names[i] for i in train_indices]
         test_files = [file_names[i] for i in test_indices]
 
-        data_train = data[data["file_id"].isin(train_files)]
-        data_test = data[data["file_id"].isin(test_files)]
+        data_train = data[data["transcript_file"].isin(train_files)]
+        data_test = data[data["transcript_file"].isin(test_files)]
 
         print(
             f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
@@ -242,10 +215,8 @@ if __name__ == "__main__":
             data_train,
             args.nb_occurrences,
             args.use_bi_grams,
-            args.use_action,
             args.use_repetitions,
             args.use_pos,
-            bin_cut=number_segments_length_feature,
         )
 
         # creating features set for train
@@ -253,16 +224,14 @@ if __name__ == "__main__":
             lambda x: get_baseline_features_from_row(
                 feature_vocabs,
                 x.tokens,
-                x["speaker"],
-                x["prev_speaker"],
+                x["speaker_code"],
+                x["prev_speaker_code"],
                 x.turn_length,
                 use_bi_grams=args.use_bi_grams,
-                action_tokens=None if not args.use_action else x.action_tokens,
                 repetitions=None
                 if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                else (x.repeated_words, x.ratio_repwords),
                 past_tokens=None if not args.use_past else x.past,
-                pastact_tokens=None if not args.use_past_actions else x.past_act,
                 pos_tags=None if not args.use_pos else x.pos,
             ),
             axis=1,
@@ -288,16 +257,14 @@ if __name__ == "__main__":
             lambda x: get_baseline_features_from_row(
                 feature_vocabs,
                 x.tokens,
-                x["speaker"],
-                x["prev_speaker"],
+                x["speaker_code"],
+                x["prev_speaker_code"],
                 x.turn_length,
                 use_bi_grams=args.use_bi_grams,
-                action_tokens=None if not args.use_action else x.action_tokens,
                 repetitions=None
                 if not args.use_repetitions
-                else (x.repeated_words, x.nb_repwords, x.ratio_repwords),
+                else (x.repeated_words, x.ratio_repwords),
                 past_tokens=None if not args.use_past else x.past,
-                pastact_tokens=None if not args.use_past_actions else x.past_act,
                 pos_tags=None if not args.use_pos else x.pos,
             ),
             axis=1,
