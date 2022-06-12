@@ -21,6 +21,13 @@ conda env create -f environment.yml
 conda activate speech-acts
 ```
 
+In case of problems with this environment file (e.g. if you're not on linux), you can try and use the
+[os-independent environment file](environment_os_independent.yml) instead:
+```
+conda env create -f environment_os_independent.yml
+conda activate speech-acts
+```
+
 # Preprocessing data for supervised training of classifiers
 
 Data for supervised training is taken from the [New England corpus](https://childes.talkbank.org/access/Eng-NA/NewEngland.html) of [CHILDES](https://childes.talkbank.org/access/).
