@@ -1,6 +1,7 @@
 import os
 import pickle
 import argparse
+from ast import literal_eval
 
 import seaborn as sns
 
@@ -91,8 +92,12 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
 
-    # Loading data
-    data = pd.read_pickle(args.data)
+    if args.data.endswith(".csv"):
+        # Loading data
+        data = pd.read_csv(args.data, converters={"pos": literal_eval, "tokens": literal_eval})
+    else:
+        # Loading data
+        data = pd.read_pickle(args.data)
 
     # Loading model
     model_path = os.path.join(args.model, "model.pycrfsuite")
@@ -146,7 +151,11 @@ if __name__ == "__main__":
     )
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
-    data_filtered.to_pickle(args.out)
+
+    if args.data.endswith(".csv"):
+        data_filtered.to_csv(args.out, index=False)
+    else:
+        data_filtered.to_pickle(args.out)
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]
