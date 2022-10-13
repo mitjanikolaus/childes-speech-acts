@@ -240,4 +240,7 @@ if __name__ == "__main__":
     result_dataframe = result_dataframes[0]
     for df in result_dataframes[1:]:
         result_dataframe = result_dataframe.append(df)
+
+    result_dataframe.speaker_code.replace({"MOT": "ADU"}, inplace=True)
+
     pickle.dump(result_dataframe, open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "wb"))

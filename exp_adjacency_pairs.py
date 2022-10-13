@@ -110,7 +110,7 @@ def get_adj_pairs_frac_data(data, age, source: str = ADULT,
 
     # for now source = 1 and target = 0
     spa_seq.rename(
-        {"speaker_1": "source", "speaker_0": "target"}, axis="columns", inplace=True
+        {"speaker_code_1": "source", "speaker_code_0": "target"}, axis="columns", inplace=True
     )
 
     spa_source = column_name_speech_act +"_1"
@@ -164,9 +164,9 @@ def get_adj_pairs_frac_data(data, age, source: str = ADULT,
 def gen_seq_data(data, age: int = None, column_name_speech_act = "speech_act"):
     # 0. Choose age
     if age is not None:
-        data_age = data[data["age_months"] == age]
+        data_age = data[data.age == age]
     # 1. Sequence extraction & columns names
-    spa_shifted = {0: data_age[[column_name_speech_act, "speaker", "file_id"]]}
+    spa_shifted = {0: data_age[[column_name_speech_act, "speaker_code", "transcript_file"]]}
     spa_shifted[1] = (
         spa_shifted[0]
         .shift(periods=1, fill_value=None)
@@ -179,9 +179,9 @@ def gen_seq_data(data, age: int = None, column_name_speech_act = "speech_act"):
     spa_compare = pd.concat(spa_shifted.values(), axis=1)
     # 3. Add empty slots for file changes
     spa_compare.loc[
-        (spa_compare["file_id_0"] != spa_compare["file_id_1"]), [f"{column_name_speech_act}_1"]
+        (spa_compare["transcript_file_0"] != spa_compare["transcript_file_1"]), [f"{column_name_speech_act}_1"]
     ] = None
-    return spa_compare[[col for col in spa_compare.columns if "file_id" not in col]]
+    return spa_compare[[col for col in spa_compare.columns if "transcript_file" not in col]]
 
 
 def create_sankey_diagram(
@@ -260,7 +260,7 @@ app.layout = html.Div(
                         ),
                         "child age",
                         dcc.Dropdown(
-                            id="age_months",
+                            id="age",
                             options=[{"label": i, "value": i} for i in [14, 20, 32]],
                             value=32,
                         ),
@@ -298,19 +298,19 @@ app.layout = html.Div(
         Input("dataset-choice", "value"),
         Input("source", "value"),
         Input("target", "value"),
-        Input("age_months", "value"),
+        Input("age", "value"),
         Input("percentage", "value"),
     ],
 )
-def update_graph(dataset, source, target, age_months, percentage):
+def update_graph(dataset, source, target, age, percentage):
     # Load data
     data = pd.read_pickle(ds_list[dataset])
     match_age = [14, 20, 32]
-    data["age_months"] = data.age_months.apply(
+    data["age"] = data.age.apply(
         lambda age: min(match_age, key=lambda x: abs(x - age))
     )
     # Filter data
-    _, spa_gp = get_adj_pairs_frac_data(data, age_months, source, target, min_percent=percentage, data_source=dataset)
+    _, spa_gp = get_adj_pairs_frac_data(data, age, source, target, min_percent=percentage, data_source=dataset)
 
     if dataset == SOURCE_SNOW:
         column_name_speech_act = SPEECH_ACT
@@ -319,7 +319,7 @@ def update_graph(dataset, source, target, age_months, percentage):
     else:
         raise ValueError("Unknown data source: ", dataset)
 
-    fig = create_sankey_diagram(spa_gp, age_months, source, target, column_name_speech_act)
+    fig = create_sankey_diagram(spa_gp, age, source, target, column_name_speech_act)
 
     return fig
 

@@ -314,14 +314,14 @@ def get_fraction_producing_speech_acts(
         prev_fraction = 0.0
         for month in ages:
             speech_acts_children_month = data_children[
-                data_children["age_months"] == month
+                data_children.age == month
             ]
-            children_ids = speech_acts_children_month["file_id"].unique()
+            transcript_ids = speech_acts_children_month.transcript_file.unique()
             n_children = 0
             n_acquired = 0
-            for child_id in children_ids:
+            for transcript_id in transcript_ids:
                 speech_acts_child = speech_acts_children_month[
-                    speech_acts_children_month["file_id"] == child_id
+                    speech_acts_children_month.transcript_file == transcript_id
                 ]
                 if len(speech_acts_child) > MIN_NUM_UTTERANCES:
                     n_children += 1
@@ -364,7 +364,7 @@ def calc_ages_of_acquisition(
 ):
 
     if target == TARGET_PRODUCTION:
-        data_children = data[data["speaker"] == CHILD]
+        data_children = data[data.speaker_code == CHILD]
 
         if data_source == SOURCE_SNOW:
             column_name_speech_act = SPEECH_ACT
@@ -466,7 +466,7 @@ if __name__ == "__main__":
     data = pd.read_pickle(PATH_NEW_ENGLAND_UTTERANCES)
 
     # map ages to corresponding bins
-    data["age_months"] = data["age_months"].apply(age_bin)
+    data["age"] = data["age"].apply(age_bin)
 
     observed_speech_acts = [label for label in data[SPEECH_ACT].unique()]
 

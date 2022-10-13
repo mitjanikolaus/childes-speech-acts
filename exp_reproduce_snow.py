@@ -78,17 +78,17 @@ def calculate_num_speech_act_types(data, column_name_speech_act):
     # number of speech act types at different ages
     results = []
     for age in AGES:
-        data_age = data[data["age_months"] == age]
+        data_age = data[data["age"] == age]
 
         results_age = {}
         for num_speech_act_types in range(MAX_NUM_SPEECH_ACT_TYPES):
             results_age[num_speech_act_types] = 0
 
-        children_ids = data_age.file_id.unique()
+        children_ids = data_age.transcript_file.unique()
         for child_id in children_ids:
             speech_acts_child = data_age[
-                (data_age.file_id == child_id)
-                & (data_age.speaker == CHILD)
+                (data_age.transcript_file == child_id)
+                & (data_age.speaker_code == CHILD)
                 & (~data_age[column_name_speech_act].isin(["YY", "OO"]))
             ][column_name_speech_act]
             speech_act_type_counts = speech_acts_child.value_counts().to_list()
@@ -161,12 +161,11 @@ def reproduce_num_speech_acts(data, data_whole_childes):
             f"Jensen-Shannon Distance (CHILDES, {age} months): {jensen_shannon_distance:.3f}"
         )
 
-    fig, (axes) = plt.subplots(3, 1, sharex="all")
+    fig, (axes) = plt.subplots(3, 1, sharex="all", figsize=(9, 5))
 
     # Move title into figure
     plt.rcParams["axes.titley"] = 1.0
     plt.rcParams["axes.titlepad"] = -14
-
     for i, age in enumerate(AGES):
         results_age = results[results.age == age]
 
@@ -195,6 +194,8 @@ def reproduce_num_speech_acts(data, data_whole_childes):
     axes[1].set_ylabel("proportion of children")
     plt.xlabel("number of different speech acts produced")
     plt.tight_layout()
+    plt.savefig("results/num_speech_act_types.png", dpi=300)
+
     plt.show()
 
 
@@ -202,9 +203,9 @@ def calculate_freq_distributions(
     data, column_name_speech_act, speech_acts_analyzed, age, source
 ):
     # number of speech act types at different ages
-    data_age = data[data["age_months"] == age]
+    data_age = data[data["age"] == age]
 
-    speech_acts_children = data_age[data_age.speaker == CHILD]
+    speech_acts_children = data_age[data_age.speaker_code == CHILD]
 
     frequencies = calculate_frequencies(speech_acts_children[column_name_speech_act])
 
@@ -250,7 +251,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         "SI",
     ]
 
-    fig, axes = plt.subplots(3, 1, sharex="all", sharey="all")
+    fig, axes = plt.subplots(3, 1, sharex="all", sharey="all", figsize=(9, 5))
 
     for i, age in enumerate(AGES):
         results_snow = calculate_freq_distributions(
@@ -323,6 +324,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
     axes[1].set_ylabel("frequency")
     axes[-1].set_xlabel("speech act")
     plt.tight_layout()
+    plt.savefig("results/distribution.png", dpi=300)
     plt.show()
 
 
@@ -450,8 +452,11 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
             axes[i].set_xlim(14, 60)
 
     fig.text(0.5, 0.04, "Data from Snow et al. (1996)", ha="center")
-    plt.subplots_adjust(bottom=0.15)
 
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.15)
+    name = "correlation_aoa_production" if target_measure == TARGET_PRODUCTION else "correlation_aoa_comprehension"
+    plt.savefig("results/" + name + ".png", dpi=300)
     plt.show()
 
 
@@ -467,34 +472,42 @@ if __name__ == "__main__":
     print("Loading data...")
     data = pickle.load(open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "rb"))
 
+    # Fix for old dataframe column names
+    if "age_months" in data.columns:
+        data.rename({"age_months": "age", "speaker": "speaker_code", "file_id": "transcript_file"}, axis=1, inplace=True)
+
     # map ages to corresponding bins
-    data["age_months"] = data["age_months"].apply(age_bin)
+    data["age"] = data["age"].apply(age_bin)
 
     # Load annotated data for whole CHILDES
     data_whole_childes = load_whole_childes_data()
+
+    # Fix for old dataframe column names
+    if "age_months" in data_whole_childes.columns:
+        data_whole_childes.rename({"age_months": "age", "speaker": "speaker_code", "file_id": "transcript_file"}, axis=1, inplace=True)
 
     print(
         "Number of analyzed transcripts in CHILDES: ",
         len(
             data_whole_childes[
-                (data_whole_childes.age_months >= min(AGES))
-                & (data_whole_childes.age_months <= max(AGES))
-            ].file_id.unique()
+                (data_whole_childes.age >= min(AGES))
+                & (data_whole_childes.age <= max(AGES))
+            ].transcript_file.unique()
         ),
     )
     print(
         "Number of analyzed children in CHILDES: ",
         len(
             data_whole_childes[
-                (data_whole_childes.age_months >= min(AGES))
-                & (data_whole_childes.age_months <= max(AGES))
+                (data_whole_childes.age >= min(AGES))
+                & (data_whole_childes.age <= max(AGES))
             ].child_id.unique()
         ),
     )
 
-    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_PRODUCTION)
-
-    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
+    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_PRODUCTION)
+    #
+    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
 
     reproduce_speech_act_distribution(data, data_whole_childes)
 

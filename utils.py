@@ -251,13 +251,17 @@ def load_whole_childes_data():
     # We need the New England data to calculate min number of utterances per age group
     data = pickle.load(open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "rb"))
 
+    # Fix for old dataframe column names
+    if "age_months" in data.columns:
+        data.rename({"age_months": "age", "speaker": "speaker_code", "file_id": "transcript_file"}, axis=1, inplace=True)
+
     # map ages to corresponding bins
-    data["age_months"] = data["age_months"].apply(age_bin)
+    data["age"] = data["age"].apply(age_bin)
 
     # calculate minimum number of utterances for each age group
     min_num_utterances = {}
     for age in AGES:
-        data_age = data[(data.age_months == age) & (data.speaker == CHILD)]
+        data_age = data[(data.age == age) & (data.speaker_code == CHILD)]
         lengths = data_age.groupby(by=["transcript_file"]).agg(
             length=("utterance_id", lambda x: len(x))
         )
@@ -268,18 +272,21 @@ def load_whole_childes_data():
     data_whole_childes = pd.read_csv(PATH_CHILDES_UTTERANCES_ANNOTATED)
     data_whole_childes.set_index("index", drop=True, inplace=True)
 
+    # Fix for old dataframe column names
+    if "age_months" in data_whole_childes.columns:
+        data_whole_childes.rename({"age_months": "age", "speaker": "speaker_code", "file_id": "transcript_file"}, axis=1, inplace=True)
+
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[
         ~data_whole_childes.transcript_file.isin(TRANSCRIPTS_NEW_ENGLAND)
     ]
 
-    # Filter for children's utterances
-    data_whole_childes_children = data_whole_childes[data_whole_childes.speaker == CHILD]
+    data_whole_childes_children = data_whole_childes[data_whole_childes.speaker_code == CHILD]
 
     # Filter for min num utterances
     for age in AGES:
         lengths = (
-            data_whole_childes_children[data_whole_childes_children.age_months == age]
+            data_whole_childes_children[data_whole_childes_children.age == age]
                 .groupby(by=["transcript_file"])
                 .agg(length=("transcript_file", lambda x: len(x)))
         )
@@ -299,13 +306,13 @@ def load_whole_childes_data():
 
 def make_train_test_splits(data, test_split_ratio):
     data_train_ids, data_test_ids = train_test_split(
-        data["transcript_file"].unique(),
+        data.transcript_file.unique(),
         test_size=test_split_ratio,
         shuffle=True,
         random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
     )
-    data_train = data[data["transcript_file"].isin(data_train_ids.tolist())]
-    data_test = data[data["transcript_file"].isin(data_test_ids.tolist())]
+    data_train = data[data.transcript_file.isin(data_train_ids.tolist())]
+    data_test = data[data.transcript_file.isin(data_test_ids.tolist())]
 
     return data_train, data_test
 
@@ -322,7 +329,7 @@ def preprend_speaker_token(tokens, speaker):
     return tokens
 
 
-def age_months(s: str) -> int:
+def age(s: str) -> int:
     """Age stored under format: "P1Y08M" or "P1Y01M14D" (or just "P1Y"); returning age in months
 
     Input:
