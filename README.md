@@ -6,11 +6,11 @@ annotation scheme.
 This repository contains code accompanying the following papers:  
 
 **Large-scale Study of Speech Acts' Development Using Automatic Labelling**  
-_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+_In Proceedings of the 43rd Annual Meeting of the Cognitive Science Society. (2021)_  
 Mitja Nikolaus*, Juliette Maes*, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi (*Joint first authors)
 
 **Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
-_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+_In Proceedings of the 43rd Annual Meeting of the Cognitive Science Society. (2021)_  
 Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
 
 
@@ -120,6 +120,6 @@ python nn_test.py --model bert --data data/new_england_preprocessed.p
 The `collapsed_force_codes` branch contains code for analyses that utilize collapsed force codes, as described in:
 
 **Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
-_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
+_In Proceedings of the 43rd Annual Meeting of the Cognitive Science Society. (2021)_  
 Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
 
