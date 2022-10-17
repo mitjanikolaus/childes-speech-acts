@@ -234,16 +234,13 @@ COMPREHENSION_SPEECH_ACTS = COMPREHENSION_SPEECH_ACTS_ENOUGH_DATA_2_OCCURRENCES
 
 
 def get_fraction_contingent_responses(
-    data, ages, observed_speech_acts, add_extra_datapoints=True, data_source=SOURCE_SNOW,
+    data, ages, observed_speech_acts, add_extra_datapoints=True, column_name_speech_act=SPEECH_ACT,
 ):
     """Calculate "understanding" of speech acts by measuring the amount of contingent responses"""
-    if data_source not in (SOURCE_SNOW, SOURCE_CRF):
-        raise ValueError("Unknown data source: ", data_source)
-
     fraction_contingent_responses = []
 
     for age_months in ages:
-        contingency_data = get_contingency_data(data, age_months, data_source)
+        contingency_data = get_contingency_data(data, age_months, column_name_speech_act)
 
         for speech_act in observed_speech_acts:
             if add_extra_datapoints:
@@ -357,7 +354,7 @@ def calc_ages_of_acquisition(
     data,
     observed_speech_acts,
     ages,
-    data_source=SOURCE_SNOW,
+    column_name_speech_act=SPEECH_ACT,
     add_extra_datapoints=True,
     max_age=MAX_AGE,
     threshold_speech_act_observed_production=THRESHOLD_SPEECH_ACT_OBSERVED_PRODUCTION,
@@ -365,13 +362,6 @@ def calc_ages_of_acquisition(
 
     if target == TARGET_PRODUCTION:
         data_children = data[data.speaker_code == CHILD]
-
-        if data_source == SOURCE_SNOW:
-            column_name_speech_act = SPEECH_ACT
-        elif data_source == SOURCE_CRF:
-            column_name_speech_act = "y_pred"
-        else:
-            raise ValueError("Unknown data source: ", data_source)
 
         observed_speech_acts = [
             s
@@ -394,7 +384,7 @@ def calc_ages_of_acquisition(
 
     elif target == TARGET_COMPREHENSION:
         fraction_contingent_responses = get_fraction_contingent_responses(
-            data, ages, observed_speech_acts, add_extra_datapoints, data_source
+            data, ages, observed_speech_acts, add_extra_datapoints, column_name_speech_act
         )
 
         fraction_data = fraction_contingent_responses
@@ -453,10 +443,10 @@ if __name__ == "__main__":
         choices=[TARGET_PRODUCTION, TARGET_COMPREHENSION],
     )
     argparser.add_argument(
-        "--data-source",
+        "--column-name-speech-act",
         type=str,
-        default=SOURCE_SNOW,
-        choices=[SOURCE_SNOW, SOURCE_CRF],
+        default=SPEECH_ACT,
+        choices=[SPEECH_ACT, "y_pred"],
     )
 
     args = argparser.parse_args()
@@ -481,11 +471,11 @@ if __name__ == "__main__":
         data,
         observed_speech_acts,
         AGES,
-        data_source=args.data_source,
+        data_source=args.column_name_speech_act,
         add_extra_datapoints=ADD_EXTRA_DATAPOINTS,
     )
 
-    path = f"results/age_of_acquisition_{args.target}_{args.data_source}.csv"
+    path = f"results/age_of_acquisition_{args.target}_{args.column_name_speech_act}.csv"
     ages_of_acquisition = pd.DataFrame.from_records([ages_of_acquisition]).T
     ages_of_acquisition.index.rename('speech_act', inplace=True)
     ages_of_acquisition.rename(columns={0: "age_of_acquisition"}, inplace=True)

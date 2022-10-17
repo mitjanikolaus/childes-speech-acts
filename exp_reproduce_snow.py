@@ -126,7 +126,7 @@ def reproduce_num_speech_acts(data, data_whole_childes):
     results_crf = calculate_num_speech_act_types(data, "y_pred")
     results_crf["source"] = SOURCE_AUTOMATIC_NEW_ENGLAND_LABEL
 
-    results_childes = calculate_num_speech_act_types(data_whole_childes, "y_pred")
+    results_childes = calculate_num_speech_act_types(data_whole_childes, SPEECH_ACT)
     results_childes["source"] = SOURCE_AUTOMATIC_CHILDES_LABEL
 
     results = results_snow.append(results_crf).append(results_childes)
@@ -221,13 +221,13 @@ def calculate_freq_distributions(
         results.append(
             {
                 "source": source,
-                "speech_act": s,
+                SPEECH_ACT: s,
                 "frequency": f,
             }
         )
 
     results = pd.DataFrame(results)
-    results.sort_values(by=["speech_act"], inplace=True)
+    results.sort_values(by=[SPEECH_ACT], inplace=True)
 
     return results
 
@@ -262,7 +262,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
         )
         results_childes = calculate_freq_distributions(
             data_whole_childes,
-            "y_pred",
+            SPEECH_ACT,
             speech_acts_analyzed,
             age,
             SOURCE_AUTOMATIC_CHILDES_LABEL,
@@ -297,7 +297,7 @@ def reproduce_speech_act_distribution(data, data_whole_childes):
 
         sns.barplot(
             ax=axes[i],
-            x="speech_act",
+            x=SPEECH_ACT,
             hue="source",
             y="frequency",
             data=results,
@@ -339,7 +339,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         data,
         observed_speech_acts,
         AGES,
-        data_source=SOURCE_SNOW,
+        column_name_speech_act=SPEECH_ACT,
         add_extra_datapoints=False,
         max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
@@ -350,7 +350,7 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         data,
         observed_speech_acts,
         AGES,
-        data_source=SOURCE_CRF,
+        column_name_speech_act="y_pred",
         add_extra_datapoints=False,
         max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
@@ -361,13 +361,13 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
         data_whole_childes,
         observed_speech_acts,
         AGES,
-        SOURCE_CRF,
+        column_name_speech_act=SPEECH_ACT,
         add_extra_datapoints=False,
         max_age=MAX_AGE,
         threshold_speech_act_observed_production=0,
     )
 
-    # observed_speech_acts = list(data_whole_childes["y_pred"].dropna().unique())
+    # observed_speech_acts = list(data_whole_childes[SPEECH_ACT].dropna().unique())
     # ages_of_acquisition_childes_long = calc_ages_of_acquisition(
     #     target_measure,
     #     data_whole_childes,
@@ -383,14 +383,14 @@ def reproduce_speech_act_age_of_acquisition(data, data_whole_childes, target_mea
     for speech_act in observed_speech_acts:
         aoa_data.append(
             {
-                "speech_act": speech_act,
+                SPEECH_ACT: speech_act,
                 "snow": ages_of_acquisition_snow[speech_act],
                 "crf": ages_of_acquisition_crf[speech_act],
                 "childes": ages_of_acquisition_childes[speech_act],
                 # "childes (long)": ages_of_acquisition_childes_long[speech_act],
             }
         )
-    aoa_data = pd.DataFrame(aoa_data).sort_values(by=["speech_act"], axis=0)
+    aoa_data = pd.DataFrame(aoa_data).sort_values(by=[SPEECH_ACT], axis=0)
     print(aoa_data)
     print(aoa_data.to_latex(float_format="%.1f", index=False))
 
@@ -505,9 +505,9 @@ if __name__ == "__main__":
         ),
     )
 
-    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_PRODUCTION)
-    #
-    # reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_PRODUCTION)
+
+    reproduce_speech_act_age_of_acquisition(data, data_whole_childes, TARGET_COMPREHENSION)
 
     reproduce_speech_act_distribution(data, data_whole_childes)
 

@@ -4,8 +4,6 @@ import math
 
 from childespy.childespy import get_transcripts, get_corpora, get_utterances
 
-import nltk
-
 from tqdm import tqdm
 
 import pandas as pd
@@ -13,6 +11,7 @@ import pandas as pd
 from utils import PATH_CHILDES_UTTERANCES
 
 DB_ARGS = None
+# Set these DB_ARGS for access to local database, otherwise the data is fetched from the internet
 # {
 #     "hostname": "localhost",
 #     "user": "childesdb",
@@ -40,14 +39,14 @@ TYPES_STATEMENT = {
 
 def add_punctuation(tokens, utterance_type):
     if utterance_type in TYPES_QUESTION:
-        tokens += "?"
+        tokens.append("?")
     elif utterance_type in TYPES_EXCLAMATION:
-        tokens += "!"
+        tokens.append("!")
     elif utterance_type in TYPES_STATEMENT:
-        tokens += "."
+        tokens.append(".")
     else:
         print("Unknown utterance type: ", utterance_type)
-        tokens += "."
+        tokens.append(".")
 
     return tokens
 
@@ -59,7 +58,7 @@ def load_utts():
     # Filter for North American corpora
     corpora = corpora[corpora["collection_name"].isin(["Eng-NA"])]
     for _, corpus in corpora.iterrows():
-        print(corpus)
+        print("Corpus: ", corpus.corpus_name)
 
         transcripts = get_transcripts(corpus=corpus["corpus_name"], db_args=DB_ARGS)
         utts = get_utterances(
@@ -84,20 +83,24 @@ def load_utts():
 
                         # Make sure we have an utterance
                         if utt["gloss"]:
-
                             # Tokenize utterances
-                            tokenized_utterance = nltk.word_tokenize(utt["gloss"])
+                            tokenized_utterance = utt["gloss"].split(" ")
+                            tokenized_utterance = [t.lower() for t in tokenized_utterance]
                             tokenized_utterance = add_punctuation(
                                 tokenized_utterance, utt["type"]
                             )
+
                             data.append(
                                 {
-                                    "file_id": transcript["transcript_id"],
+                                    "transcript_file": transcript["transcript_id"],
                                     "child_id": utt["target_child_id"],
-                                    "age_months": round(transcript["target_child_age"]),
+                                    "child_name": utt["target_child_name"],
+                                    "age": round(transcript["target_child_age"]),
                                     "tokens": tokenized_utterance,
-                                    "pos": utt["part_of_speech"],
-                                    "speaker": utt["speaker_role"],
+                                    "pos": utt["part_of_speech"].split(" "),
+                                    "speaker_code": utt["speaker_code"],
+                                    "utterance_id": utt.id,
+                                    "corpus": utt["corpus_name"],
                                 }
                             )
     return pd.DataFrame(data)
@@ -109,5 +112,4 @@ if __name__ == "__main__":
     data = load_utts()
 
     # Store utterances for future re-use
-    data.rename(columns={'child_age': 'age_months'}, inplace=True)
     data.to_pickle(PATH_CHILDES_UTTERANCES)

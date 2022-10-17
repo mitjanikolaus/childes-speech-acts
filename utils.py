@@ -270,7 +270,7 @@ def load_whole_childes_data():
 
     # Load annotated data for whole CHILDES
     data_whole_childes = pd.read_csv(PATH_CHILDES_UTTERANCES_ANNOTATED)
-    data_whole_childes.set_index("index", drop=True, inplace=True)
+    data_whole_childes.reset_index(drop=True, inplace=True)
 
     # Fix for old dataframe column names
     if "age_months" in data_whole_childes.columns:

@@ -97,14 +97,7 @@ def get_adj_pairs_frac_data(data, age, source: str = ADULT,
     target: str = CHILD,
     min_percent: float = 0.0,
     min_percent_recipient: float = 0.0,
-    data_source = SOURCE_SNOW):
-
-    if data_source == SOURCE_SNOW:
-        column_name_speech_act = SPEECH_ACT
-    elif data_source == SOURCE_CRF:
-        column_name_speech_act = "y_pred"
-    else:
-        raise ValueError("Unknown data source: ", data_source)
+    column_name_speech_act = SPEECH_ACT):
 
     spa_seq = gen_seq_data(data, age=age, column_name_speech_act=column_name_speech_act)
 

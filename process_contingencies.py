@@ -1,11 +1,12 @@
 import pandas as pd
 
-from utils import SOURCE_SNOW, SOURCE_CRF, load_whole_childes_data, age_bin, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED
+from utils import load_whole_childes_data, age_bin, PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, \
+    SPEECH_ACT
 from exp_adjacency_pairs import get_adj_pairs_frac_data
 from utils import AGES, ADULT, CHILD
 
 
-def get_contingency_data(data, age, data_source):
+def get_contingency_data(data, age, column_name_speech_act):
     contingency_data = pd.read_csv(
         "adjacency_pairs/adjacency_pairs_contingency.csv", keep_default_na=False
     )
@@ -17,7 +18,7 @@ def get_contingency_data(data, age, data_source):
         target=CHILD,
         min_percent=0.0,
         min_percent_recipient=0.0,
-        data_source=data_source,
+        column_name_speech_act=column_name_speech_act,
     )
 
     contingencies = []
@@ -54,7 +55,7 @@ def create_file_with_all_possible_adjacency_pairs_for_annotation():
     # map ages to corresponding bins
     data["age_months"] = data["age_months"].apply(age_bin)
 
-    for data_source in [SOURCE_SNOW, SOURCE_CRF]:
+    for column_name_speech_act in [SPEECH_ACT, "y_pred"]:
         for age in AGES:
             adj_data, _ = get_adj_pairs_frac_data(
                 data,
@@ -63,7 +64,7 @@ def create_file_with_all_possible_adjacency_pairs_for_annotation():
                 target=CHILD,
                 min_percent=0.0,
                 min_percent_recipient=0.0,
-                data_source=data_source,
+                column_name_speech_act=column_name_speech_act,
             )
             adj_data_all = adj_data_all.append(adj_data, ignore_index=True)
 
@@ -78,7 +79,7 @@ def create_file_with_all_possible_adjacency_pairs_for_annotation():
             target=CHILD,
             min_percent=0.0,
             min_percent_recipient=0.0,
-            data_source=SOURCE_CRF,
+            column_name_speech_act=SPEECH_ACT,
         )
         adj_data_all = adj_data_all.append(adj_data, ignore_index=True)
 
