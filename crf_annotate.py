@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     if args.data.endswith(".csv"):
         # Loading data
-        data = pd.read_csv(args.data, converters={"pos": literal_eval, "tokens": literal_eval})
+        data = pd.read_csv(args.data, index_col=False, converters={"pos": literal_eval, "tokens": literal_eval})
     else:
         # Loading data
         data = pd.read_pickle(args.data)
