@@ -154,7 +154,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
     if args.out.endswith(".csv"):
-        data_filtered.to_csv(args.out, index=False)
+        data_filtered.to_csv(args.out)
     else:
         data_filtered.to_pickle(args.out)
 
