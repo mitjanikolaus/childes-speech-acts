@@ -149,7 +149,6 @@ if __name__ == "__main__":
             "features",
         ]
     )
-    data_filtered.speaker_code.replace({"MOT": "ADU"}, inplace=True)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
