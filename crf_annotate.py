@@ -14,6 +14,8 @@ from crf_test import crf_predict
 from crf_train import get_features_from_row, add_feature_columns
 from utils import CHILD
 from utils import calculate_frequencies
+from tqdm import tqdm
+tqdm.pandas()
 
 
 def parse_args():
@@ -92,12 +94,14 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
 
+    print("Loading data.. ", end="")
     if args.data.endswith(".csv"):
         # Loading data
         data = pd.read_csv(args.data, index_col=0, converters={"pos": literal_eval, "tokens": literal_eval})
     else:
         # Loading data
         data = pd.read_pickle(args.data)
+    print("Done.")
 
     # Loading model
     model_path = os.path.join(args.model, "model.pycrfsuite")
@@ -107,12 +111,13 @@ if __name__ == "__main__":
     with open(features_path, "rb") as pickle_file:
         feature_vocabs = pickle.load(pickle_file)
 
+    print("Preparing feature columns.. ")
     data = add_feature_columns(
         data, check_repetition=args.use_repetitions, use_past=args.use_past,
     )
 
     data = data.assign(
-        features=data.apply(
+        features=data.progress_apply(
             lambda x: get_features_from_row(
                 feature_vocabs,
                 x.tokens,
@@ -134,6 +139,7 @@ if __name__ == "__main__":
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
 
+    print("Starting annotate.. ", end="")
     y_pred = crf_predict(tagger, data)
     data = data.assign(speech_act=y_pred)
 
@@ -152,10 +158,12 @@ if __name__ == "__main__":
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
+    print("Saving data.. ", end="")
     if args.out.endswith(".csv"):
         data_filtered.to_csv(args.out)
     else:
         data_filtered.to_pickle(args.out)
+    print("Done.")
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]

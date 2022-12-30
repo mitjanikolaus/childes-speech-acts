@@ -16,7 +16,6 @@ from sklearn.metrics import (
 )
 import numpy as np
 import pycrfsuite
-from tqdm import tqdm
 
 from preprocess import SPEECH_ACT
 from utils import (
@@ -28,6 +27,8 @@ from utils import (
     PATH_NEW_ENGLAND_UTTERANCES,
     CHILD,
 )
+from tqdm import tqdm
+tqdm.pandas()
 
 
 def parse_args():
@@ -125,7 +126,7 @@ def add_feature_columns(
         data["prev_tokens"] = data["prev_tokens"].fillna("").apply(list)
 
     if check_repetition:
-        data["repeated_words"] = data.apply(
+        data["repeated_words"] = data.progress_apply(
             lambda x: [
                 w
                 for w in x.tokens
@@ -485,7 +486,7 @@ def train(
 
     # creating crf features set for train
     data_train = data_train.assign(
-        features=data_train.apply(
+        features=data_train.progress_apply(
             lambda x: get_features_from_row(
                 feature_vocabs,
                 x.tokens,
@@ -548,7 +549,7 @@ def train(
     tagger.open(os.path.join(checkpoint_path, "model.pycrfsuite"))
 
     data_test = data_test.assign(
-        features=data_test.apply(
+        features=data_test.progress_apply(
             lambda x: get_features_from_row(
                 feature_vocabs,
                 x.tokens,
