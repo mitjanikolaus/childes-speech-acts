@@ -14,7 +14,7 @@ SS Directives SS "Signal to start performing an act such as running or rolling a
 
 WD Directives WD "Warn of danger."
 
-CXSC "Speech Elicitations" RPCS "Complete text if so demanded. | Complete statement or other utterance in compliance with request"
+CXSC "Speech Elicitations" CXSC "Complete text if so demanded. | Complete statement or other utterance in compliance with request"
 
 EAEIECEX "Speech Elicitations" EAEIECEX "Elicit onomatopoeic or animal sounds. | Elicit imitation of word or sentence by modelling or by explicit command | Elicit completion of word or sentence. | Elicit completion of rote-learned text."
 
