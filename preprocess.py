@@ -164,3 +164,5 @@ if __name__ == "__main__":
 
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     data.to_pickle(args.output_path)
+    data.to_csv(args.output_path.replace(".p", ".csv"))
+

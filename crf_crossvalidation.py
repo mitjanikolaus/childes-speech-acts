@@ -119,8 +119,8 @@ if __name__ == "__main__":
         test_files = [file_names[i] for i in test_indices]
 
         data_train = data[data["transcript_file"].isin(train_files)]
+        data_train = data_train[~data_train.speech_act.isna()]
         data_test = data[data["transcript_file"].isin(test_files)]
-
         print(
             f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
         )
@@ -217,7 +217,8 @@ if __name__ == "__main__":
         # Remove uninformative tags before doing analysis
         data_crf = data_test[~data_test[SPEECH_ACT].isin(["NAT", "NEE"])]
 
-        acc = accuracy_score(data_crf[SPEECH_ACT].tolist(), data_crf["y_pred"].tolist())
+        data_crf_not_nan = data_crf[data_crf[SPEECH_ACT].astype(str) != "None"]
+        acc = accuracy_score(data_crf_not_nan[SPEECH_ACT].tolist(), data_crf_not_nan["y_pred"].tolist())
 
         accuracies.append(acc)
         result_dataframes.append(
@@ -244,3 +245,4 @@ if __name__ == "__main__":
     result_dataframe.speaker_code.replace({"MOT": "ADU"}, inplace=True)
 
     pickle.dump(result_dataframe, open(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED, "wb"))
+    result_dataframe.to_csv(PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED.replace(".p", ".csv"))
