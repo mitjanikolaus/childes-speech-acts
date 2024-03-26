@@ -21,6 +21,20 @@ conda env create -f environment.yml
 conda activate speech-acts
 ```
 
+For processing data from childes-db, there are some additional requirements. First of all, you need to have R installed
+on your system and install the `childesr` and `curl` R packages:
+```
+sudo apt-get install r-base
+R
+> install.packages("childesr")
+> install.packages("curl")
+```
+
+Make sure the installations succeed. Afterwards, you can install the `childespy` python package:
+```
+pip install git+https://github.com/langcog/childespy.git
+```
+
 # Preprocessing data for supervised training of classifiers
 
 Data for supervised training is taken from the [New England corpus](https://childes.talkbank.org/access/Eng-NA/NewEngland.html) of [CHILDES](https://childes.talkbank.org/access/).
@@ -66,7 +80,7 @@ The data should be stored in a CSV file, containing the following columns
 - `utterance_id`: unique id of the utterance within the transcript  
 - `age`: child age in months
 - `tokens`: a list of the tokens of the utterance
-- `pos`: a lift of part-of-speech tags for each token
+- `pos`: a list of part-of-speech tags for each token
 - `speaker_code`: A value of `CHI` if the current speaker is the child, any other value is treated as adult speaker. 
  
 An example for the creation of CSVs from
