@@ -5,11 +5,12 @@ annotation scheme.
 
 This repository contains code accompanying the following papers:  
 
-**Large-scale Study of Speech Acts' Development Using Automatic Labelling**  
-_In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
-Mitja Nikolaus*, Juliette Maes*, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi (*Joint first authors)
+**[Large-scale study of speech acts' development in early childhood](https://ldr.lps.library.cmu.edu/article/532/galley/486/view/)**  
+_Language Development Research (2022)_  
+Mitja Nikolaus, Eliot Maes, Jeremy Auguste, Laurent Prévot and Abdellah Fourtassi
 
-**Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues.**  
+
+**[Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues](https://escholarship.org/uc/item/10k7j8fr)**  
 _In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
 Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
 
