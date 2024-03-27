@@ -12,7 +12,7 @@ import pycrfsuite
 
 from crf_test import crf_predict, update_args
 from crf_train import get_features_from_row, add_feature_columns
-from utils import CHILD
+from utils import CHILD, SPEECH_ACT_DESCRIPTIONS
 from utils import calculate_frequencies
 
 
@@ -31,10 +31,13 @@ def parse_args():
         help="Path to CSV with preprocessed data to annotate",
     )
     argparser.add_argument(
-        "--out", type=str, required=True, help="Path to store output file."
+        "--out", type=str, required=True, help="Dir to store output files."
     )
     argparser.add_argument(
         "--compare", type=str, help="Path to frequencies to compare to"
+    )
+    argparser.add_argument(
+        "--output-for-childes-db", action="store_true", default=False,
     )
 
     args = argparser.parse_args()
@@ -124,10 +127,32 @@ if __name__ == "__main__":
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
-    if args.out.endswith(".csv"):
-        data_filtered.to_csv(args.out, index=False)
+    os.makedirs(args.out, exist_ok=True)
+    if not args.output_for_childes_db:
+        out_path = os.path.join(args.out, "annotated.csv")
+        data_filtered.to_csv(out_path, index=False)
     else:
-        data_filtered.to_pickle(args.out)
+        utterances_speech_acts_crf_path = os.path.join(args.out, "utterances_speech_acts_crf.csv")
+        utterances_speech_acts_crf = data_filtered[["utterance_id", "speech_act"]]
+        utterances_speech_acts_crf.to_csv(utterances_speech_acts_crf_path, index=False)
+
+        metadata_path = os.path.join(args.out, "metadata.csv")
+        metadata = pd.DataFrame.from_records([{"table_name": "utterances_speech_acts_crf_2024.1_1",
+                                               "dataset_name": "speech_acts_crf",
+                                               "entity_type": "utterances",
+                                               "childes_db_version": "2021.1",
+                                               "dataset_version": "1",
+                                               "coding_table": "utterances_speech_acts_crf",
+                                               "tag_type": "model",
+                                               "model_version": "1",
+                                               "date_of_release": "2024-04-01",
+                                               "contact": "mitja.nikolaus@posteo.de",
+                                               "citation": "https://doi.org/10.34842/2022.0532",
+                                               }])
+        metadata.to_csv(metadata_path, index=False)
+
+        variables_path = os.path.join(args.out, "variables.csv")
+        SPEECH_ACT_DESCRIPTIONS.to_csv(variables_path)
 
     if args.compare:
         data_children = data_filtered[data.speaker_code == CHILD]

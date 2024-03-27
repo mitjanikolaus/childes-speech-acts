@@ -93,10 +93,10 @@ childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.)
 
 Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
 ```
-python crf_annotate.py --checkpoint checkpoint_full_train --data examples/example.csv --out data_annotated/example.csv
+python crf_annotate.py --checkpoint checkpoint_full_train --data examples/example.csv --out data_annotated
 ```
 
-An output CSV is stored to the indicated output file (`data_annotated/example.csv`). It contains an additional column
+An output CSV is stored to the indicated output file (`data_annotated/annotated.csv`). It contains an additional column
 `speech_act` in which the predicted speech act is stored.
 
 ## Annotate data from childes-db using the CRF classifier
@@ -108,10 +108,9 @@ python preprocess_childes_db.py --output-path utterances_childes_db.p
 
 Annotate:
 ```
-python crf_annotate.py --checkpoint checkpoint_full_train --data utterances_childes_db.p --out utterances_childes_db_annotated.csv
+python crf_annotate.py --checkpoint checkpoint_full_train --data utterances_childes_db.p --out data_annotated
 ```
-The output file contains an additional column `speech_act` in which the predicted speech act is stored. Depending on the
-file name, it is either saved as CSV or pickle.
+The output file contains an additional column `speech_act` in which the predicted speech act is stored.
 
 # Neural Networks
 (The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)
