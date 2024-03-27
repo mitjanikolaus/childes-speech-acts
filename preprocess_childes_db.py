@@ -58,7 +58,7 @@ def load_utts(args):
         print("Loading from all Eng-NA corpora: ")
         corpora = get_corpora(db_args=DB_ARGS)
         corpora = corpora[corpora["collection_name"].isin(["Eng-NA"])]
-        corpora = [c["corpus_name"] for c in corpora]
+        corpora = corpora.corpus_name.values
         print(corpora)
     else:
         corpora = args.corpora
