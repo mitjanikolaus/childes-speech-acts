@@ -1,4 +1,4 @@
-utterance_id,transcript_file,child_id,age_months,tokens,pos,speaker_code
+utterance_id,transcript_id,child_id,age_months,tokens,pos,speaker_code
 0,2765,2454,27,"['yeah', '.']",['co'],CHI
 1,2765,2454,27,"['what', 'was', 'the', 'book', 'about', '?']","['pro:int', 'cop', 'det:art', 'n', 'adv']",Investigator
 2,2765,2454,27,"['ow', '.']",['co'],CHI

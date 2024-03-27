@@ -113,13 +113,13 @@ if __name__ == "__main__":
     accuracies = []
     result_dataframes = []
 
-    file_names = data["transcript_file"].unique().tolist()
+    file_names = data["transcript_id"].unique().tolist()
     for i, (train_indices, test_indices) in enumerate(kf.split(file_names)):
         train_files = [file_names[i] for i in train_indices]
         test_files = [file_names[i] for i in test_indices]
 
-        data_train = data[data["transcript_file"].isin(train_files)]
-        data_test = data[data["transcript_file"].isin(test_files)]
+        data_train = data[data["transcript_id"].isin(train_files)]
+        data_test = data[data["transcript_id"].isin(test_files)]
 
         print(
             f"\n### Training on permutation {i} - {len(data_train)} utterances in train,  {len(data_test)} utterances in test set: "
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         )
 
         # Once the features are done, groupby name and extract a list of lists
-        grouped_train = data_train.groupby(by=["transcript_file"]).agg(
+        grouped_train = data_train.groupby(by=["transcript_id"]).agg(
             {
                 "features": lambda x: [y for y in x],
                 SPEECH_ACT: lambda x: [y for y in x],
@@ -224,7 +224,7 @@ if __name__ == "__main__":
             data_crf[
                 [
                     "utterance_id",
-                    "transcript_file",
+                    "transcript_id",
                     "speaker_code",
                     "age",
                     "tokens",

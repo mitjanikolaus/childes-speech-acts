@@ -62,8 +62,7 @@ def parse_args():
         help="ages to match data to - for split analysis",
     )
     argparser.add_argument(
-        "--model",
-        "-m",
+        "--checkpoint",
         required=True,
         type=str,
         help="folder containing model and features",
@@ -82,30 +81,30 @@ def parse_args():
         type=str,
         help="Whether to predict with NOL/NAT/NEE labels or not.",
     )
-    argparser.add_argument(
-        "--use-bi-grams",
-        "-bi",
-        action="store_true",
-        help="whether to use bi-gram features to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use-pos",
-        "-pos",
-        action="store_true",
-        help="whether to add POS tags to features",
-    )
-    argparser.add_argument(
-        "--use-past",
-        "-past",
-        action="store_true",
-        help="whether to add previous sentence as features",
-    )
-    argparser.add_argument(
-        "--use-repetitions",
-        "-rep",
-        action="store_true",
-        help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
-    )
+    # argparser.add_argument(
+    #     "--use-bi-grams",
+    #     "-bi",
+    #     action="store_true",
+    #     help="whether to use bi-gram features to train the algorithm",
+    # )
+    # argparser.add_argument(
+    #     "--use-pos",
+    #     "-pos",
+    #     action="store_true",
+    #     help="whether to add POS tags to features",
+    # )
+    # argparser.add_argument(
+    #     "--use-past",
+    #     "-past",
+    #     action="store_true",
+    #     help="whether to add previous sentence as features",
+    # )
+    # argparser.add_argument(
+    #     "--use-repetitions",
+    #     "-rep",
+    #     action="store_true",
+    #     help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
+    # )
 
     args = argparser.parse_args()
 
@@ -192,22 +191,34 @@ def report_to_file(dfs: dict, file_location: str):
     writer.save()
 
 
-#### MAIN
+def update_args(args, checkpoint_args_file):
+    checkpoint_args = pickle.load(open(checkpoint_args_file, "rb"))
+    args.use_past = checkpoint_args.use_past
+    args.use_bi_grams = checkpoint_args.use_bi_grams
+    args.use_pos = checkpoint_args.use_pos
+    args.use_repetitions = checkpoint_args.use_repetitions
+    print("Args: ", args)
+    return args
+
+
 if __name__ == "__main__":
     args = parse_args()
     print(args)
 
     # Loading model
-    model_path = os.path.join(args.model, "model.pycrfsuite")
-    features_path = os.path.join(args.model, "feature_vocabs.p")
+    model_path = os.path.join(args.checkpoint, "model.pycrfsuite")
+    features_path = os.path.join(args.checkpoint, "feature_vocabs.p")
+    args_path = os.path.join(args.checkpoint, "args.p")
 
-    report_path = os.path.join(args.model, args.data.replace("/", "_") + "_report.xlsx")
-    plot_path = os.path.join(args.model, args.data.split("/")[-1] + "_agesevol.png")
-    classification_scores_path = os.path.join(args.model, "classification_scores.p")
-    classification_scores_adult_path = os.path.join(args.model, "classification_scores_adult.p")
+    report_path = os.path.join(args.checkpoint, args.data.replace("/", "_") + "_report.xlsx")
+    plot_path = os.path.join(args.checkpoint, args.data.split("/")[-1] + "_agesevol.png")
+    classification_scores_path = os.path.join(args.checkpoint, "classification_scores.p")
+    classification_scores_adult_path = os.path.join(args.checkpoint, "classification_scores_adult.p")
 
     # Loading data
     data = pd.read_pickle(args.data)
+
+    args = update_args(args, args_path)
 
     data = add_feature_columns(
         data, check_repetition=args.use_repetitions, use_past=args.use_past,
@@ -274,7 +285,7 @@ if __name__ == "__main__":
     states, transitions = features_report(tagger)
 
     int_cols = (
-        ["transcript_file", "speaker_code"]
+        ["transcript_id", "speaker_code"]
         + ([args.col_ages] if args.col_ages is not None else [])
         + [x for x in data_test.columns if "spa_" in x]
         + [SPEECH_ACT, "speech_act_predicted", "pred_OK"]

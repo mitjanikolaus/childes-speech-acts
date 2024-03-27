@@ -105,23 +105,23 @@ def add_feature_columns(
     * number of repeated words
     * ratio of words that were repeated from previous sentence over sentence length
     """
-    data = data.sort_values(["transcript_file", "utterance_id"])
+    data = data.sort_values(["transcript_id", "utterance_id"])
 
     data["tokens"] = data.tokens
 
     data["turn_length"] = data.tokens.apply(len)
 
-    data["prev_file"] = data.transcript_file.shift(
-        1, fill_value=data.transcript_file.iloc[0]
+    data["prev_transcript_id"] = data.transcript_id.shift(
+        1, fill_value=data.transcript_id.iloc[0]
     )
 
     data["prev_speaker_code"] = data["speaker_code"].shift(1)
-    data.loc[data.transcript_file != data.prev_file, "prev_speaker_code"] = None
+    data.loc[data.transcript_id != data.prev_transcript_id, "prev_speaker_code"] = None
 
     # repetition features
     if check_repetition or use_past:
         data["prev_tokens"] = data.tokens.shift(1)
-        data.loc[data.transcript_file != data.prev_file, "prev_tokens"] = None
+        data.loc[data.transcript_id != data.prev_transcript_id, "prev_tokens"] = None
         data["prev_tokens"] = data["prev_tokens"].fillna("").apply(list)
 
     if check_repetition:
@@ -139,7 +139,7 @@ def add_feature_columns(
         data["ratio_repwords"] = data.nb_repwords / data.turn_length
 
     # remove helper columns
-    data = data.drop(columns=["prev_file"])
+    data = data.drop(columns=["prev_transcript_id"])
 
     # return Dataframe
     return data
@@ -377,7 +377,7 @@ def crf_predict(
 
     https://python-crfsuite.readthedocs.io/en/latest/pycrfsuite.html
     """
-    grouped_data = data.groupby(by=["transcript_file"], sort=False).agg(
+    grouped_data = data.groupby(by=["transcript_id"], sort=False).agg(
         {"features": lambda x: [y for y in x]}
     )["features"]
 
@@ -404,7 +404,7 @@ def crf_predict(
                 .idxmax(axis=1)
                 .tolist()
             )
-            file_proba["transcript_file"] = fi
+            file_proba["transcript_id"] = fi
 
     return [y for x in y_pred for y in x]  # flatten
 
@@ -457,6 +457,7 @@ def train(
     cut_train_set=1.0,
     nb_occurrences=5,
     verbose=False,
+    args=None,
 ):
     print("### Loading data:".upper())
 
@@ -471,12 +472,12 @@ def train(
     print("Number of samples in test split: ", len(data_test))
 
     if cut_train_set < 1.0:
-        train_files = data_train["transcript_file"].unique().tolist()
+        train_files = data_train["transcript_id"].unique().tolist()
         train_subset = np.random.choice(
             len(train_files), size=int(len(train_files) * cut_train_set), replace=False
         )
         train_files = [train_files[x] for x in train_subset]
-        data_train = data_train[data_train["transcript_file"].isin(train_files)]
+        data_train = data_train[data_train["transcript_id"].isin(train_files)]
 
     print("### Creating features:")
     feature_vocabs = generate_features_vocabs(
@@ -505,7 +506,7 @@ def train(
 
     # Once the features are done, groupby name and extract a list of lists
     # The list contains transcripts, which each contain a list of utterances
-    grouped_train = data_train.groupby(by=["transcript_file"]).agg(
+    grouped_train = data_train.groupby(by=["transcript_id"]).agg(
         {"features": lambda x: [y for y in x], SPEECH_ACT: lambda x: [y for y in x],}
     )
 
@@ -539,9 +540,12 @@ def train(
     if verbose:
         plot_training(trainer, checkpoint_path)
 
-    # dumping features
+    # dump features and args
     with open(os.path.join(checkpoint_path, "feature_vocabs.p"), "wb") as pickle_file:
         pickle.dump(feature_vocabs, pickle_file)
+
+    with open(os.path.join(checkpoint_path, "args.p"), "wb") as pickle_file:
+        pickle.dump(args, pickle_file)
 
     # Calculate test accuracy
     tagger = pycrfsuite.Tagger()
@@ -595,4 +599,5 @@ if __name__ == "__main__":
         args.cut_train_set,
         args.nb_occurrences,
         args.verbose,
+        args,
     )

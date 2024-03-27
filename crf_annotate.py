@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import entropy
 import pycrfsuite
 
-from crf_test import crf_predict
+from crf_test import crf_predict, update_args
 from crf_train import get_features_from_row, add_feature_columns
 from utils import CHILD
 from utils import calculate_frequencies
@@ -19,8 +19,7 @@ from utils import calculate_frequencies
 def parse_args():
     argparser = argparse.ArgumentParser(description="Annotate.")
     argparser.add_argument(
-        "--model",
-        "-m",
+        "--checkpoint",
         required=True,
         type=str,
         help="folder containing model and features",
@@ -36,30 +35,6 @@ def parse_args():
     )
     argparser.add_argument(
         "--compare", type=str, help="Path to frequencies to compare to"
-    )
-    argparser.add_argument(
-        "--use-bi-grams",
-        "-bi",
-        action="store_true",
-        help="whether to use bi-gram features to train the algorithm",
-    )
-    argparser.add_argument(
-        "--use-pos",
-        "-pos",
-        action="store_true",
-        help="whether to add POS tags to features",
-    )
-    argparser.add_argument(
-        "--use-past",
-        "-past",
-        action="store_true",
-        help="whether to add previous sentence as features",
-    )
-    argparser.add_argument(
-        "--use-repetitions",
-        "-rep",
-        action="store_true",
-        help="whether to check in data if words were repeated from previous sentence, to train the algorithm",
     )
 
     args = argparser.parse_args()
@@ -90,18 +65,17 @@ def compare_frequencies(frequencies, args):
 
 if __name__ == "__main__":
     args = parse_args()
-    print(args)
 
     if args.data.endswith(".csv"):
-        # Loading data
         data = pd.read_csv(args.data, converters={"pos": literal_eval, "tokens": literal_eval})
     else:
-        # Loading data
         data = pd.read_pickle(args.data)
 
     # Loading model
-    model_path = os.path.join(args.model, "model.pycrfsuite")
-    features_path = os.path.join(args.model, "feature_vocabs.p")
+    model_path = os.path.join(args.checkpoint, "model.pycrfsuite")
+    features_path = os.path.join(args.checkpoint, "feature_vocabs.p")
+    args_path = os.path.join(args.checkpoint, "args.p")
+    args = update_args(args, args_path)
 
     # Loading features
     with open(features_path, "rb") as pickle_file:
@@ -111,31 +85,29 @@ if __name__ == "__main__":
         data, check_repetition=args.use_repetitions, use_past=args.use_past,
     )
 
-    data = data.assign(
-        features=data.apply(
-            lambda x: get_features_from_row(
-                feature_vocabs,
-                x.tokens,
-                x.speaker_code,
-                x.prev_speaker_code,
-                x.turn_length,
-                use_bi_grams=args.use_bi_grams,
-                repetitions=None
-                if not args.use_repetitions
-                else (x.repeated_words, x.ratio_repwords),
-                prev_tokens=None if not args.use_past else x.past,
-                pos_tags=None if not args.use_pos else x.pos,
-            ),
-            axis=1,
-        )
+    data["features"] = data.apply(
+        lambda x: get_features_from_row(
+            feature_vocabs,
+            x.tokens,
+            x.speaker_code,
+            x.prev_speaker_code,
+            x.turn_length,
+            use_bi_grams=args.use_bi_grams,
+            repetitions=None
+            if not args.use_repetitions
+            else (x.repeated_words, x.ratio_repwords),
+            prev_tokens=None if not args.use_past else x.past,
+            pos_tags=None if not args.use_pos else x.pos,
+        ),
+        axis=1,
     )
 
     # Predictions
     tagger = pycrfsuite.Tagger()
     tagger.open(model_path)
-
     y_pred = crf_predict(tagger, data)
-    data = data.assign(speech_act=y_pred)
+
+    data["speech_act"] = y_pred
 
     # Filter for important columns
     data_filtered = data.drop(

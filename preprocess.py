@@ -1,27 +1,26 @@
 import argparse
+import math
 import os
 
 import pandas as pd
-import pylangacq
+from tqdm import tqdm
 
 from utils import (
     PATH_NEW_ENGLAND_UTTERANCES,
     SPEECH_ACT,
     CHILD,
     SPEECH_ACT_DESCRIPTIONS,
-    POS_PUNCTUATION,
+    POS_PUNCTUATION, ADULT,
 )
 
 CODING_ERRORS = {"AS": "SA", "CTP": "CT", "00": "OO"}
 
 
-def get_speech_act(utt):
-    if "%spa" not in utt.tiers:
-        return None
-    tag = utt.tiers["%spa"].strip()
-
+def parse_speech_act_tag(tag):
     if tag.startswith("$ "):
         tag = tag[2:]
+    if tag.startswith("$"):
+        tag = tag[1:]
 
     # if more than one tag keep the first
     if " " in tag:
@@ -36,6 +35,14 @@ def get_speech_act(utt):
         return tag
     else:
         return None
+
+
+def get_speech_act(utt):
+    if "%spa" not in utt.tiers:
+        return None
+    tag = utt.tiers["%spa"].strip()
+
+    return parse_speech_act_tag(tag)
 
 
 def get_pos_tag(tag):
@@ -58,12 +65,12 @@ def preprocess_utterances(corpus, transcripts):
         for header in transcripts.headers()
     ]
 
-    utts_by_file = transcripts.utterances(by_files=True,)
+    utts_by_file = transcripts.utterances(by_files=True, )
 
     all_utts = []
 
     for file, age, child_name, utts_transcript in zip(
-        file_paths, ages, child_names, utts_by_file
+            file_paths, ages, child_names, utts_by_file
     ):
         # Filter out empty transcripts and transcripts without age or child information
         if len(utts_transcript) == 0:
@@ -92,7 +99,7 @@ def preprocess_utterances(corpus, transcripts):
                     ],
                     "age": round(age),
                     "corpus": corpus,
-                    "transcript_file": file,
+                    "transcript_id": file,
                     "child_name": child_name,
                     "speech_act": get_speech_act(utt),
                 }
@@ -110,30 +117,75 @@ def preprocess_utterances(corpus, transcripts):
     return utterances
 
 
-def preprocess_transcripts(args):
-    all_utterances = []
-    for corpus in args.corpora:
-        print(f"Reading transcripts of {corpus} corpus.. ", end="")
-        transcripts = pylangacq.read_chat(
-            os.path.expanduser(f"~/data/CHILDES/{corpus}/"),
-        )
-        print("done.")
+def parse_speaker_role(role):
+    if role == "Target_Child":
+        return CHILD
+    else:
+        return ADULT
 
-        print(f"Preprocessing utterances.. ", end="")
-        utterances_corpus = preprocess_utterances(corpus, transcripts)
-        print("done.")
 
-        all_utterances.append(utterances_corpus)
+def preprocess_chat_files(corpus="NewEngland"):
+    import pylangacq
 
-    all_utterances = pd.concat(all_utterances, ignore_index=True)
+    print(f"Reading transcripts of {corpus} corpus.. ", end="")
+    transcripts = pylangacq.read_chat(
+        os.path.expanduser(f"~/data/CHILDES/{corpus}/"),
+    )
+    print("done.")
 
-    return all_utterances
+    print(f"Preprocessing utterances.. ", end="")
+    utterances_corpus = preprocess_utterances(corpus, transcripts)
+    print("done.")
+
+    return utterances_corpus
+
+
+def preprocess_childes_db_data():
+    from childespy import get_utterances, get_transcripts
+
+    utterances = get_utterances(corpus="NewEngland", db_version="2024_hackathon")
+    transcripts = get_transcripts(corpus="NewEngland", db_version="2024_hackathon")
+
+    data = []
+    for _, transcript in tqdm(transcripts.iterrows(), total=len(transcripts)):
+
+        # Make sure we know the age of the child
+        if not math.isnan(transcript["target_child_age"]):
+
+            # Filter utterances for current transcript
+            utts_transcript = utterances.loc[
+                (utterances["transcript_id"] == transcript["transcript_id"])
+            ]
+
+            if len(utts_transcript) > 0:
+                utts_transcript = utts_transcript.sort_values(
+                    by=["utterance_order"]
+                )
+                for _, utt in utts_transcript.iterrows():
+                    tokenized_utterance = utt["gloss"].split(" ") + [utt["punctuation"]]
+                    speech_act = parse_speech_act_tag(utt["speech_act"])
+                    pos = [get_pos_tag(p) for p in utt["part_of_speech"].split(" ") if p not in POS_PUNCTUATION]
+                    speaker_code = parse_speaker_role(utt["speaker_role"])
+                    data.append(
+                        {
+                            "utterance_id": utt["id"],
+                            "transcript_id": transcript["transcript_id"],
+                            "corpus_id": transcript["corpus_id"],
+                            "child_id": utt["target_child_id"],
+                            "age": round(transcript["target_child_age"]),
+                            "tokens": tokenized_utterance,
+                            "pos": pos,
+                            "speaker_code": speaker_code,
+                            "speech_act": speech_act,
+                        }
+                    )
+    return pd.DataFrame(data)
 
 
 def parse_args():
     argparser = argparse.ArgumentParser()
-    # Data files
-    argparser.add_argument("--corpora", type=str, nargs="+", default=["NewEngland"])
+    argparser.add_argument("--childes-db", action='store_true', default=False,
+                           help="Load data from childes-db database")
     argparser.add_argument(
         "--output-path", "-o", type=str, default=PATH_NEW_ENGLAND_UTTERANCES
     )
@@ -152,7 +204,10 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    data = preprocess_transcripts(args)
+    if args.childes_db:
+        data = preprocess_childes_db_data()
+    else:
+        data = preprocess_chat_files()
 
     if args.drop_untagged:
         data.dropna(subset=[SPEECH_ACT], inplace=True)

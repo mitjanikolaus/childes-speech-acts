@@ -12,7 +12,7 @@ Mitja Nikolaus, Eliot Maes, Jeremy Auguste, Laurent Prévot and Abdellah Fourtas
 
 **[Modeling Speech Act Development in Early Childhood: The Role of Frequency and Linguistic Cues](https://escholarship.org/uc/item/10k7j8fr)**  
 _In Proceedings of the 43nd Annual Meeting of the Cognitive Science Society. (2021)_  
-Mitja Nikolaus, Juliette Maes and Abdellah Fourtassi
+Mitja Nikolaus, Eliot Maes and Abdellah Fourtassi
 
 
 # Environment
@@ -44,9 +44,14 @@ Data for supervised training is taken from the [New England corpus](https://chil
 then extract and save it to `~/data/CHILDES/`.
 
 2. Preprocess data
-    ```
-    python preprocess.py --corpora NewEngland --drop-untagged
-   ```
+```
+ python preprocess.py --drop-untagged
+```
+
+Alternatively, the data can be loaded from childes-db:
+```
+ python preprocess.py --childes-db --drop-untagged
+```
   
 # CRF
 ## Train CRF classifier
@@ -60,24 +65,23 @@ python crf_train.py --use-pos --use-bi-grams --use-repetitions
 
 Test the classifier on the same corpus:
 ```
-python crf_test.py -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
+python crf_test.py -checkpoint checkpoints/crf/
 ```
 
 Test the classifier on the [Rollins corpus](https://childes.talkbank.org/access/Eng-NA/Rollins.html):
 1. Use the steps described above to download the corpus and preprocess it.
-2. Test the classifier on the corpus. Always make sure that you use the same feature selection args
-(e.g. `--use-pos`) as during training!
+2. Test the classifier on the corpus.
 ```
-python crf_test.py --data data/rollins_preprocessed.p -m checkpoints/crf/ --use-pos --use-bi-grams --use-repetitions
+python crf_test.py --data data/rollins_preprocessed.p --checkpoint checkpoints/crf/
 ```
    
-## Apply the CRF classifier
+## Annotate using the CRF classifier
 
 We provide a [trained checkpoint](checkpoint_full_train) of the CRF classifier. It can be applied to annotate new data.
 
 The data should be stored in a CSV file, containing the following columns 
 (see also [example.csv](examples/example.csv)).:
-- `transcript_file`: the file name of the transcript
+- `transcript_id`: the file id of the transcript
 - `utterance_id`: unique id of the utterance within the transcript  
 - `age`: child age in months
 - `tokens`: a list of the tokens of the utterance
@@ -89,13 +93,25 @@ childes-db can be found in [preprocess_childes_db.py](preprocess_childes_db.py.)
 
 Using `crf_annotate.py`, we can now annotate the speech acts for each utterance:
 ```
-python crf_annotate.py --model checkpoint_full_train --data examples/example.csv --out data_annotated/example.csv --use-pos --use-bi-grams --use-repetitions
+python crf_annotate.py --checkpoint checkpoint_full_train --data examples/example.csv --out data_annotated/example.csv
 ```
-Always make sure that you use the same feature selection args
-(e.g. `--use-pos`) as during training!
 
 An output CSV is stored to the indicated output file (`data_annotated/example.csv`). It contains an additional column
 `speech_act` in which the predicted speech act is stored.
+
+## Annotate data from childes-db using the CRF classifier
+
+Preprocess data from childes-db (use the `--corpora` argument to preprocess only a subset of corpora):
+```
+python preprocess_childes_db.py --output-path utterances_childes_db.p
+```
+
+Annotate:
+```
+python crf_annotate.py --checkpoint checkpoint_full_train --data utterances_childes_db.p --out utterances_childes_db_annotated.csv
+```
+The output file contains an additional column `speech_act` in which the predicted speech act is stored. Depending on the
+file name, it is either saved as CSV or pickle.
 
 # Neural Networks
 (The neural networks should be trained on a GPU, see corresponding [sbatch scripts](sbatch-scripts).)

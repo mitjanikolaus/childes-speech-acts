@@ -1,18 +1,16 @@
-"""Load and store transcripts of children from childes-db."""
-
+"""Load and store transcripts from childes-db."""
+import argparse
 import math
-
-from childespy.childespy import get_transcripts, get_corpora, get_utterances
-
-import nltk
 
 from tqdm import tqdm
 
 import pandas as pd
 
-from utils import PATH_CHILDES_UTTERANCES
+from preprocess import get_pos_tag, parse_speaker_role
+from utils import PATH_CHILDES_UTTERANCES, POS_PUNCTUATION
 
 DB_ARGS = None
+# Change if you are using local db access:
 # {
 #     "hostname": "localhost",
 #     "user": "childesdb",
@@ -52,28 +50,35 @@ def add_punctuation(tokens, utterance_type):
     return tokens
 
 
-def load_utts():
-    data = []
-    corpora = get_corpora(db_args=DB_ARGS)
+def load_utts(args):
+    from childespy.childespy import get_transcripts, get_corpora, get_utterances
 
-    # Filter for North American corpora
-    corpora = corpora[corpora["collection_name"].isin(["Eng-NA"])]
-    for _, corpus in corpora.iterrows():
+    data = []
+    if args.corpora is None:
+        print("Loading from all Eng-NA corpora: ")
+        corpora = get_corpora(db_args=DB_ARGS)
+        corpora = corpora[corpora["collection_name"].isin(["Eng-NA"])]
+        corpora = [c["corpus_name"] for c in corpora]
+        print(corpora)
+    else:
+        corpora = args.corpora
+
+    for corpus in corpora:
         print(corpus)
 
-        transcripts = get_transcripts(corpus=corpus["corpus_name"], db_args=DB_ARGS)
-        utts = get_utterances(
-            corpus=corpus["corpus_name"], language="eng", db_args=DB_ARGS
+        transcripts = get_transcripts(corpus=corpus, db_args=DB_ARGS, db_version=args.db_version)
+        utterances = get_utterances(
+            corpus=corpus, language="eng", db_args=DB_ARGS, db_version=args.db_version
         )
 
-        for _, transcript in tqdm(transcripts.iterrows(), total=transcripts.shape[0]):
+        for _, transcript in tqdm(transcripts.iterrows(), total=len(transcripts)):
 
             # Make sure we know the age of the child
             if not math.isnan(transcript["target_child_age"]):
 
                 # Filter utterances for current transcript
-                utts_transcript = utts.loc[
-                    (utts["transcript_id"] == transcript["transcript_id"])
+                utts_transcript = utterances.loc[
+                    (utterances["transcript_id"] == transcript["transcript_id"])
                 ]
 
                 if len(utts_transcript) > 0:
@@ -81,33 +86,51 @@ def load_utts():
                         by=["utterance_order"]
                     )
                     for _, utt in utts_transcript.iterrows():
+                        tokenized_utterance = utt["gloss"].split(" ")
+                        if "punctuation" in utt.keys():
+                            tokenized_utterance += [utt["punctuation"]]
+                        else:
+                            tokenized_utterance = add_punctuation(tokenized_utterance, utt["type"])
+                        pos = [get_pos_tag(p) for p in utt["part_of_speech"].split(" ") if p not in POS_PUNCTUATION]
+                        speaker_code = parse_speaker_role(utt["speaker_role"])
+                        data.append(
+                            {
+                                "utterance_id": utt["id"],
+                                "transcript_id": transcript["transcript_id"],
+                                "corpus_id": transcript["corpus_id"],
+                                "child_id": utt["target_child_id"],
+                                "age": round(transcript["target_child_age"]),
+                                "tokens": tokenized_utterance,
+                                "pos": pos,
+                                "speaker_code": speaker_code,
+                            }
+                        )
 
-                        # Make sure we have an utterance
-                        if utt["gloss"]:
-
-                            # Tokenize utterances
-                            tokenized_utterance = nltk.word_tokenize(utt["gloss"])
-                            tokenized_utterance = add_punctuation(
-                                tokenized_utterance, utt["type"]
-                            )
-                            data.append(
-                                {
-                                    "file_id": transcript["transcript_id"],
-                                    "child_id": utt["target_child_id"],
-                                    "age_months": round(transcript["target_child_age"]),
-                                    "tokens": tokenized_utterance,
-                                    "pos": utt["part_of_speech"],
-                                    "speaker": utt["speaker_role"],
-                                }
-                            )
     return pd.DataFrame(data)
 
 
+def parse_args():
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        "--output-path", type=str, default=PATH_CHILDES_UTTERANCES
+    )
+    argparser.add_argument(
+        "--corpora", nargs="+",
+        help="Load data only from selected corpora. If not provided, all Eng-NA corpora will be loaded"
+    )
+
+    argparser.add_argument(
+        "--db-version", type=str, default="2021.1"
+    )
+
+    args = argparser.parse_args()
+
+    return args
+
+
 if __name__ == "__main__":
+    args = parse_args()
 
-    # Loading data
-    data = load_utts()
+    data = load_utts(args)
 
-    # Store utterances for future re-use
-    data.rename(columns={'child_age': 'age_months'}, inplace=True)
-    data.to_pickle(PATH_CHILDES_UTTERANCES)
+    data.to_pickle(args.output_path)

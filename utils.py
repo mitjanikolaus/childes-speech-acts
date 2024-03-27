@@ -46,8 +46,7 @@ PUNCTUATION = {
     "other_4": "+/.",
 }
 
-POS_PUNCTUATION = [".", "?", "...", "!", "+/", "+/?", "" "...?", ",", "-", "+\"/.", "+...", "++/.", "+/."]
-
+POS_PUNCTUATION = ["", ".", "?", "...", "!", "+/", "+/?", "" "...?", ",", "-", "+\"/.", "+...", "++/.", "+/."]
 
 SPEECH_ACT_UNINTELLIGIBLE = "OO"
 SPEECH_ACT_NO_FUNCTION = "YY"
@@ -240,11 +239,11 @@ TRANSCRIPTS_NEW_ENGLAND = [
     3757,
 ]
 
-PATH_CHILDES_UTTERANCES = os.path.expanduser("~/data/speech_acts/data/childes_utterances.p")
-PATH_CHILDES_UTTERANCES_ANNOTATED = os.path.expanduser("~/data/speech_acts/data/childes_utterances_annotated.csv")
+PATH_CHILDES_UTTERANCES = os.path.expanduser("~/data/speech_acts/childes_utterances.p")
+PATH_CHILDES_UTTERANCES_ANNOTATED = os.path.expanduser("~/data/speech_acts/childes_utterances_annotated.csv")
 
-PATH_NEW_ENGLAND_UTTERANCES = os.path.expanduser("~/data/speech_acts/data/new_england_preprocessed.p")
-PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED = os.path.expanduser("~/data/speech_acts/data/new_england_reproduced_crf.p")
+PATH_NEW_ENGLAND_UTTERANCES = os.path.expanduser("~/data/speech_acts/new_england_preprocessed.p")
+PATH_NEW_ENGLAND_UTTERANCES_ANNOTATED = os.path.expanduser("~/data/speech_acts/new_england_reproduced_crf.p")
 
 
 def load_whole_childes_data():
@@ -258,7 +257,7 @@ def load_whole_childes_data():
     min_num_utterances = {}
     for age in AGES:
         data_age = data[(data.age_months == age) & (data.speaker == CHILD)]
-        lengths = data_age.groupby(by=["transcript_file"]).agg(
+        lengths = data_age.groupby(by=["transcript_id"]).agg(
             length=("utterance_id", lambda x: len(x))
         )
         min_num_utterances[age] = lengths.length.min()
@@ -270,7 +269,7 @@ def load_whole_childes_data():
 
     # Filter out New England corpus transcripts
     data_whole_childes = data_whole_childes[
-        ~data_whole_childes.transcript_file.isin(TRANSCRIPTS_NEW_ENGLAND)
+        ~data_whole_childes.transcript_id.isin(TRANSCRIPTS_NEW_ENGLAND)
     ]
 
     # Filter for children's utterances
@@ -280,8 +279,8 @@ def load_whole_childes_data():
     for age in AGES:
         lengths = (
             data_whole_childes_children[data_whole_childes_children.age_months == age]
-                .groupby(by=["transcript_file"])
-                .agg(length=("transcript_file", lambda x: len(x)))
+            .groupby(by=["transcript_id"])
+            .agg(length=("transcript_id", lambda x: len(x)))
         )
         transcripts_too_short = lengths[
             lengths.length < min_num_utterances[age]
@@ -291,7 +290,7 @@ def load_whole_childes_data():
             f"Filtering out {len(transcripts_too_short)} transcripts that are too short (age {age} months)"
         )
         data_whole_childes = data_whole_childes[
-            ~data_whole_childes.transcript_file.isin(transcripts_too_short)
+            ~data_whole_childes.transcript_id.isin(transcripts_too_short)
         ]
 
     return data_whole_childes
@@ -299,13 +298,13 @@ def load_whole_childes_data():
 
 def make_train_test_splits(data, test_split_ratio):
     data_train_ids, data_test_ids = train_test_split(
-        data["transcript_file"].unique(),
+        data["transcript_id"].unique(),
         test_size=test_split_ratio,
         shuffle=True,
         random_state=TRAIN_TEST_SPLIT_RANDOM_STATE,
     )
-    data_train = data[data["transcript_file"].isin(data_train_ids.tolist())]
-    data_test = data[data["transcript_file"].isin(data_test_ids.tolist())]
+    data_train = data[data["transcript_id"].isin(data_train_ids.tolist())]
+    data_test = data[data["transcript_id"].isin(data_test_ids.tolist())]
 
     return data_train, data_test
 
